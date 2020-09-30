@@ -54,23 +54,35 @@ namespace LuaGUI
             Script script = Scripts.Create(scriptString);
             Console.WriteLine("Script created");
 
-            Console.WriteLine("(C#) Execute 0");
-            script.Execute();
-
-            for (int j = 0; j < 5; j++)
+            for (int j = 0; j < 8; j++)
             {
-                Console.WriteLine($"(C#) PostExecute {j}");
+                Console.WriteLine($"LOOP {j} ============================");
+                Console.WriteLine($"(C#) PreExecute {j}");
+                script.PreExecute();
+                Console.WriteLine($"\r\n(C#) Execute {j}");
+                script.Execute();
+                Console.WriteLine($"\r\n(C#) PostExecute {j}");
                 script.PostExecute();
             }
 
-            Console.WriteLine("(C#) Execute 1");
-            script.Execute();
-            Console.WriteLine("(C#) Execute 2");
-            script.Execute();
-            Console.WriteLine("(C#) Execute 3");
-            script.Execute();
-            Console.WriteLine("(C#) Execute 4");
-            script.Execute();
+
+            //Console.WriteLine("(C#) Execute 0");
+            //script.Execute();
+
+            //for (int j = 0; j < 5; j++)
+            //{
+            //    Console.WriteLine($"(C#) PostExecute {j}");
+            //    script.PostExecute();
+            //}
+
+            //Console.WriteLine("(C#) Execute 1");
+            //script.Execute();
+            //Console.WriteLine("(C#) Execute 2");
+            //script.Execute();
+            //Console.WriteLine("(C#) Execute 3");
+            //script.Execute();
+            //Console.WriteLine("(C#) Execute 4");
+            //script.Execute();
 
             script.Dispose();
         }
