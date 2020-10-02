@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -10,6 +11,7 @@ namespace ScriptCore
     public static class ScriptInitializer
     {
         static Dictionary<string, List<string>> links = new Dictionary<string, List<string>>();
+        static List<LuaFunc> luaFunctions = new List<LuaFunc>();
 
         //TODO: initialize/add preset functions better, add sandboxing?
         const string libCode = @"
@@ -18,11 +20,16 @@ namespace ScriptCore
                 coroutine.yield()
             end
             function waitFrame()
-                yieldTimer = 1
+                yieldTimer = 0
                 coroutine.yield()
             end
-
         ";
+
+
+        public static void RegisterFunc(string path, object target, MethodBase function)
+        {
+            luaFunctions.Add(new LuaFunc(path, target, function));
+        }
 
         public static void AddAssemblyAndNamespaces(string assembly, params string[] namespaces)
         {
@@ -51,10 +58,15 @@ namespace ScriptCore
                 {
                     sb.AppendLine($@"import ('{assemb.Key}', '{namespc}')");
                 }
-                
             }
             script.lua.DoString(sb.ToString(), "imports");
-            script.lua.DoString(libCode, "yielder");
+            script.lua.DoString(libCode, "yieldCode");
+
+            foreach (var func in luaFunctions)
+            {
+                script.lua.RegisterFunction(func.path, func.target, func.function);
+            }
+
         }
 
 

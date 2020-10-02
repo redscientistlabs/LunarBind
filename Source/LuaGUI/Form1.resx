@@ -117,4 +117,30 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+  <data name="tbScript.Text" xml:space="preserve">
+    <value>Execute = coroutine.create(function ()
+	printA('B')
+	print('(lua) exec0, yield 1 frame')
+	waitFrames(1)
+
+	print('(lua) exec1, yield 3 frames')
+	waitFrames(3)
+
+	print('(lua) exec2, final')
+end)
+
+
+PostExecute = coroutine.create(function ()
+	print('(lua) postexec0, yield 2 frames')
+	waitFrames(2)
+
+	print('(lua) postexec1, yield 1 frame')
+	waitFrames(1)
+
+	print('(lua) postexec2, yield 1 frame')
+
+	waitFrames(1)
+	peekByte('SRAM',123)
+end)</value>
+  </data>
 </root>

@@ -50,6 +50,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="LuaFunc.cs" />
     <Compile Include="Script.cs" />
     <Compile Include="ScriptConstants.cs" />
     <Compile Include="ScriptInitializer.cs" />

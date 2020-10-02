@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
+using System.Diagnostics;
 using System.Drawing;
 using System.Linq;
 using System.Text;
@@ -12,49 +13,35 @@ namespace LuaGUI
 {
     public partial class Form1 : Form
     {
+        Script testScript = null;
+
         public Form1()
         {
             InitializeComponent();
 
-            //ADD ASSEMBLIES NEEDED
-            ScriptInitializer.AddAssemblyAndNamespaces(GetType().Assembly.FullName, nameof(LuaGUI));
+            //ADD FULL NAMESPACES
+            //ScriptInitializer.AddAssemblyAndNamespaces(GetType().Assembly.FullName, nameof(LuaGUI));
+            //ADD INDIVIDUAL FUNCTIONS 
+            ScriptInitializer.RegisterFunc("printA", null, GetType().GetMethod("PrintPlusA", System.Reflection.BindingFlags.Static | System.Reflection.BindingFlags.Public));
+            ScriptInitializer.RegisterFunc("peekByte", null, typeof(CSharpClass).GetMethod("PeekByte", System.Reflection.BindingFlags.Static | System.Reflection.BindingFlags.Public));
+            //TODO: ADD TYPES
+        }
+
+        public static void PrintPlusA(string s)
+        {
+            Console.WriteLine("(A) " + s);
         }
 
         private void bTest_Click(object sender, EventArgs e)
         {
-            string scriptString = @"
-            Execute = coroutine.create(function ()
-                local tempvar0 = 10
-                print('(lua) exec0, yield 1 frame')
-                waitFrames(1)
+           
 
-                print('(lua) exec1, yield 3 frames')
-                waitFrames(3)
-
-                print('(lua) exec2, final')
-            end)
-            
-
-            PostExecute = coroutine.create(function ()
-                print('(lua) postexec0, yield 2 frames')
-                waitFrames(2)
-
-                print('(lua) postexec1, yield 1 frame')
-                waitFrames(1)
-
-                print('(lua) postexec2, yield 1 frame')
-
-                waitFrames(1)
-                print('(lua) calling static C# method in post execute, final')
-                print('(lua) return val from C#', CSharpClass.PeekByte('SRAM', 123))
-            end)
-
-            ";
-
-            Script script = Scripts.Create(scriptString);
+            Script script = Scripts.Create(tbScript.Text);
             Console.WriteLine("Script created");
 
-            for (int j = 0; j < 8; j++)
+            Stopwatch w = new Stopwatch();
+            w.Start();
+            for (int j = 0; j < 60; j++)
             {
                 Console.WriteLine($"LOOP {j} ============================");
                 Console.WriteLine($"(C#) PreExecute {j}");
@@ -64,27 +51,55 @@ namespace LuaGUI
                 Console.WriteLine($"\r\n(C#) PostExecute {j}");
                 script.PostExecute();
             }
-
-
-            //Console.WriteLine("(C#) Execute 0");
-            //script.Execute();
-
-            //for (int j = 0; j < 5; j++)
-            //{
-            //    Console.WriteLine($"(C#) PostExecute {j}");
-            //    script.PostExecute();
-            //}
-
-            //Console.WriteLine("(C#) Execute 1");
-            //script.Execute();
-            //Console.WriteLine("(C#) Execute 2");
-            //script.Execute();
-            //Console.WriteLine("(C#) Execute 3");
-            //script.Execute();
-            //Console.WriteLine("(C#) Execute 4");
-            //script.Execute();
+            Console.WriteLine(w.Elapsed);
+            w.Stop();
 
             script.Dispose();
+        }
+
+        private void bStart_Click(object sender, EventArgs e)
+        {
+            testScript?.Dispose();
+            testScript = Scripts.Create(tbScript.Text);
+            bExecute.Enabled = true;
+            bDispose.Enabled = true;
+            bAbort.Enabled = true;
+
+            bStart.Enabled = false;
+        }
+
+        private void bExecute_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                Console.WriteLine($"LOOP ============================");
+                Console.WriteLine($"(C#) PreExecute");
+                testScript.PreExecute();
+                Console.WriteLine($"\r\n(C#) Execute");
+                testScript.Execute();
+                Console.WriteLine($"\r\n(C#) PostExecute");
+                testScript.PostExecute();
+            }
+            catch 
+            {
+                Console.WriteLine("ERROR: Script was aborted!");
+                bDispose_Click(null, null);
+            }
+        }
+
+        private void bDispose_Click(object sender, EventArgs e)
+        {
+            testScript.Dispose();
+            testScript = null;
+            bExecute.Enabled = false;
+            bDispose.Enabled = false;
+            bAbort.Enabled = false;
+            bStart.Enabled = true;
+        }
+
+        private void bAbort_Click(object sender, EventArgs e)
+        {
+            testScript.Abort();
         }
     }
 }
