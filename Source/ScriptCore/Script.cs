@@ -54,12 +54,12 @@ namespace ScriptCore
         {
             lua.DoString(userScript);
             //Detect hooks, find better way?
-            hooks[PRE]  = HookExists("PreExecute");
-            hooks[EXEC] = HookExists("Execute");
-            hooks[POST] = HookExists("PostExecute");
+            hooks[PRE]  = LuaFunctionExists("PreExecute");
+            hooks[EXEC] = LuaFunctionExists("Execute");
+            hooks[POST] = LuaFunctionExists("PostExecute");
         }
 
-        public bool HookExists(string hook)
+        public bool LuaFunctionExists(string hook)
         {
             return (bool)lua.DoString($"return {hook} ~= nil")[0];
         }
@@ -79,12 +79,13 @@ namespace ScriptCore
 
             if (exec)
             {
-                lua.DoString(luaStr);
+                lua.DoString(luaStr, "User Code");
                 object yt = lua[ScriptConstants.LUA_YIELD];
                 if (yt != null)
                 {
+                    //Console.WriteLine(yt.GetType().ToString());
                     //TODO: decide if yielding 1 frame means skipping the next frame or waiting until the next frame
-                    yieldTimers[timerIndex] = Convert.ToInt64(yt)+1; 
+                    yieldTimers[timerIndex] = ((long)(double)yt)+1; 
                 }
                 lua[ScriptConstants.LUA_YIELD] = null;
             }

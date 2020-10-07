@@ -84,10 +84,10 @@
             this.tbScript.AcceptsTab = true;
             this.tbScript.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.tbScript.Location = new System.Drawing.Point(253, 13);
+            this.tbScript.Location = new System.Drawing.Point(237, 13);
             this.tbScript.Multiline = true;
             this.tbScript.Name = "tbScript";
-            this.tbScript.Size = new System.Drawing.Size(495, 425);
+            this.tbScript.Size = new System.Drawing.Size(511, 425);
             this.tbScript.TabIndex = 4;
             this.tbScript.Text = resources.GetString("tbScript.Text");
             // 

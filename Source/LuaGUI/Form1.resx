@@ -140,7 +140,7 @@ PostExecute = coroutine.create(function ()
 	print('(lua) postexec2, yield 1 frame')
 
 	waitFrames(1)
-	peekByte('SRAM',123)
+	print( peekByte('SRAM',123) )
 end)</value>
   </data>
 </root>

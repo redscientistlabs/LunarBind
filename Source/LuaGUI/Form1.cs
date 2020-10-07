@@ -9,23 +9,39 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using ScriptCore;
+using System.Runtime.InteropServices;
+
 namespace LuaGUI
 {
     public partial class Form1 : Form
     {
         Script testScript = null;
 
+        [DllImport("kernel32.dll", SetLastError = true)]
+        [return: MarshalAs(UnmanagedType.Bool)]
+        static extern bool AllocConsole();
+
         public Form1()
         {
             InitializeComponent();
+            Load += Form1_Load;
 
             //ADD FULL NAMESPACES
-            //ScriptInitializer.AddAssemblyAndNamespaces(GetType().Assembly.FullName, nameof(LuaGUI));
+            //Scripts.AddAssemblyAndNamespaces(GetType().Assembly.FullName, nameof(LuaGUI));
             //ADD INDIVIDUAL FUNCTIONS 
-            ScriptInitializer.RegisterFunc("printA", null, GetType().GetMethod("PrintPlusA", System.Reflection.BindingFlags.Static | System.Reflection.BindingFlags.Public));
-            ScriptInitializer.RegisterFunc("peekByte", null, typeof(CSharpClass).GetMethod("PeekByte", System.Reflection.BindingFlags.Static | System.Reflection.BindingFlags.Public));
+            Scripts.RegisterFunc("printA", null, GetType().GetMethod("PrintPlusA", System.Reflection.BindingFlags.Static | System.Reflection.BindingFlags.Public));
+            Scripts.RegisterFunc("peekByte", null, typeof(CSharpClass).GetMethod("PeekByte", System.Reflection.BindingFlags.Static | System.Reflection.BindingFlags.Public));
             //TODO: ADD TYPES
         }
+
+
+        private void Form1_Load(object sender, EventArgs e)
+        {
+            AllocConsole();
+            Console.WriteLine("Is 64: " + Environment.Is64BitProcess.ToString());
+        }
+
+
 
         public static void PrintPlusA(string s)
         {
