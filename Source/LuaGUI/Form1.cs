@@ -15,8 +15,9 @@ namespace LuaGUI
 {
     public partial class Form1 : Form
     {
-        Script testScript = null;
+        ScriptRunner testScriptRunner = null;
 
+        //Console show stuff
         [DllImport("kernel32.dll", SetLastError = true)]
         [return: MarshalAs(UnmanagedType.Bool)]
         static extern bool AllocConsole();
@@ -28,20 +29,18 @@ namespace LuaGUI
 
             //ADD FULL NAMESPACES
             //Scripts.AddAssemblyAndNamespaces(GetType().Assembly.FullName, nameof(LuaGUI));
-            //ADD INDIVIDUAL FUNCTIONS 
-            Scripts.RegisterFunc("printA", null, GetType().GetMethod("PrintPlusA", System.Reflection.BindingFlags.Static | System.Reflection.BindingFlags.Public));
-            Scripts.RegisterFunc("peekByte", null, typeof(CSharpClass).GetMethod("PeekByte", System.Reflection.BindingFlags.Static | System.Reflection.BindingFlags.Public));
-            //TODO: ADD TYPES
-        }
 
+            //ADD INDIVIDUAL FUNCTIONS 
+            ScriptInitializer.RegisterFunc("printA", null, GetType().GetMethod("PrintPlusA", System.Reflection.BindingFlags.Static | System.Reflection.BindingFlags.Public));
+            ScriptInitializer.RegisterFunc("peekByte", null, typeof(CSharpClass).GetMethod("PeekByte", System.Reflection.BindingFlags.Static | System.Reflection.BindingFlags.Public));
+            
+        }
 
         private void Form1_Load(object sender, EventArgs e)
         {
             AllocConsole();
             Console.WriteLine("Is 64: " + Environment.Is64BitProcess.ToString());
         }
-
-
 
         public static void PrintPlusA(string s)
         {
@@ -50,9 +49,10 @@ namespace LuaGUI
 
         private void bTest_Click(object sender, EventArgs e)
         {
-           
+            ScriptRunner scriptRunner = new ScriptRunner();
+            scriptRunner.LoadScripts(null,null,tbScript.Text);
+            scriptRunner.SetCurrentScript(1);
 
-            Script script = Scripts.Create(tbScript.Text);
             Console.WriteLine("Script created");
 
             Stopwatch w = new Stopwatch();
@@ -61,22 +61,24 @@ namespace LuaGUI
             {
                 Console.WriteLine($"LOOP {j} ============================");
                 Console.WriteLine($"(C#) PreExecute {j}");
-                script.PreExecute();
+                scriptRunner.PreExecute();
                 Console.WriteLine($"\r\n(C#) Execute {j}");
-                script.Execute();
+                scriptRunner.Execute();
                 Console.WriteLine($"\r\n(C#) PostExecute {j}");
-                script.PostExecute();
+                scriptRunner.PostExecute();
             }
             Console.WriteLine(w.Elapsed);
             w.Stop();
 
-            script.Dispose();
+            scriptRunner.Dispose();
         }
 
         private void bStart_Click(object sender, EventArgs e)
         {
-            testScript?.Dispose();
-            testScript = Scripts.Create(tbScript.Text);
+            testScriptRunner?.Dispose();
+
+            testScriptRunner = new ScriptRunner();
+            testScriptRunner.LoadScripts(tbScript.Text);
             bExecute.Enabled = true;
             bDispose.Enabled = true;
             bAbort.Enabled = true;
@@ -90,11 +92,11 @@ namespace LuaGUI
             {
                 Console.WriteLine($"LOOP ============================");
                 Console.WriteLine($"(C#) PreExecute");
-                testScript.PreExecute();
+                testScriptRunner.PreExecute();
                 Console.WriteLine($"\r\n(C#) Execute");
-                testScript.Execute();
+                testScriptRunner.Execute();
                 Console.WriteLine($"\r\n(C#) PostExecute");
-                testScript.PostExecute();
+                testScriptRunner.PostExecute();
             }
             catch 
             {
@@ -105,8 +107,8 @@ namespace LuaGUI
 
         private void bDispose_Click(object sender, EventArgs e)
         {
-            testScript.Dispose();
-            testScript = null;
+            testScriptRunner.Dispose();
+            testScriptRunner = null;
             bExecute.Enabled = false;
             bDispose.Enabled = false;
             bAbort.Enabled = false;
@@ -115,7 +117,7 @@ namespace LuaGUI
 
         private void bAbort_Click(object sender, EventArgs e)
         {
-            testScript.Abort();
+            testScriptRunner.Abort();
         }
     }
 }

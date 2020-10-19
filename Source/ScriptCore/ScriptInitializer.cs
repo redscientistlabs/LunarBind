@@ -1,37 +1,28 @@
-﻿using NLua;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace ScriptCore
+﻿namespace ScriptCore
 {
-    public static class Scripts
+    using NLua;
+    using System;
+    using System.Collections.Generic;
+    using System.Linq;
+    using System.Reflection;
+    using System.Text;
+    using System.Threading.Tasks;
+
+    public static class ScriptInitializer
     {
         static Dictionary<string, List<string>> links = new Dictionary<string, List<string>>();
         static List<LuaFunc> luaFunctions = new List<LuaFunc>();
 
-        //TODO: initialize/add preset functions better, add sandboxing?
         const string libCode = @"
             function waitFrames(frames)
-                yieldTimer = frames
+                LUA_YIELD = frames
                 coroutine.yield()
             end
             function waitFrame()
-                yieldTimer = 0
+                LUA_YIELD = 0
                 coroutine.yield()
             end
         ";
-
-        public static Script Create(string script)
-        {
-            Script scr = new Script(script);
-            Initialize(scr);
-            scr.Initialize();
-            return scr;
-        }
 
         public static void RegisterFunc(string path, object target, MethodBase function)
         {
@@ -56,7 +47,7 @@ namespace ScriptCore
             links[assembly].Add(namespce);
         }
 
-        public static void Initialize(Script script)
+        internal static void Initialize(Lua lua)
         {
             StringBuilder sb = new StringBuilder();
             foreach (var assemb in links)
@@ -66,19 +57,14 @@ namespace ScriptCore
                     sb.AppendLine($@"import ('{assemb.Key}', '{namespc}')");
                 }
             }
-            script.lua.DoString(sb.ToString(), "imports");
-            script.lua.DoString(libCode, "yieldCode");
+            lua.DoString(sb.ToString(), "imports");
+            lua.DoString(libCode, "Additional Code");
 
             foreach (var func in luaFunctions)
             {
-                script.lua.RegisterFunction(func.path, func.target, func.function);
+                lua.RegisterFunction(func.path, func.target, func.function);
             }
-
         }
-
-
-
     }
-
 
 }

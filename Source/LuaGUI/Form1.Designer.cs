@@ -35,6 +35,7 @@
             this.bDispose = new System.Windows.Forms.Button();
             this.tbScript = new System.Windows.Forms.TextBox();
             this.bAbort = new System.Windows.Forms.Button();
+            this.lFullTestInfo = new System.Windows.Forms.Label();
             this.SuspendLayout();
             // 
             // bTest
@@ -101,11 +102,21 @@
             this.bAbort.UseVisualStyleBackColor = true;
             this.bAbort.Click += new System.EventHandler(this.bAbort_Click);
             // 
+            // lFullTestInfo
+            // 
+            this.lFullTestInfo.AutoSize = true;
+            this.lFullTestInfo.Location = new System.Drawing.Point(12, 39);
+            this.lFullTestInfo.Name = "lFullTestInfo";
+            this.lFullTestInfo.Size = new System.Drawing.Size(205, 13);
+            this.lFullTestInfo.TabIndex = 6;
+            this.lFullTestInfo.Text = "(Sets as stashkey script 1 with decoration)";
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(764, 450);
+            this.Controls.Add(this.lFullTestInfo);
             this.Controls.Add(this.bAbort);
             this.Controls.Add(this.tbScript);
             this.Controls.Add(this.bDispose);
@@ -128,6 +139,7 @@
         private System.Windows.Forms.Button bDispose;
         private System.Windows.Forms.TextBox tbScript;
         private System.Windows.Forms.Button bAbort;
+        private System.Windows.Forms.Label lFullTestInfo;
     }
 }
 
