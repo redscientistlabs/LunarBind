@@ -43,10 +43,10 @@ namespace LuaGUI
         private void bTest_Click(object sender, EventArgs e)
         {
             ScriptRunner scriptRunner = new ScriptRunner();
-            scriptRunner.LoadScripts(null,null,tbScript.Text);
+            scriptRunner.LoadScripts(tbScript.Text, null, tbStashkey1.Text, null);
             scriptRunner.SetCurrentScript(1);
 
-            Console.WriteLine("Script created");
+            Console.WriteLine("Script test");
 
             Stopwatch w = new Stopwatch();
             w.Start();
@@ -59,8 +59,12 @@ namespace LuaGUI
                 scriptRunner.Execute();
                 Console.WriteLine($"\r\n(C#) PostExecute {j}");
                 scriptRunner.PostExecute();
+                if(j % 10 == 0)
+                {
+                    scriptRunner.SetCurrentScript(1);
+                }
             }
-            Console.WriteLine(w.Elapsed);
+            Console.WriteLine("Elapsed time: " + w.Elapsed.ToString());
             w.Stop();
 
             scriptRunner.Dispose();
@@ -118,6 +122,7 @@ namespace LuaGUI
         private void bSetStashkey_Click(object sender, EventArgs e)
         {
             testScriptRunner?.SetCurrentScript((int)nmStashkey.Value);
+            Console.WriteLine($"Set Stashkey Script to index {((int)nmStashkey.Value)}");
         }
     }
 }

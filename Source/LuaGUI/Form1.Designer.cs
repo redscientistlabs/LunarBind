@@ -51,9 +51,9 @@
             // 
             this.bTest.Location = new System.Drawing.Point(15, 517);
             this.bTest.Name = "bTest";
-            this.bTest.Size = new System.Drawing.Size(75, 23);
+            this.bTest.Size = new System.Drawing.Size(98, 23);
             this.bTest.TabIndex = 0;
-            this.bTest.Text = "Old Test";
+            this.bTest.Text = "Execute 60 Test";
             this.bTest.UseVisualStyleBackColor = true;
             this.bTest.Click += new System.EventHandler(this.bTest_Click);
             // 

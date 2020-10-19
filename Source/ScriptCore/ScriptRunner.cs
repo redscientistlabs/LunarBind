@@ -166,8 +166,7 @@
             {
                 if (info.FramesToResume <= 0)
                 {
-                    var res = lua.DoString($"coroutine.resume({coroutineName}{decorator})");
-                    var v = lua.GetObjectFromPath(ScriptConstants.LUA_YIELD);
+                    lua.DoString($"coroutine.resume({coroutineName}{decorator})");
                     // info.FramesToResume = ((long)lua.GetObjectFromPath(ScriptConstants.LUA_YIELD));//Most efficient way I think
                     info.FramesToResume = lua.GetLong(ScriptConstants.LUA_YIELD);
                 }
