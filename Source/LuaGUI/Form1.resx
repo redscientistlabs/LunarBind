@@ -131,7 +131,7 @@ end)
 
 
 PostExecute = coroutine.create(function ()
-	print('(lua) postexec0, yield 2 frames')
+	print('(lua MAIN SCR) postexec0, yield 2 frames')
 	waitFrames(2)
 
 	print('(lua MAIN SCR) postexec1, yield 1 frame')
