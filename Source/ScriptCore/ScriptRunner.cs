@@ -9,9 +9,9 @@
 
     public class ScriptRunner : IDisposable
     {
-        private StepScript MainScript { get; set; } = null;
-        private List<StepScript> StashkeyScripts = new List<StepScript>();
-        private StepScript CurrentStashkeyScript = null;
+        private Script MainScript { get; set; } = null;
+        private List<Script> StashkeyScripts = new List<Script>();
+        private Script CurrentStashkeyScript = null;
 
         private Lua lua;
 
@@ -46,7 +46,7 @@
             {
                 if (mainScript != null)
                 {
-                    var scr = new StepScript(mainScript);
+                    var scr = new Script(mainScript);
                     //TODO: Sandbox
                     lua.DoString(scr.ScriptString);
 
@@ -66,7 +66,8 @@
                         }
                         else
                         {
-                            var scr = new StepScript(stashkeyScripts[i]);
+                            var scr = new Script(stashkeyScripts[i]);
+                            //Todo: find a better way to decorate, this is janky
                             scr.Decorate(i.ToString(), "Execute");
                             //TODO: Sandbox
                             lua.DoString(scr.ScriptString);

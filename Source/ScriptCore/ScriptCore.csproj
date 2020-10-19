@@ -53,7 +53,7 @@
   <ItemGroup>
     <Compile Include="LuaFunc.cs" />
     <Compile Include="ScriptCoroutineInfo.cs" />
-    <Compile Include="StepScript.cs" />
+    <Compile Include="Script.cs" />
     <Compile Include="ScriptConstants.cs" />
     <Compile Include="ScriptInitializer.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

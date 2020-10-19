@@ -9,7 +9,7 @@
     /// <summary>
     /// A script to run in stepactions
     /// </summary>
-    internal class StepScript
+    internal class Script
     {
         public string Original { get; protected set; }
         public string ScriptString { get; protected set; }
@@ -20,7 +20,7 @@
         internal ScriptCoroutineInfo PostExecuteInfo = new ScriptCoroutineInfo();
 
 
-        public StepScript(string script)
+        public Script(string script)
         {
             Original = script;
             ScriptString = script;
