@@ -94,6 +94,7 @@
             this.tbScript.AcceptsTab = true;
             this.tbScript.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Right)));
+            this.tbScript.Font = new System.Drawing.Font("Consolas", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.tbScript.Location = new System.Drawing.Point(243, 39);
             this.tbScript.Multiline = true;
             this.tbScript.Name = "tbScript";
@@ -119,6 +120,7 @@
             this.tbStashkey1.AcceptsTab = true;
             this.tbStashkey1.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Right)));
+            this.tbStashkey1.Font = new System.Drawing.Font("Consolas", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.tbStashkey1.Location = new System.Drawing.Point(564, 39);
             this.tbStashkey1.Multiline = true;
             this.tbStashkey1.Name = "tbStashkey1";
