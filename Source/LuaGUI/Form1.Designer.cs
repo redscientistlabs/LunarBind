@@ -105,6 +105,7 @@
             // 
             // bAbort
             // 
+            this.bAbort.Enabled = false;
             this.bAbort.Location = new System.Drawing.Point(94, 80);
             this.bAbort.Name = "bAbort";
             this.bAbort.Size = new System.Drawing.Size(75, 23);

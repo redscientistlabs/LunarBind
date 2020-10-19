@@ -52,12 +52,12 @@ namespace LuaGUI
             w.Start();
             for (int j = 0; j < 60; j++)
             {
-                Console.WriteLine($"LOOP {j} ============================");
-                Console.WriteLine($"(C#) PreExecute {j}");
+                //Console.WriteLine($"LOOP {j} ============================");
+                //Console.WriteLine($"(C#) PreExecute {j}");
                 scriptRunner.PreExecute();
-                Console.WriteLine($"\r\n(C#) Execute {j}");
+                //Console.WriteLine($"\r\n(C#) Execute {j}");
                 scriptRunner.Execute();
-                Console.WriteLine($"\r\n(C#) PostExecute {j}");
+                //Console.WriteLine($"\r\n(C#) PostExecute {j}");
                 scriptRunner.PostExecute();
                 if(j % 10 == 0)
                 {
