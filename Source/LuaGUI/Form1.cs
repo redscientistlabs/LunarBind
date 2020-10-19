@@ -16,12 +16,6 @@ namespace LuaGUI
     public partial class Form1 : Form
     {
         ScriptRunner testScriptRunner = null;
-
-        //Console show stuff
-        [DllImport("kernel32.dll", SetLastError = true)]
-        [return: MarshalAs(UnmanagedType.Bool)]
-        static extern bool AllocConsole();
-
         public Form1()
         {
             InitializeComponent();
@@ -38,8 +32,7 @@ namespace LuaGUI
 
         private void Form1_Load(object sender, EventArgs e)
         {
-            AllocConsole();
-            Console.WriteLine("Is 64: " + Environment.Is64BitProcess.ToString());
+            Console.WriteLine("Is 64 bit process: " + Environment.Is64BitProcess.ToString());
         }
 
         public static void PrintPlusA(string s)
@@ -78,11 +71,12 @@ namespace LuaGUI
             testScriptRunner?.Dispose();
 
             testScriptRunner = new ScriptRunner();
-            testScriptRunner.LoadScripts(tbScript.Text);
+            testScriptRunner.LoadScripts(tbScript.Text, null, tbStashkey1.Text, null);
+            testScriptRunner.SetCurrentScript(0);
             bExecute.Enabled = true;
             bDispose.Enabled = true;
             bAbort.Enabled = true;
-
+            bSetStashkey.Enabled = true;
             bStart.Enabled = false;
         }
 
@@ -113,11 +107,17 @@ namespace LuaGUI
             bDispose.Enabled = false;
             bAbort.Enabled = false;
             bStart.Enabled = true;
+            bSetStashkey.Enabled = false;
         }
 
         private void bAbort_Click(object sender, EventArgs e)
         {
             testScriptRunner.Abort();
+        }
+
+        private void bSetStashkey_Click(object sender, EventArgs e)
+        {
+            testScriptRunner?.SetCurrentScript((int)nmStashkey.Value);
         }
     }
 }
