@@ -118,7 +118,11 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="tbScript.Text" xml:space="preserve">
-    <value>function executeMain()
+    <value>function preExecuteMain()
+	print('(lua MAIN SCR) exec every frame')
+end
+
+function executeMain()
 	print('(lua MAIN SCR) exec0, yield 0 frames')
 	waitFrames(0)
 
@@ -128,7 +132,7 @@
 	print('(lua MAIN SCR) exec2, final')
                 print(PeekByte('SRAM', 123))
 end
-
+RegisterHook(preExecuteMain, 'PreExecute')
 RegisterCoroutine(executeMain, 'Execute')</value>
   </data>
 </root>
