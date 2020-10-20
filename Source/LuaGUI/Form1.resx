@@ -119,20 +119,43 @@
   </resheader>
   <data name="tbScript.Text" xml:space="preserve">
     <value>function preExecuteMain()
-	print('(lua MAIN SCR) exec every frame')
+  testNumber = testNumber + 1
+  print('(lua MAIN SCR) exec every frame, testNumber++')
 end
 
 function executeMain()
-	print('(lua MAIN SCR) exec0, yield 0 frames')
-	waitFrames(0)
-
-	print('(lua MAIN SCR) exec1, yield 1 frame')
-	waitFrames(1)
-
-	print('(lua MAIN SCR) exec2, final')
-                print(PeekByte('SRAM', 123))
+  print('(lua MAIN SCR) exec0, yield 0 frames')
+  waitFrames(0)
+  
+  print('(lua MAIN SCR) exec1, yield 1 frame')
+  waitFrames(1)
+  
+  print('(lua MAIN SCR) exec2, final')
+  print(PeekByte('SRAM', 123))
 end
+
+testNumber = 0
+
 RegisterHook(preExecuteMain, 'PreExecute')
 RegisterCoroutine(executeMain, 'Execute')</value>
+  </data>
+  <data name="tbStashkey1.Text" xml:space="preserve">
+    <value>function executeMain()
+  print('(lua SIDE SCR) exec every frame, test number:', testNumber)
+end
+
+function postExecuteMain()
+  print('(lua SIDE SCR) exec0, yield 0 frames')
+  waitFrames(0)
+  
+  print('(lua SIDE SCR) exec1, yield 1 frame')
+  waitFrames(1)
+  
+  print('(lua SIDE SCR) exec2, final')
+  print(PeekByte('SRAM', 123))
+end
+
+RegisterHook(executeMain, 'Execute')
+RegisterCoroutine(postExecuteMain, 'PostExecute')</value>
   </data>
 </root>
