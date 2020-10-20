@@ -5,28 +5,31 @@
     using System.Linq;
     using System.Text;
     using System.Threading.Tasks;
-    using NLua;
+    using MoonSharp.Interpreter;
+    using ScriptCore.Attributes;
+    using ScriptCore.Yielders;
 
-    public class ScriptRunner : IDisposable
+    public class ScriptRunner
     {
-        private Script MainScript { get; set; } = null;
-        private List<Script> StashkeyScripts = new List<Script>();
-        private Script CurrentStashkeyScript = null;
-
-        private Lua lua;
+        private ScriptContainer MainScript { get; set; } = null;
+        private List<ScriptContainer> StashkeyScripts = new List<ScriptContainer>();
+        private ScriptContainer CurrentStashkeyScript = null;
 
         private volatile bool Cancelled = false;
 
+        private Script lua;
+
+        ScriptContainer registrationContext = null;
+
+
         public ScriptRunner()
         {
-            lua = new Lua();
-            lua.State.Encoding = Encoding.UTF8;
-            lua.LoadCLRPackage();
-            lua[ScriptConstants.LUA_YIELD] = 0.0;
-            Initialize();
-            //TODO: Better abort option?
-            lua.SetDebugHook(KeraLua.LuaHookMask.Line, 0);
-            lua.DebugHook += Lua_DebugHook;
+            lua = new Script(CoreModules.Preset_HardSandbox | CoreModules.Coroutine | CoreModules.OS_Time);
+            lua.Globals[ScriptConstants.LUA_YIELD] = null;
+            lua.Globals["RegisterHook"] = (Action<DynValue, string>)RegisterHook;
+            UserData.RegisterType<Yielder>();
+            UserData.RegisterType<WaitFrames>();
+            ScriptInitializer.Initialize(lua);
         }
 
         public void SetCurrentScript(int script)
@@ -34,11 +37,14 @@
             CurrentStashkeyScript = StashkeyScripts[script];
             if(CurrentStashkeyScript != null)
             {
-                CurrentStashkeyScript.ResetInfos();
-                //TODO: Sandbox
+                CurrentStashkeyScript.ResetHooks();
+
+                registrationContext = CurrentStashkeyScript;
                 lua.DoString(CurrentStashkeyScript.ScriptString);
+                registrationContext = null;
             }
         }
+
 
         public void LoadScripts(string mainScript, params string[] stashkeyScripts)
         {
@@ -46,13 +52,17 @@
             {
                 if (mainScript != null)
                 {
-                    var scr = new Script(mainScript);
-                    //TODO: Sandbox
-                    lua.DoString(scr.ScriptString);
-
-                    scr.PreExecuteInfo.Enabled = LuaFunctionExists("PreExecute");
-                    scr.ExecuteInfo.Enabled = LuaFunctionExists("Execute");
-                    scr.PostExecuteInfo.Enabled = LuaFunctionExists("PostExecute");
+                    var scr = new ScriptContainer(mainScript);
+                    registrationContext = scr;
+                    try
+                    {
+                        lua.DoString(scr.ScriptString);
+                    }
+                    catch(ScriptRuntimeException ex)
+                    {
+                        throw ex;
+                    }
+                    registrationContext = null;
                     MainScript = scr;
                 }
 
@@ -66,121 +76,87 @@
                         }
                         else
                         {
-                            var scr = new Script(stashkeyScripts[i]);
-                            //Todo: find a better way to decorate, this is janky
-                            scr.Decorate(i.ToString(), "Execute");
-                            //TODO: Sandbox
+                            var scr = new ScriptContainer(stashkeyScripts[i]);
+                            registrationContext = scr;
                             lua.DoString(scr.ScriptString);
-                            scr.PreExecuteInfo.Enabled = LuaFunctionExists($"PreExecute{i}");
-                            scr.ExecuteInfo.Enabled = LuaFunctionExists($"Execute{i}");
-                            scr.PostExecuteInfo.Enabled = LuaFunctionExists($"PostExecute{i}");
-
+                            registrationContext = null;
                             StashkeyScripts.Add(scr);
                         }
                     }
                 }
             }
-            catch(NLua.Exceptions.LuaScriptException ex)
+            catch(ScriptRuntimeException ex)
             {
                 //Todo: exception handling
-                Console.WriteLine(ex);
+                //Console.WriteLine(ex);
                 throw ex;
             }
         }
 
-        private bool LuaFunctionExists(string hook)
+        //[LuaDocumentation("Registers a function as a callback")]
+        //[LuaCallback("RegisterHook")]
+        void RegisterHook(DynValue del, string name)
         {
-            return (bool)lua.DoString($"return {hook} ~= nil")[0];
+            //TODO: throw error?
+
+            //var type = del.Type;
+            if (registrationContext == null) { return; }
+            registrationContext.Hooks.Add(name, new NamedScriptHook(del));
         }
 
-        private void Lua_DebugHook(object sender, NLua.Event.DebugHookEventArgs e)
+
+        public void Execute(string hookName)
         {
-            if (Cancelled)
+            try
             {
-                lua.State.Error("User Cancelled");
+                if (!Cancelled)
+                {
+                    if (MainScript != null)
+                    {
+                        RunLua(MainScript, hookName);
+                    }
+
+                    if (CurrentStashkeyScript != null)
+                    {
+                        RunLua(CurrentStashkeyScript, hookName);
+                    }
+                }
+            }
+            catch(ScriptRuntimeException ex)
+            {
+                throw ex;
             }
         }
 
-        public void Initialize()
+        private void RunLua(ScriptContainer script, string hookName)
         {
-            ScriptInitializer.Initialize(lua);
-        }
-
-        public void PreExecute()
-        {
-            if (!Cancelled)
+            var hook = script.GetHook(hookName);
+            if (hook != null && hook.CheckYieldStatus())
             {
-                if (MainScript != null)
+                lua.Call(hook.LuaFunc);
+                var yieldObj = lua.Globals[ScriptConstants.LUA_YIELD];
+
+
+                //Gave me an error if I combined them
+                if (yieldObj == null)
                 {
-                    RunLua(MainScript.PreExecuteInfo, "PreExecute", "");
+                    hook.CurYielder = null;
+                }
+                if (yieldObj is Yielder yielder)
+                {
+                    hook.CurYielder = yielder;
+                }
+                else
+                {
+                    //TODO: Throw error
                 }
 
-                if (CurrentStashkeyScript != null)
-                {
-                    RunLua(CurrentStashkeyScript.PreExecuteInfo, "PreExecute", CurrentStashkeyScript.Decorator);
-                }
-            }
-        }
-
-        public void Execute()
-        {
-            if (!Cancelled)
-            {
-                if (MainScript != null)
-                {
-                    RunLua(MainScript.ExecuteInfo, "Execute", "");
-                }
-
-                if (CurrentStashkeyScript != null)
-                {
-                    RunLua(CurrentStashkeyScript.ExecuteInfo, "Execute", CurrentStashkeyScript.Decorator);
-                }
             }
         }
 
         public void Abort()
         {
             Cancelled = true;
-        }
-
-        public void PostExecute()
-        {
-            if (!Cancelled)
-            {
-                if (MainScript != null)
-                {
-                    RunLua(MainScript.PostExecuteInfo, "PostExecute", "");
-                }
-
-                if (CurrentStashkeyScript != null)
-                {
-                    RunLua(CurrentStashkeyScript.PostExecuteInfo, "PostExecute", CurrentStashkeyScript.Decorator);
-                }
-            }
-        }
-
-        private void RunLua(ScriptCoroutineInfo info, string coroutineName, string decorator)
-        {
-            //Todo: cache decorator/whole run string in coroutine info to clean up this function
-            if (info.Enabled && !info.Finished)
-            {
-                if (info.FramesToResume <= 0)
-                {
-                    lua.DoString($"coroutine.resume({coroutineName}{decorator})");
-                    // info.FramesToResume = ((long)lua.GetObjectFromPath(ScriptConstants.LUA_YIELD));//Most efficient way I think
-                    info.FramesToResume = lua.GetLong(ScriptConstants.LUA_YIELD);
-                }
-                else
-                {
-                    info.FramesToResume--;
-                }
-            }
-        }
-
-        public void Dispose()
-        {
-            lua.Close();
-            lua.Dispose();
         }
     }
 }

@@ -1,6 +1,7 @@
 ﻿namespace ScriptCore
 {
-    using NLua;
+    using MoonSharp.Interpreter;
+    using ScriptCore.Attributes;
     using System;
     using System.Collections.Generic;
     using System.Linq;
@@ -10,60 +11,99 @@
 
     public static class ScriptInitializer
     {
-        static Dictionary<string, List<string>> links = new Dictionary<string, List<string>>();
-        static List<LuaFunc> luaFunctions = new List<LuaFunc>();
+        //static List<CallbackFunc> callbackFunctions = new List<CallbackFunc>();
+        static Dictionary<string,CallbackFunc> callbackFunctions = new Dictionary<string,CallbackFunc>();
 
         const string libCode = @"
             function waitFrames(frames)
-                LUA_YIELD = frames
+                LUA_YIELD = WaitForFrames(frames)
                 coroutine.yield()
             end
             function waitFrame()
-                LUA_YIELD = 0
+                LUA_YIELD = WaitForFrames(0)
                 coroutine.yield()
+            end
+
+            function RegisterCoroutine(co, name)
+                local cor = coroutine.create(co)
+
+                local cfunc = function()
+                    if coroutine.status(cor) ~= 'dead' then coroutine.resume(cor) end
+                end
+
+                RegisterHook(cfunc,name)
             end
         ";
 
-        public static void RegisterFunc(string path, object target, MethodBase function)
-        {
-            luaFunctions.Add(new LuaFunc(path, target, function));
-        }
 
-        public static void AddAssemblyAndNamespaces(string assembly, params string[] namespaces)
+        /// <summary>
+        /// Call this to register all the callback functions
+        /// </summary>
+        public static void Start()
         {
-            links[assembly] = new List<string>();
-            links[assembly].AddRange(namespaces);
-        }
-        public static void AddNamespaces(string assembly, params string[] namespaces)
-        {
-            links[assembly].AddRange(namespaces);
-        }
-        public static void AddAssembly(string assembly)
-        {
-            links[assembly] = new List<string>();
-        }
-        public static void AddNamespace(string assembly, string namespce)
-        {
-            links[assembly].Add(namespce);
-        }
-
-        internal static void Initialize(Lua lua)
-        {
-            StringBuilder sb = new StringBuilder();
-            foreach (var assemb in links)
+            var assemblies = AppDomain.CurrentDomain.GetAssemblies();
+            foreach (var assembly in assemblies)
             {
-                foreach (var namespc in assemb.Value)
+                RegisterAssemblyFuncs(assembly);
+            }
+        }
+
+        static void RegisterAssemblyFuncs(Assembly assembly)
+        {
+            Type[] types = assembly.GetTypes();
+            foreach (var type in types)
+            {
+                MethodInfo[] mis = type.GetMethods(BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic);
+                foreach (var mi in mis)
                 {
-                    sb.AppendLine($@"import ('{assemb.Key}', '{namespc}')");
+                    var attr = (LuaCallbackAttribute)Attribute.GetCustomAttribute(mi, typeof(LuaCallbackAttribute));
+                    if (attr != null)
+                    {
+                        var documentation = (LuaDocumentationAttribute)Attribute.GetCustomAttribute(mi, typeof(LuaDocumentationAttribute));
+                        var example = (LuaExampleAttribute)Attribute.GetCustomAttribute(mi, typeof(LuaExampleAttribute));
+                        var del = CreateDelegate(mi);
+                        callbackFunctions[attr.Name] = new CallbackFunc(attr.Name, del, documentation?.Data ?? "", example?.Data ?? "");
+                    }
                 }
             }
-            lua.DoString(sb.ToString(), "imports");
-            lua.DoString(libCode, "Additional Code");
+        }
 
-            foreach (var func in luaFunctions)
+        //Taken from https://stackoverflow.com/a/40579063
+        private static Delegate CreateDelegate(MethodInfo methodInfo, object target = null)
+        {
+            Func<Type[], Type> getType;
+            var isAction = methodInfo.ReturnType.Equals((typeof(void)));
+            var types = methodInfo.GetParameters().Select(p => p.ParameterType);
+
+            if (isAction)
             {
-                lua.RegisterFunction(func.path, func.target, func.function);
+                getType = System.Linq.Expressions.Expression.GetActionType;
             }
+            else
+            {
+                getType = System.Linq.Expressions.Expression.GetFuncType;
+                types = types.Concat(new[] { methodInfo.ReturnType });
+            }
+
+            if (methodInfo.IsStatic)
+            {
+                return Delegate.CreateDelegate(getType(types.ToArray()), methodInfo);
+            }
+
+            return Delegate.CreateDelegate(getType(types.ToArray()), target, methodInfo.Name);
+        }
+
+        
+
+
+        
+        internal static void Initialize(Script lua)
+        {
+            foreach (var func in callbackFunctions)
+            {
+                lua.Globals[func.Value.Path] = func.Value.Callback;
+            }
+            lua.DoString(libCode, null, "Lua Helper Code");
         }
     }
 

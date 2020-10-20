@@ -15,6 +15,11 @@ namespace LuaGUI
 {
     public partial class Form1 : Form
     {
+        //Console show stuff
+        [DllImport("kernel32.dll", SetLastError = true)]
+        [return: MarshalAs(UnmanagedType.Bool)]
+        static extern bool AllocConsole();
+
         ScriptRunner testScriptRunner = null;
         public Form1()
         {
@@ -25,14 +30,15 @@ namespace LuaGUI
             //Scripts.AddAssemblyAndNamespaces(GetType().Assembly.FullName, nameof(LuaGUI));
 
             //ADD INDIVIDUAL FUNCTIONS 
-            ScriptInitializer.RegisterFunc("printA", null, GetType().GetMethod("PrintPlusA", System.Reflection.BindingFlags.Static | System.Reflection.BindingFlags.Public));
-            ScriptInitializer.RegisterFunc("peekByte", null, typeof(CSharpClass).GetMethod("PeekByte", System.Reflection.BindingFlags.Static | System.Reflection.BindingFlags.Public));
-            
+            //ScriptInitializer.RegisterFunc("printA", null, GetType().GetMethod("PrintPlusA", System.Reflection.BindingFlags.Static | System.Reflection.BindingFlags.Public));
+            //ScriptInitializer.RegisterFunc("peekByte", null, typeof(CSharpClass).GetMethod("PeekByte", System.Reflection.BindingFlags.Static | System.Reflection.BindingFlags.Public));
+            ScriptInitializer.Start();
         }
 
         private void Form1_Load(object sender, EventArgs e)
         {
             Console.WriteLine("Is 64 bit process: " + Environment.Is64BitProcess.ToString());
+            AllocConsole();
         }
 
         public static void PrintPlusA(string s)
@@ -54,11 +60,11 @@ namespace LuaGUI
             {
                 //Console.WriteLine($"LOOP {j} ============================");
                 //Console.WriteLine($"(C#) PreExecute {j}");
-                scriptRunner.PreExecute();
+                scriptRunner.Execute("PreExecute");
                 //Console.WriteLine($"\r\n(C#) Execute {j}");
-                scriptRunner.Execute();
+                scriptRunner.Execute("Execute");
                 //Console.WriteLine($"\r\n(C#) PostExecute {j}");
-                scriptRunner.PostExecute();
+                scriptRunner.Execute("PostExecute");
                 if(j % 10 == 0)
                 {
                     scriptRunner.SetCurrentScript(1);
@@ -66,14 +72,10 @@ namespace LuaGUI
             }
             Console.WriteLine("Elapsed time: " + w.Elapsed.ToString());
             w.Stop();
-
-            scriptRunner.Dispose();
         }
 
         private void bStart_Click(object sender, EventArgs e)
         {
-            testScriptRunner?.Dispose();
-
             testScriptRunner = new ScriptRunner();
             testScriptRunner.LoadScripts(tbScript.Text, null, tbStashkey1.Text, null);
             testScriptRunner.SetCurrentScript(0);
@@ -90,11 +92,11 @@ namespace LuaGUI
             {
                 Console.WriteLine($"LOOP ============================");
                 Console.WriteLine($"(C#) PreExecute");
-                testScriptRunner.PreExecute();
+                testScriptRunner.Execute("PreExecute");
                 Console.WriteLine($"\r\n(C#) Execute");
-                testScriptRunner.Execute();
+                testScriptRunner.Execute("Execute");
                 Console.WriteLine($"\r\n(C#) PostExecute");
-                testScriptRunner.PostExecute();
+                testScriptRunner.Execute("PostExecute");
             }
             catch 
             {
@@ -105,7 +107,6 @@ namespace LuaGUI
 
         private void bDispose_Click(object sender, EventArgs e)
         {
-            testScriptRunner.Dispose();
             testScriptRunner = null;
             bExecute.Enabled = false;
             bDispose.Enabled = false;

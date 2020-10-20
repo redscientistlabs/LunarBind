@@ -35,11 +35,8 @@
     <PlatformTarget>x86</PlatformTarget>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="KeraLua, Version=1.2.6.0, Culture=neutral, PublicKeyToken=6a194c04b9c89217, processorArchitecture=MSIL">
-      <HintPath>..\packages\KeraLua.1.2.6\lib\net45\KeraLua.dll</HintPath>
-    </Reference>
-    <Reference Include="NLua, Version=1.5.1.0, Culture=neutral, PublicKeyToken=6a194c04b9c89217, processorArchitecture=MSIL">
-      <HintPath>..\packages\NLua.1.5.1\lib\net45\NLua.dll</HintPath>
+    <Reference Include="MoonSharp.Interpreter, Version=2.0.0.0, Culture=neutral, PublicKeyToken=921e73ce94aa17f8, processorArchitecture=MSIL">
+      <HintPath>..\packages\MoonSharp.2.0.0.0\lib\net40-client\MoonSharp.Interpreter.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
@@ -51,23 +48,24 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="LuaFunc.cs" />
-    <Compile Include="ScriptCoroutineInfo.cs" />
-    <Compile Include="Script.cs" />
+    <Compile Include="Attributes\LuaCallbackAttribute.cs" />
+    <Compile Include="Attributes\LuaDocumentationAttribute.cs" />
+    <Compile Include="Attributes\LuaExampleAttribute.cs" />
+    <Compile Include="Hooks.cs" />
+    <Compile Include="CallbackFunc.cs" />
+    <Compile Include="NamedScriptHook.cs" />
+    <Compile Include="ScriptContainer.cs" />
     <Compile Include="ScriptConstants.cs" />
+    <Compile Include="ScriptExecutionContext.cs" />
     <Compile Include="ScriptInitializer.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ScriptRunner.cs" />
+    <Compile Include="Yielders\WaitFrames.cs" />
+    <Compile Include="Yielders\Yielder.cs" />
+    <Compile Include="Yielders\Yielders.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
-  <Import Project="..\packages\KeraLua.1.2.6\build\net45\KeraLua.targets" Condition="Exists('..\packages\KeraLua.1.2.6\build\net45\KeraLua.targets')" />
-  <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
-    <PropertyGroup>
-      <ErrorText>This project references NuGet package(s) that are missing on this computer. Use NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
-    </PropertyGroup>
-    <Error Condition="!Exists('..\packages\KeraLua.1.2.6\build\net45\KeraLua.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\KeraLua.1.2.6\build\net45\KeraLua.targets'))" />
-  </Target>
 </Project>

@@ -118,66 +118,17 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="tbScript.Text" xml:space="preserve">
-    <value>Execute = coroutine.create(function ()
-	printA('B')
-	print('(lua MAIN SCR) exec0, yield 1 frame')
-	waitFrames(1)
+    <value>function executeMain()
+	print('(lua MAIN SCR) exec0, yield 0 frames')
+	waitFrames(0)
 
-	print('(lua MAIN SCR) exec1, yield 3 frames')
-	waitFrames(3)
+	print('(lua MAIN SCR) exec1, yield 1 frame')
+	waitFrames(1)
 
 	print('(lua MAIN SCR) exec2, final')
-end)
+                print(PeekByte('SRAM', 123))
+end
 
-
-PostExecute = coroutine.create(function ()
-	print('(lua MAIN SCR) postexec0, yield 2 frames')
-	waitFrames(2)
-
-	print('(lua MAIN SCR) postexec1, yield 1 frame')
-	waitFrames(1)
-
-	print('(lua MAIN SCR) postexec2, yield 1 frame')
-
-	waitFrames(1)
-	print(peekByte('SRAM',123) )
-end)</value>
-  </data>
-  <data name="tbStashkey1.Text" xml:space="preserve">
-    <value>PreExecute = coroutine.create(function ()
-	print('(lua STASHKEY) preexec0, yield 1 frame')
-	waitFrames(1)
-
-	print('(lua STASHKEY) preexec1, yield 1 frame')
-	waitFrames(1)
-
-	print('(lua STASHKEY) preexec2, final')
-end)
-
-
-
-Execute = coroutine.create(function ()
-	print('(lua STASHKEY) exec0, yield 1 frame')
-	waitFrames(1)
-
-	print('(lua STASHKEY) exec1, yield 3 frames')
-	waitFrames(3)
-
-	print('(lua STASHKEY) exec2, final')
-end)
-
-
-PostExecute = coroutine.create(function ()
-	print('(lua STASHKEY) postexec0, yield 2 frames')
-	waitFrames(2)
-
-	print('(lua STASHKEY) postexec1, yield 1 frame')
-	waitFrames(1)
-
-	print('(lua STASHKEY) postexec2, yield 1 frame')
-
-	waitFrames(1)
-	print( peekByte('SRAM',123) )
-end)</value>
+RegisterCoroutine(executeMain, 'Execute')</value>
   </data>
 </root>
