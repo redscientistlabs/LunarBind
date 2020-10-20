@@ -96,7 +96,7 @@
         void RegisterHook(DynValue del, string name)
         {
             if (registrationContext == null) { return; }
-            registrationContext.Hooks.Add(name, new NamedScriptHook(del));
+            registrationContext.Hooks[name] = new NamedScriptHook(del);
         }
 
         public void Execute(string hookName)
