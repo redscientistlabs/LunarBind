@@ -37,8 +37,8 @@ namespace LuaGUI
 
         private void Form1_Load(object sender, EventArgs e)
         {
-            Console.WriteLine("Is 64 bit process: " + Environment.Is64BitProcess.ToString());
             AllocConsole();
+            Console.WriteLine("Is 64 bit process: " + Environment.Is64BitProcess.ToString());
         }
 
         public static void PrintPlusA(string s)

@@ -27,8 +27,10 @@
             lua = new Script(CoreModules.Preset_HardSandbox | CoreModules.Coroutine | CoreModules.OS_Time);
             lua.Globals[ScriptConstants.LUA_YIELD] = null;
             lua.Globals["RegisterHook"] = (Action<DynValue, string>)RegisterHook;
+            //TODO: register with attributes
             UserData.RegisterType<Yielder>();
             UserData.RegisterType<WaitFrames>();
+
             ScriptInitializer.Initialize(lua);
         }
 
@@ -44,7 +46,6 @@
                 registrationContext = null;
             }
         }
-
 
         public void LoadScripts(string mainScript, params string[] stashkeyScripts)
         {
@@ -88,22 +89,15 @@
             catch(ScriptRuntimeException ex)
             {
                 //Todo: exception handling
-                //Console.WriteLine(ex);
                 throw ex;
             }
         }
 
-        //[LuaDocumentation("Registers a function as a callback")]
-        //[LuaCallback("RegisterHook")]
         void RegisterHook(DynValue del, string name)
         {
-            //TODO: throw error?
-
-            //var type = del.Type;
             if (registrationContext == null) { return; }
             registrationContext.Hooks.Add(name, new NamedScriptHook(del));
         }
-
 
         public void Execute(string hookName)
         {

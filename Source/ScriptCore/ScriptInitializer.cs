@@ -93,10 +93,6 @@
             return Delegate.CreateDelegate(getType(types.ToArray()), target, methodInfo.Name);
         }
 
-        
-
-
-        
         internal static void Initialize(Script lua)
         {
             foreach (var func in callbackFunctions)

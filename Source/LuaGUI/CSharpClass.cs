@@ -8,6 +8,7 @@ namespace LuaGUI
 {
     public static class CSharpClass
     {
+        [LuaDocumentation("Peeks bytes, demonstration function")]
         [LuaCallback("PeekByte")]
         public static byte PeekByte(string domain, long address)
         {

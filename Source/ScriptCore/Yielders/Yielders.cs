@@ -7,7 +7,7 @@ using MoonSharp.Interpreter;
 using ScriptCore.Attributes;
 namespace ScriptCore.Yielders
 {
-    static class Yielders
+    internal static class Yielders
     {
         [LuaCallback(nameof(WaitForFrames))]
         public static WaitFrames WaitForFrames(long frames)

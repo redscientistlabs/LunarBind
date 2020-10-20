@@ -11,7 +11,7 @@ namespace ScriptCore.Yielders
     /// Waits X amount of calls
     /// </summary>
     [MoonSharpUserData]
-    public class WaitFrames : Yielder
+    internal class WaitFrames : Yielder
     {
         long framesLeft;
 

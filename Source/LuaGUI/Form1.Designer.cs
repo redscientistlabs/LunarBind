@@ -49,8 +49,9 @@
             // 
             // bTest
             // 
+            this.bTest.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.bTest.Location = new System.Drawing.Point(20, 636);
-            this.bTest.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.bTest.Margin = new System.Windows.Forms.Padding(4);
             this.bTest.Name = "bTest";
             this.bTest.Size = new System.Drawing.Size(131, 28);
             this.bTest.TabIndex = 0;
@@ -61,7 +62,7 @@
             // bStart
             // 
             this.bStart.Location = new System.Drawing.Point(17, 63);
-            this.bStart.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.bStart.Margin = new System.Windows.Forms.Padding(4);
             this.bStart.Name = "bStart";
             this.bStart.Size = new System.Drawing.Size(100, 28);
             this.bStart.TabIndex = 1;
@@ -73,7 +74,7 @@
             // 
             this.bExecute.Enabled = false;
             this.bExecute.Location = new System.Drawing.Point(17, 98);
-            this.bExecute.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.bExecute.Margin = new System.Windows.Forms.Padding(4);
             this.bExecute.Name = "bExecute";
             this.bExecute.Size = new System.Drawing.Size(100, 28);
             this.bExecute.TabIndex = 2;
@@ -85,7 +86,7 @@
             // 
             this.bDispose.Enabled = false;
             this.bDispose.Location = new System.Drawing.Point(16, 134);
-            this.bDispose.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.bDispose.Margin = new System.Windows.Forms.Padding(4);
             this.bDispose.Name = "bDispose";
             this.bDispose.Size = new System.Drawing.Size(100, 28);
             this.bDispose.TabIndex = 3;
@@ -100,7 +101,7 @@
             | System.Windows.Forms.AnchorStyles.Right)));
             this.tbScript.Font = new System.Drawing.Font("Consolas", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.tbScript.Location = new System.Drawing.Point(324, 48);
-            this.tbScript.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.tbScript.Margin = new System.Windows.Forms.Padding(4);
             this.tbScript.Multiline = true;
             this.tbScript.Name = "tbScript";
             this.tbScript.ScrollBars = System.Windows.Forms.ScrollBars.Both;
@@ -113,7 +114,7 @@
             // 
             this.bAbort.Enabled = false;
             this.bAbort.Location = new System.Drawing.Point(125, 98);
-            this.bAbort.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.bAbort.Margin = new System.Windows.Forms.Padding(4);
             this.bAbort.Name = "bAbort";
             this.bAbort.Size = new System.Drawing.Size(100, 28);
             this.bAbort.TabIndex = 5;
@@ -128,7 +129,7 @@
             | System.Windows.Forms.AnchorStyles.Right)));
             this.tbStashkey1.Font = new System.Drawing.Font("Consolas", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.tbStashkey1.Location = new System.Drawing.Point(752, 48);
-            this.tbStashkey1.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.tbStashkey1.Margin = new System.Windows.Forms.Padding(4);
             this.tbStashkey1.Multiline = true;
             this.tbStashkey1.Name = "tbStashkey1";
             this.tbStashkey1.ScrollBars = System.Windows.Forms.ScrollBars.Both;
@@ -142,7 +143,7 @@
             // 
             this.bSetStashkey.Enabled = false;
             this.bSetStashkey.Location = new System.Drawing.Point(188, 325);
-            this.bSetStashkey.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.bSetStashkey.Margin = new System.Windows.Forms.Padding(4);
             this.bSetStashkey.Name = "bSetStashkey";
             this.bSetStashkey.Size = new System.Drawing.Size(100, 28);
             this.bSetStashkey.TabIndex = 8;
@@ -153,7 +154,7 @@
             // nmStashkey
             // 
             this.nmStashkey.Location = new System.Drawing.Point(20, 329);
-            this.nmStashkey.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.nmStashkey.Margin = new System.Windows.Forms.Padding(4);
             this.nmStashkey.Maximum = new decimal(new int[] {
             2,
             0,
@@ -253,8 +254,8 @@
             this.Controls.Add(this.bExecute);
             this.Controls.Add(this.bStart);
             this.Controls.Add(this.bTest);
-            this.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
-            this.MinimumSize = new System.Drawing.Size(1035, 593);
+            this.Margin = new System.Windows.Forms.Padding(4);
+            this.MinimumSize = new System.Drawing.Size(1229, 720);
             this.Name = "Form1";
             this.Text = "Scriptcore Test GUI";
             ((System.ComponentModel.ISupportInitialize)(this.nmStashkey)).EndInit();

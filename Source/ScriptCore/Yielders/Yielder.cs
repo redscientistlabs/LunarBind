@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 namespace ScriptCore.Yielders
 {
     [MoonSharpUserData]
-    public abstract class Yielder
+    internal abstract class Yielder
     {
         /// <summary>
         /// Returns the state of the yielder
