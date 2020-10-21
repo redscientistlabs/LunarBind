@@ -124,6 +124,7 @@
             this.tbStashkey1.Location = new System.Drawing.Point(564, 39);
             this.tbStashkey1.Multiline = true;
             this.tbStashkey1.Name = "tbStashkey1";
+            this.tbStashkey1.ReadOnly = true;
             this.tbStashkey1.ScrollBars = System.Windows.Forms.ScrollBars.Both;
             this.tbStashkey1.Size = new System.Drawing.Size(334, 501);
             this.tbStashkey1.TabIndex = 7;
@@ -133,17 +134,17 @@
             // bSetStashkey
             // 
             this.bSetStashkey.Enabled = false;
-            this.bSetStashkey.Location = new System.Drawing.Point(141, 264);
+            this.bSetStashkey.Location = new System.Drawing.Point(94, 150);
             this.bSetStashkey.Name = "bSetStashkey";
             this.bSetStashkey.Size = new System.Drawing.Size(75, 23);
             this.bSetStashkey.TabIndex = 8;
-            this.bSetStashkey.Text = "Set";
+            this.bSetStashkey.Text = "Load";
             this.bSetStashkey.UseVisualStyleBackColor = true;
             this.bSetStashkey.Click += new System.EventHandler(this.bSetStashkey_Click);
             // 
             // nmStashkey
             // 
-            this.nmStashkey.Location = new System.Drawing.Point(15, 267);
+            this.nmStashkey.Location = new System.Drawing.Point(13, 322);
             this.nmStashkey.Maximum = new decimal(new int[] {
             2,
             0,
@@ -157,6 +158,7 @@
             0,
             0,
             0});
+            this.nmStashkey.Visible = false;
             // 
             // label1
             // 
@@ -176,28 +178,30 @@
             this.label2.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.label2.Location = new System.Drawing.Point(240, 23);
             this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(82, 13);
+            this.label2.Size = new System.Drawing.Size(87, 13);
             this.label2.TabIndex = 11;
-            this.label2.Text = "Master Script";
+            this.label2.Text = "Script to Load";
             // 
             // label3
             // 
             this.label3.AutoSize = true;
-            this.label3.Location = new System.Drawing.Point(12, 251);
+            this.label3.Location = new System.Drawing.Point(10, 306);
             this.label3.Name = "label3";
             this.label3.Size = new System.Drawing.Size(33, 13);
             this.label3.TabIndex = 12;
             this.label3.Text = "Index";
+            this.label3.Visible = false;
             // 
             // label4
             // 
             this.label4.AutoSize = true;
-            this.label4.Location = new System.Drawing.Point(11, 176);
+            this.label4.Location = new System.Drawing.Point(9, 231);
             this.label4.Name = "label4";
             this.label4.Size = new System.Drawing.Size(219, 26);
             this.label4.TabIndex = 13;
             this.label4.Text = "Select Stashkey Script (Only index 1 defined)\r\nSelecting again resets stashkey sc" +
     "ript";
+            this.label4.Visible = false;
             // 
             // label5
             // 
@@ -211,11 +215,12 @@
             // label6
             // 
             this.label6.AutoSize = true;
-            this.label6.Location = new System.Drawing.Point(12, 212);
+            this.label6.Location = new System.Drawing.Point(10, 267);
             this.label6.Name = "label6";
             this.label6.Size = new System.Drawing.Size(157, 26);
             this.label6.TabIndex = 15;
             this.label6.Text = "Index 0 is initially selected when\r\nstarting with the start button";
+            this.label6.Visible = false;
             // 
             // Form1
             // 

@@ -10,6 +10,7 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using ScriptCore;
 using System.Runtime.InteropServices;
+using ScriptCore.Attributes;
 
 namespace LuaGUI
 {
@@ -41,6 +42,7 @@ namespace LuaGUI
             Console.WriteLine("Is 64 bit process: " + Environment.Is64BitProcess.ToString());
         }
 
+        [LuaCallback("PrintPlusA")]
         public static void PrintPlusA(string s)
         {
             Console.WriteLine("(A) " + s);
@@ -49,8 +51,10 @@ namespace LuaGUI
         private void bTest_Click(object sender, EventArgs e)
         {
             ScriptRunner scriptRunner = new ScriptRunner();
-            scriptRunner.LoadScripts(tbScript.Text, null, tbStashkey1.Text, null);
-            scriptRunner.SetCurrentScript(1);
+            //scriptRunner.LoadScripts(tbScript.Text, null, tbStashkey1.Text, null);
+            //scriptRunner.SetCurrentScript(1);
+            scriptRunner.LoadScript(tbScript.Text);
+            scriptRunner.LoadScript(tbStashkey1.Text);
 
             Console.WriteLine("Script test");
 
@@ -67,7 +71,7 @@ namespace LuaGUI
                 scriptRunner.Execute("PostExecute");
                 if(j % 10 == 0)
                 {
-                    scriptRunner.SetCurrentScript(1);
+                    scriptRunner.LoadScript(tbStashkey1.Text);
                 }
             }
             Console.WriteLine("Elapsed time: " + w.Elapsed.ToString());
@@ -77,8 +81,9 @@ namespace LuaGUI
         private void bStart_Click(object sender, EventArgs e)
         {
             testScriptRunner = new ScriptRunner();
-            testScriptRunner.LoadScripts(tbScript.Text, null, tbStashkey1.Text, null);
-            testScriptRunner.SetCurrentScript(0);
+            testScriptRunner.LoadScript(tbScript.Text);
+            //testScriptRunner.LoadScript(tbStashkey1.Text);
+            //testScriptRunner.SetCurrentScript(0);
             bExecute.Enabled = true;
             bDispose.Enabled = true;
             bAbort.Enabled = true;
@@ -122,8 +127,10 @@ namespace LuaGUI
 
         private void bSetStashkey_Click(object sender, EventArgs e)
         {
-            testScriptRunner?.SetCurrentScript((int)nmStashkey.Value);
-            Console.WriteLine($"Set Stashkey Script to index {((int)nmStashkey.Value)}");
+            //testScriptRunner?.SetCurrentScript((int)nmStashkey.Value);
+            testScriptRunner?.LoadScript(tbScript.Text);
+            Console.WriteLine($"Loaded script");
+            //Console.WriteLine($"Set Stashkey Script to index {((int)nmStashkey.Value)}");
         }
     }
 }

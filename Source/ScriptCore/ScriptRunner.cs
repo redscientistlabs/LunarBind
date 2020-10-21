@@ -11,123 +11,123 @@
 
     public class ScriptRunner
     {
-        private ScriptContainer MainScript { get; set; } = null;
-        private List<ScriptContainer> StashkeyScripts = new List<ScriptContainer>();
-        private ScriptContainer CurrentStashkeyScript = null;
+        private Dictionary<string,ScriptContainer> GlobalScripts = new Dictionary<string, ScriptContainer>();
+        private ScriptContainer CurrentTempScript = null;
 
+        //Todo: better abort options
         private volatile bool Cancelled = false;
 
         private Script lua;
 
-        ScriptContainer registrationContext = null;
+        private ScriptContainer runningScript = null;
 
 
         public ScriptRunner()
         {
             lua = new Script(CoreModules.Preset_HardSandbox | CoreModules.Coroutine | CoreModules.OS_Time);
-            lua.Globals[ScriptConstants.LUA_YIELD] = null;
+
+            //scriptrunner local methods, will have to hardcode documentation for this
             lua.Globals["RegisterHook"] = (Action<DynValue, string>)RegisterHook;
-            //TODO: register with attributes
+            lua.Globals["MakeGlobal"] = (Action<string>)MakeGlobal;
+            lua.Globals["RemoveGlobal"] = (Action<string>)RemoveGlobal;
+            lua.Globals["ResetGlobals"] = (Action)ResetGlobals;
+
+            //Yielding
+            lua.Globals[ScriptConstants.LUA_YIELD] = null;
+            //TODO: gather and register types with attributes in initializer
             UserData.RegisterType<Yielder>();
             UserData.RegisterType<WaitFrames>();
 
             ScriptInitializer.Initialize(lua);
         }
 
-        public void SetCurrentScript(int script)
+        public void LoadScript(string scriptString)
         {
-            CurrentStashkeyScript = StashkeyScripts[script];
-            if(CurrentStashkeyScript != null)
+            if (string.IsNullOrWhiteSpace(scriptString))
             {
-                CurrentStashkeyScript.ResetHooks();
-
-                registrationContext = CurrentStashkeyScript;
-                lua.DoString(CurrentStashkeyScript.ScriptString);
-                registrationContext = null;
+                //No script
+                return;
             }
+            var scr = new ScriptContainer(scriptString);
+            CurrentTempScript?.ResetHooks();
+            CurrentTempScript = scr;
+
+            runningScript = scr;
+            lua.DoString(scr.ScriptString);
+            runningScript = null;
         }
 
-        public void LoadScripts(string mainScript, params string[] stashkeyScripts)
-        {
-            try
-            {
-                if (mainScript != null)
-                {
-                    var scr = new ScriptContainer(mainScript);
-                    registrationContext = scr;
-                    try
-                    {
-                        lua.DoString(scr.ScriptString);
-                    }
-                    catch(ScriptRuntimeException ex)
-                    {
-                        throw ex;
-                    }
-                    registrationContext = null;
-                    MainScript = scr;
-                }
-
-                if (stashkeyScripts != null && stashkeyScripts.Length > 0)
-                {
-                    for (int i = 0; i < stashkeyScripts.Length; i++)
-                    {
-                        if (stashkeyScripts[i] == null)
-                        {
-                            StashkeyScripts.Add(null);
-                        }
-                        else
-                        {
-                            var scr = new ScriptContainer(stashkeyScripts[i]);
-                            registrationContext = scr;
-                            lua.DoString(scr.ScriptString);
-                            registrationContext = null;
-                            StashkeyScripts.Add(scr);
-                        }
-                    }
-                }
-            }
-            catch(ScriptRuntimeException ex)
-            {
-                //Todo: exception handling
-                throw ex;
-            }
-        }
-
+        #region callbacks
         void RegisterHook(DynValue del, string name)
         {
-            if (registrationContext == null) { return; }
-            registrationContext.Hooks[name] = new NamedScriptHook(del);
+            if (runningScript == null) { return; }
+            runningScript.Hooks[name] = new NamedScriptHook(del);
+        }
+        void MakeGlobal(string name)
+        {
+            if (runningScript == null) { return; }
+            if (!GlobalScripts.ContainsKey(name))
+            {
+                //Unique global scripts
+                GlobalScripts[name] = runningScript;
+            }
+            CurrentTempScript = null; //Remove temp so as to not dupe either way
+        }
+        void RemoveGlobal(string name)
+        {
+            if (runningScript == null) { return; }
+            if (GlobalScripts.ContainsKey(name))
+            {
+                GlobalScripts[name].ResetHooks();
+                GlobalScripts.Remove(name);
+            }
+        }
+        void ResetGlobals()
+        {
+            if (runningScript == null) { return; }
+            foreach (var scr in GlobalScripts)
+            {
+                scr.Value.ResetHooks();
+            }
+            GlobalScripts.Clear();
         }
 
-        public void Execute(string hookName)
+        #endregion
+
+        public void Execute(string hookName, params object[] args)
         {
             try
             {
                 if (!Cancelled)
                 {
-                    if (MainScript != null)
+                    foreach (var script in GlobalScripts.Values)
                     {
-                        RunLua(MainScript, hookName);
+                        runningScript = script;
+                        RunLua(script, hookName, args);
+                        runningScript = null;
                     }
 
-                    if (CurrentStashkeyScript != null)
+                    if (CurrentTempScript != null)
                     {
-                        RunLua(CurrentStashkeyScript, hookName);
+                        runningScript = CurrentTempScript;
+                        RunLua(CurrentTempScript, hookName, args);
+                        runningScript = null;
                     }
                 }
             }
             catch(ScriptRuntimeException ex)
             {
+                //Todo: error handling
                 throw ex;
             }
         }
 
-        private void RunLua(ScriptContainer script, string hookName)
+        private void RunLua(ScriptContainer script, string hookName, params object[] args)
         {
             var hook = script.GetHook(hookName);
             if (hook != null && hook.CheckYieldStatus())
             {
-                lua.Call(hook.LuaFunc);
+                lua.Call(hook.LuaFunc, args);
                 var yieldObj = lua.Globals[ScriptConstants.LUA_YIELD];
 
 

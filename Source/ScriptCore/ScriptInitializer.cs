@@ -53,7 +53,7 @@
             Type[] types = assembly.GetTypes();
             foreach (var type in types)
             {
-                MethodInfo[] mis = type.GetMethods(BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic);
+                MethodInfo[] mis = type.GetMethods(BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic);
                 foreach (var mi in mis)
                 {
                     var attr = (LuaCallbackAttribute)Attribute.GetCustomAttribute(mi, typeof(LuaCallbackAttribute));

@@ -137,7 +137,8 @@ end
 testNumber = 0
 
 RegisterHook(preExecuteMain, 'PreExecute')
-RegisterCoroutine(executeMain, 'Execute')</value>
+RegisterCoroutine(executeMain, 'Execute')
+MakeGlobal('Main Script')</value>
   </data>
   <data name="tbStashkey1.Text" xml:space="preserve">
     <value>function executeMain()
