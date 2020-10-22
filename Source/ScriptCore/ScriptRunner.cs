@@ -35,8 +35,8 @@
             //Yielding
             lua.Globals[ScriptConstants.LUA_YIELD] = null;
             //TODO: gather and register types with attributes in initializer
-            UserData.RegisterType<Yielder>();
-            UserData.RegisterType<WaitFrames>();
+            //UserData.RegisterType<Yielder>();
+            //UserData.RegisterType<WaitFrames>();
 
             ScriptInitializer.Initialize(lua);
         }
@@ -55,6 +55,8 @@
             runningScript = scr;
             lua.DoString(scr.ScriptString);
             runningScript = null;
+            //TODO: uncomment if memory becomes an issue somehow
+            //GC.Collect();
         }
 
         #region callbacks

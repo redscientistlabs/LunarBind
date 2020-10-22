@@ -49,6 +49,11 @@
             }
         }
 
+        public static void RegisterType(Type t)
+        {
+            UserData.RegisterType(t);
+        }
+
         static void RegisterAssemblyFuncs(Assembly assembly)
         {
             Type[] types = assembly.GetTypes();
