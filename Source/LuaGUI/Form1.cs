@@ -27,13 +27,10 @@ namespace LuaGUI
             InitializeComponent();
             Load += Form1_Load;
 
-            //ADD FULL NAMESPACES
-            //Scripts.AddAssemblyAndNamespaces(GetType().Assembly.FullName, nameof(LuaGUI));
-
-            //ADD INDIVIDUAL FUNCTIONS 
-            //ScriptInitializer.RegisterFunc("printA", null, GetType().GetMethod("PrintPlusA", System.Reflection.BindingFlags.Static | System.Reflection.BindingFlags.Public));
-            //ScriptInitializer.RegisterFunc("peekByte", null, typeof(CSharpClass).GetMethod("PeekByte", System.Reflection.BindingFlags.Static | System.Reflection.BindingFlags.Public));
+            //Start script initializer
             ScriptInitializer.Start();
+            //Register types you cannot put an attribute on
+            //ScriptInitializer.RegisterType(typeof(Control));
         }
 
         private void Form1_Load(object sender, EventArgs e)
@@ -50,32 +47,7 @@ namespace LuaGUI
 
         private void bTest_Click(object sender, EventArgs e)
         {
-            ScriptRunner scriptRunner = new ScriptRunner();
-            //scriptRunner.LoadScripts(tbScript.Text, null, tbStashkey1.Text, null);
-            //scriptRunner.SetCurrentScript(1);
-            scriptRunner.LoadScript(tbScript.Text);
-            scriptRunner.LoadScript(tbStashkey1.Text);
-
-            Console.WriteLine("Script test");
-
-            Stopwatch w = new Stopwatch();
-            w.Start();
-            for (int j = 0; j < 60; j++)
-            {
-                //Console.WriteLine($"LOOP {j} ============================");
-                //Console.WriteLine($"(C#) PreExecute {j}");
-                scriptRunner.Execute("PreExecute");
-                //Console.WriteLine($"\r\n(C#) Execute {j}");
-                scriptRunner.Execute("Execute");
-                //Console.WriteLine($"\r\n(C#) PostExecute {j}");
-                scriptRunner.Execute("PostExecute");
-                if(j % 10 == 0)
-                {
-                    scriptRunner.LoadScript(tbStashkey1.Text);
-                }
-            }
-            Console.WriteLine("Elapsed time: " + w.Elapsed.ToString());
-            w.Stop();
+           
         }
 
         private void bStart_Click(object sender, EventArgs e)
