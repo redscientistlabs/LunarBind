@@ -81,7 +81,6 @@ namespace LuaGUI
         private void bStart_Click(object sender, EventArgs e)
         {
             testScriptRunner = new ScriptRunner();
-            testScriptRunner.LoadScript(tbScript.Text);
             //testScriptRunner.LoadScript(tbStashkey1.Text);
             //testScriptRunner.SetCurrentScript(0);
             bExecute.Enabled = true;
@@ -89,6 +88,7 @@ namespace LuaGUI
             bAbort.Enabled = true;
             bSetStashkey.Enabled = true;
             bStart.Enabled = false;
+            bCallHook.Enabled = true;
         }
 
         private void bExecute_Click(object sender, EventArgs e)
@@ -118,6 +118,8 @@ namespace LuaGUI
             bAbort.Enabled = false;
             bStart.Enabled = true;
             bSetStashkey.Enabled = false;
+            bCallHook.Enabled = false;
+
         }
 
         private void bAbort_Click(object sender, EventArgs e)
@@ -131,6 +133,12 @@ namespace LuaGUI
             testScriptRunner?.LoadScript(tbScript.Text);
             Console.WriteLine($"Loaded script");
             //Console.WriteLine($"Set Stashkey Script to index {((int)nmStashkey.Value)}");
+        }
+
+        private void bCallHook_Click(object sender, EventArgs e)
+        {
+            Console.WriteLine($"Executing {tbHook.Text}");
+            testScriptRunner?.Execute(tbHook.Text);
         }
     }
 }

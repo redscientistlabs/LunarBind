@@ -44,6 +44,9 @@
             this.label4 = new System.Windows.Forms.Label();
             this.label5 = new System.Windows.Forms.Label();
             this.label6 = new System.Windows.Forms.Label();
+            this.bCallHook = new System.Windows.Forms.Button();
+            this.tbHook = new System.Windows.Forms.TextBox();
+            this.label7 = new System.Windows.Forms.Label();
             ((System.ComponentModel.ISupportInitialize)(this.nmStashkey)).BeginInit();
             this.SuspendLayout();
             // 
@@ -107,7 +110,7 @@
             // bAbort
             // 
             this.bAbort.Enabled = false;
-            this.bAbort.Location = new System.Drawing.Point(94, 80);
+            this.bAbort.Location = new System.Drawing.Point(93, 95);
             this.bAbort.Name = "bAbort";
             this.bAbort.Size = new System.Drawing.Size(75, 23);
             this.bAbort.TabIndex = 5;
@@ -134,17 +137,17 @@
             // bSetStashkey
             // 
             this.bSetStashkey.Enabled = false;
-            this.bSetStashkey.Location = new System.Drawing.Point(94, 150);
+            this.bSetStashkey.Location = new System.Drawing.Point(93, 66);
             this.bSetStashkey.Name = "bSetStashkey";
             this.bSetStashkey.Size = new System.Drawing.Size(75, 23);
             this.bSetStashkey.TabIndex = 8;
-            this.bSetStashkey.Text = "Load";
+            this.bSetStashkey.Text = "Load Script";
             this.bSetStashkey.UseVisualStyleBackColor = true;
             this.bSetStashkey.Click += new System.EventHandler(this.bSetStashkey_Click);
             // 
             // nmStashkey
             // 
-            this.nmStashkey.Location = new System.Drawing.Point(13, 322);
+            this.nmStashkey.Location = new System.Drawing.Point(22, 444);
             this.nmStashkey.Maximum = new decimal(new int[] {
             2,
             0,
@@ -185,7 +188,7 @@
             // label3
             // 
             this.label3.AutoSize = true;
-            this.label3.Location = new System.Drawing.Point(10, 306);
+            this.label3.Location = new System.Drawing.Point(19, 428);
             this.label3.Name = "label3";
             this.label3.Size = new System.Drawing.Size(33, 13);
             this.label3.TabIndex = 12;
@@ -195,7 +198,7 @@
             // label4
             // 
             this.label4.AutoSize = true;
-            this.label4.Location = new System.Drawing.Point(9, 231);
+            this.label4.Location = new System.Drawing.Point(18, 353);
             this.label4.Name = "label4";
             this.label4.Size = new System.Drawing.Size(219, 26);
             this.label4.TabIndex = 13;
@@ -215,18 +218,49 @@
             // label6
             // 
             this.label6.AutoSize = true;
-            this.label6.Location = new System.Drawing.Point(10, 267);
+            this.label6.Location = new System.Drawing.Point(19, 389);
             this.label6.Name = "label6";
             this.label6.Size = new System.Drawing.Size(157, 26);
             this.label6.TabIndex = 15;
             this.label6.Text = "Index 0 is initially selected when\r\nstarting with the start button";
             this.label6.Visible = false;
             // 
+            // bCallHook
+            // 
+            this.bCallHook.Enabled = false;
+            this.bCallHook.Location = new System.Drawing.Point(128, 193);
+            this.bCallHook.Name = "bCallHook";
+            this.bCallHook.Size = new System.Drawing.Size(75, 23);
+            this.bCallHook.TabIndex = 16;
+            this.bCallHook.Text = "Call Hook";
+            this.bCallHook.UseVisualStyleBackColor = true;
+            this.bCallHook.Click += new System.EventHandler(this.bCallHook_Click);
+            // 
+            // tbHook
+            // 
+            this.tbHook.Location = new System.Drawing.Point(22, 196);
+            this.tbHook.Name = "tbHook";
+            this.tbHook.Size = new System.Drawing.Size(100, 20);
+            this.tbHook.TabIndex = 17;
+            this.tbHook.Text = "Execute";
+            // 
+            // label7
+            // 
+            this.label7.AutoSize = true;
+            this.label7.Location = new System.Drawing.Point(18, 170);
+            this.label7.Name = "label7";
+            this.label7.Size = new System.Drawing.Size(91, 13);
+            this.label7.TabIndex = 18;
+            this.label7.Text = "Manual Hook Call";
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(910, 553);
+            this.Controls.Add(this.label7);
+            this.Controls.Add(this.tbHook);
+            this.Controls.Add(this.bCallHook);
             this.Controls.Add(this.label6);
             this.Controls.Add(this.label5);
             this.Controls.Add(this.label4);
@@ -268,6 +302,9 @@
         private System.Windows.Forms.Label label4;
         private System.Windows.Forms.Label label5;
         private System.Windows.Forms.Label label6;
+        private System.Windows.Forms.Button bCallHook;
+        private System.Windows.Forms.TextBox tbHook;
+        private System.Windows.Forms.Label label7;
     }
 }
 
