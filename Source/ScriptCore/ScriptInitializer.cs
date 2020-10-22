@@ -45,6 +45,7 @@
             foreach (var assembly in assemblies)
             {
                 RegisterAssemblyFuncs(assembly);
+                UserData.RegisterAssembly(assembly);
             }
         }
 
