@@ -28,6 +28,7 @@
 
             //scriptrunner local methods, will have to hardcode documentation for this
             lua.Globals["RegisterHook"] = (Action<DynValue, string>)RegisterHook;
+            lua.Globals["RemoveHook"] = (Action<string>)RemoveHook;
             lua.Globals["MakeGlobal"] = (Action<string>)MakeGlobal;
             lua.Globals["RemoveGlobal"] = (Action<string>)RemoveGlobal;
             lua.Globals["ResetGlobals"] = (Action)ResetGlobals;
@@ -64,6 +65,12 @@
         {
             if (runningScript == null) { return; }
             runningScript.Hooks[name] = new NamedScriptHook(del);
+        }
+
+        void RemoveHook(string name)
+        {
+            if (runningScript == null) { return; }
+            runningScript.Hooks.Remove(name);
         }
         void MakeGlobal(string name)
         {
