@@ -35,9 +35,8 @@
 
             //Yielding
             lua.Globals[ScriptConstants.LUA_YIELD] = null;
-            //TODO: gather and register types with attributes in initializer
-            //UserData.RegisterType<Yielder>();
-            //UserData.RegisterType<WaitFrames>();
+
+            //TODO: set up other constant globals
 
             ScriptInitializer.Initialize(lua);
         }
@@ -139,21 +138,14 @@
                 lua.Call(hook.LuaFunc, args);
                 var yieldObj = lua.Globals[ScriptConstants.LUA_YIELD];
 
-
-                //Gave me an error if I combined them
-                if (yieldObj == null)
-                {
-                    hook.CurYielder = null;
-                }
                 if (yieldObj is Yielder yielder)
                 {
                     hook.CurYielder = yielder;
                 }
-                else
+                else if(yieldObj != null)
                 {
                     //TODO: Throw error
                 }
-
             }
         }
 

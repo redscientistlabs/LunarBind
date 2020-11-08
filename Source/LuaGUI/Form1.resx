@@ -132,6 +132,8 @@ function executeMain()
   
   print('(lua MAIN SCR) exec2, final')
   print(PeekByte('SRAM', 123))
+  print('REMOVED PRE EXECUTE HOOK')
+  RemoveHook('PreExecute')
 end
 
 testNumber = 0

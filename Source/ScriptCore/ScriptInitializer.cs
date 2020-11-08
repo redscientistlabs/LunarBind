@@ -1,6 +1,7 @@
 ﻿namespace ScriptCore
 {
     using MoonSharp.Interpreter;
+    using MoonSharp.Interpreter.Interop;
     using ScriptCore.Attributes;
     using System;
     using System.Collections.Generic;
@@ -49,9 +50,31 @@
             }
         }
 
+        public static void Start(params Assembly[] assemblies)
+        {
+            //var assemblies = AppDomain.CurrentDomain.GetAssemblies();
+            foreach (var assembly in assemblies)
+            {
+                RegisterAssemblyFuncs(assembly);
+                UserData.RegisterAssembly(assembly);
+            }
+            RegisterAssemblyFuncs(typeof(ScriptInitializer).Assembly);
+            UserData.RegisterAssembly(typeof(ScriptInitializer).Assembly);
+        }
+
         public static void RegisterType(Type t)
         {
             UserData.RegisterType(t);
+        }
+
+        public static void RegisterType(Type t, InteropAccessMode mode)
+        {
+            UserData.RegisterType(t, mode);
+        }
+
+        public static void RegisterType(Type t, IUserDataDescriptor descriptor)
+        {
+            UserData.RegisterType(t, descriptor);
         }
 
         static void RegisterAssemblyFuncs(Assembly assembly)
