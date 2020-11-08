@@ -7,12 +7,9 @@
     using System.Collections.Generic;
     using System.Linq;
     using System.Reflection;
-    using System.Text;
-    using System.Threading.Tasks;
 
     public static class ScriptInitializer
     {
-        //static List<CallbackFunc> callbackFunctions = new List<CallbackFunc>();
         static Dictionary<string,CallbackFunc> callbackFunctions = new Dictionary<string,CallbackFunc>();
 
         const string libCode = @"
@@ -50,9 +47,12 @@
             }
         }
 
+        /// <summary>
+        /// Register all the callback functions for specific assemblies only. This is the preferred method
+        /// </summary>
+        /// <param name="assemblies"></param>
         public static void Start(params Assembly[] assemblies)
         {
-            //var assemblies = AppDomain.CurrentDomain.GetAssemblies();
             foreach (var assembly in assemblies)
             {
                 RegisterAssemblyFuncs(assembly);
@@ -62,6 +62,10 @@
             UserData.RegisterAssembly(typeof(ScriptInitializer).Assembly);
         }
 
+        /// <summary>
+        /// Manually register a type to use in Lua
+        /// </summary>
+        /// <param name="t"></param>
         public static void RegisterType(Type t)
         {
             UserData.RegisterType(t);
@@ -98,6 +102,7 @@
         }
 
         //Taken from https://stackoverflow.com/a/40579063
+        //Creates a delegate from reflection info
         private static Delegate CreateDelegate(MethodInfo methodInfo, object target = null)
         {
             Func<Type[], Type> getType;

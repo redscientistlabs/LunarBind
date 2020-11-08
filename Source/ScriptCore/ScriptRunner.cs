@@ -2,11 +2,7 @@
 {
     using System;
     using System.Collections.Generic;
-    using System.Linq;
-    using System.Text;
-    using System.Threading.Tasks;
     using MoonSharp.Interpreter;
-    using ScriptCore.Attributes;
     using ScriptCore.Yielders;
 
     public class ScriptRunner
@@ -63,7 +59,7 @@
         void RegisterHook(DynValue del, string name)
         {
             if (runningScript == null) { return; }
-            runningScript.Hooks[name] = new NamedScriptHook(del);
+            runningScript.Hooks[name] = new ScriptHook(del);
         }
 
         void RemoveHook(string name)

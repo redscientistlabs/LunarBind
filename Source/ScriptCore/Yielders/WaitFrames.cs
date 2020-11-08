@@ -1,12 +1,6 @@
-﻿using MoonSharp.Interpreter;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace ScriptCore.Yielders
+﻿namespace ScriptCore.Yielders
 {
+    using MoonSharp.Interpreter;
     /// <summary>
     /// Waits X amount of calls
     /// </summary>

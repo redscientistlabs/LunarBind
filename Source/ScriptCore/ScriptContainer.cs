@@ -1,19 +1,15 @@
 ﻿namespace ScriptCore
 {
-    using System;
     using System.Collections.Generic;
-    using System.Linq;
-    using System.Text;
-    using System.Threading.Tasks;
 
     /// <summary>
-    /// A script to run in stepactions
+    /// Holds a script to run in stepactions
     /// </summary>
     internal class ScriptContainer
     {
         public string ScriptString { get; protected set; }
 
-        internal Dictionary<string, NamedScriptHook> Hooks = new Dictionary<string, NamedScriptHook>();
+        internal Dictionary<string, ScriptHook> Hooks = new Dictionary<string, ScriptHook>();
         
         public ScriptContainer(string script)
         {
@@ -25,9 +21,9 @@
             Hooks.Clear();
         }
 
-        public NamedScriptHook GetHook(string name)
+        public ScriptHook GetHook(string name)
         {
-            if(Hooks.TryGetValue(name, out NamedScriptHook value))
+            if(Hooks.TryGetValue(name, out ScriptHook value))
             {
                 return value;
             }

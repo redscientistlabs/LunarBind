@@ -1,12 +1,7 @@
-﻿using MoonSharp.Interpreter;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace ScriptCore.Yielders
+﻿namespace ScriptCore.Yielders
 {
+    using MoonSharp.Interpreter;
+
     [MoonSharpUserData]
     internal abstract class Yielder
     {
