@@ -32,20 +32,19 @@
             //Yielding
             lua.Globals[ScriptConstants.LUA_YIELD] = null;
 
-            //TODO: set up other constant globals
-
             ScriptInitializer.Initialize(lua);
         }
 
         public void LoadScript(string scriptString)
         {
+            CurrentTempScript?.ResetHooks();
             if (string.IsNullOrWhiteSpace(scriptString))
             {
                 //No script
+                CurrentTempScript = null;
                 return;
             }
             var scr = new ScriptContainer(scriptString);
-            CurrentTempScript?.ResetHooks();
             CurrentTempScript = scr;
 
             runningScript = scr;
