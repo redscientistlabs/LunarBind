@@ -131,7 +131,6 @@ function executeMain()
   waitFrames(1)
   
   print('(lua MAIN SCR) exec2, final')
-  print(PeekByte('SRAM', 123))
   print('REMOVED PRE EXECUTE HOOK')
   RemoveHook('PreExecute')
 end

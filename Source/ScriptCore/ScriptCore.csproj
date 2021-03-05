@@ -48,16 +48,22 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Attributes\LuaCallbackAttribute.cs" />
+    <Compile Include="Attributes\LuaFunctionAttribute.cs" />
     <Compile Include="Attributes\LuaDocumentationAttribute.cs" />
     <Compile Include="Attributes\LuaExampleAttribute.cs" />
+    <Compile Include="BasicScriptRunner.cs" />
     <Compile Include="CallbackFunc.cs" />
+    <Compile Include="HelperFuncs.cs" />
+    <Compile Include="QuickScripting.cs" />
+    <Compile Include="ScriptBindings.cs" />
     <Compile Include="ScriptHook.cs" />
-    <Compile Include="ScriptContainer.cs" />
+    <Compile Include="HookedScriptContainer.cs" />
     <Compile Include="ScriptConstants.cs" />
-    <Compile Include="ScriptInitializer.cs" />
+    <Compile Include="GlobalScriptBindings.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="ScriptRunner.cs" />
+    <Compile Include="HookedScriptRunner.cs" />
+    <Compile Include="ScriptLibrary.cs" />
+    <Compile Include="ScriptTools.cs" />
     <Compile Include="Yielders\WaitFrames.cs" />
     <Compile Include="Yielders\Yielder.cs" />
     <Compile Include="Yielders\Yielders.cs" />

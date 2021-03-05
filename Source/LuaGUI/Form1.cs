@@ -21,26 +21,37 @@ namespace LuaGUI
         [return: MarshalAs(UnmanagedType.Bool)]
         static extern bool AllocConsole();
 
-        ScriptRunner testScriptRunner = null;
+        HookedScriptRunner testScriptRunner = null;
         public Form1()
         {
             InitializeComponent();
             Load += Form1_Load;
-
+            FormClosed += Form1_FormClosed;
             //Start script initializer
-            ScriptInitializer.Start();
+            //GlobalScriptBindings.HookAllAssemblies();
             //Register types you cannot put an attribute on
             //ScriptInitializer.RegisterType(typeof(Control));
+
+
+        }
+
+        private void Form1_FormClosed(object sender, FormClosedEventArgs e)
+        {
+            QuickScripting.RemoveBindings(new ScriptBindings(this));
         }
 
         private void Form1_Load(object sender, EventArgs e)
         {
             AllocConsole();
             Console.WriteLine("Is 64 bit process: " + Environment.Is64BitProcess.ToString());
+            QuickScripting.AddBindings(new ScriptBindings(this));
+            QuickScripting.Run(@"PrintPlusA('Quick Test')");
         }
 
-        [LuaCallback("PrintPlusA")]
-        public static void PrintPlusA(string s)
+        [LuaDocumentation("Prints (A) + value to the console")]
+        [LuaExample("PrintPlusA('Hello World')")]
+        [LuaFunction("PrintPlusA")]
+        public void PrintPlusA(string s)
         {
             Console.WriteLine("(A) " + s);
         }
@@ -52,7 +63,7 @@ namespace LuaGUI
 
         private void bStart_Click(object sender, EventArgs e)
         {
-            testScriptRunner = new ScriptRunner();
+            testScriptRunner = new HookedScriptRunner(new ScriptBindings(this));
             //testScriptRunner.LoadScript(tbStashkey1.Text);
             //testScriptRunner.SetCurrentScript(0);
             bExecute.Enabled = true;
@@ -96,7 +107,7 @@ namespace LuaGUI
 
         private void bAbort_Click(object sender, EventArgs e)
         {
-            testScriptRunner.Abort();
+            //testScriptRunner.Abort();
         }
 
         private void bSetStashkey_Click(object sender, EventArgs e)
@@ -111,6 +122,11 @@ namespace LuaGUI
         {
             Console.WriteLine($"Executing {tbHook.Text}");
             testScriptRunner?.Execute(tbHook.Text);
+        }
+
+        private void bTestQuick_Click(object sender, EventArgs e)
+        {
+            QuickScripting.Run(@"PrintPlusA('Quick Test')");
         }
     }
 }

@@ -2,7 +2,7 @@
 {
     using System;
     [System.AttributeUsage(AttributeTargets.Method, Inherited = false, AllowMultiple = false)]
-    public sealed class LuaCallbackAttribute : Attribute
+    public sealed class LuaFunctionAttribute : Attribute
     {
         readonly string name;
 
@@ -10,7 +10,7 @@
         {
             get { return name; }
         }
-        public LuaCallbackAttribute(string name)
+        public LuaFunctionAttribute(string name)
         {
             this.name = name;
         }

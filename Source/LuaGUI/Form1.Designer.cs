@@ -45,6 +45,7 @@
             this.bCallHook = new System.Windows.Forms.Button();
             this.tbHook = new System.Windows.Forms.TextBox();
             this.label7 = new System.Windows.Forms.Label();
+            this.bTestQuick = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.nmStashkey)).BeginInit();
             this.SuspendLayout();
             // 
@@ -226,11 +227,22 @@
             this.label7.TabIndex = 18;
             this.label7.Text = "Manual Hook Call";
             // 
+            // bTestQuick
+            // 
+            this.bTestQuick.Location = new System.Drawing.Point(12, 252);
+            this.bTestQuick.Name = "bTestQuick";
+            this.bTestQuick.Size = new System.Drawing.Size(75, 23);
+            this.bTestQuick.TabIndex = 19;
+            this.bTestQuick.Text = "Quick";
+            this.bTestQuick.UseVisualStyleBackColor = true;
+            this.bTestQuick.Click += new System.EventHandler(this.bTestQuick_Click);
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(835, 553);
+            this.Controls.Add(this.bTestQuick);
             this.Controls.Add(this.label7);
             this.Controls.Add(this.tbHook);
             this.Controls.Add(this.bCallHook);
@@ -274,6 +286,7 @@
         private System.Windows.Forms.Button bCallHook;
         private System.Windows.Forms.TextBox tbHook;
         private System.Windows.Forms.Label label7;
+        private System.Windows.Forms.Button bTestQuick;
     }
 }
 

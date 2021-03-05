@@ -5,13 +5,13 @@
     /// <summary>
     /// Holds a script to run in stepactions
     /// </summary>
-    internal class ScriptContainer
+    internal class HookedScriptContainer
     {
         public string ScriptString { get; protected set; }
 
         internal Dictionary<string, ScriptHook> Hooks = new Dictionary<string, ScriptHook>();
         
-        public ScriptContainer(string script)
+        public HookedScriptContainer(string script)
         {
             ScriptString = script;
         }

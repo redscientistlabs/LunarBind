@@ -5,20 +5,20 @@
     using MoonSharp.Interpreter;
     using ScriptCore.Yielders;
 
-    public class ScriptRunner
+    public class HookedScriptRunner
     {
-        private Dictionary<string,ScriptContainer> GlobalScripts = new Dictionary<string, ScriptContainer>();
-        private ScriptContainer CurrentTempScript = null;
+        private Dictionary<string,HookedScriptContainer> GlobalScripts = new Dictionary<string, HookedScriptContainer>();
+        private HookedScriptContainer CurrentTempScript = null;
 
         //Todo: better abort options
-        private volatile bool Cancelled = false;
+        //private volatile bool Cancelled = false;
 
         private Script lua;
 
-        private ScriptContainer runningScript = null;
+        private HookedScriptContainer runningScript = null;
 
 
-        public ScriptRunner()
+        public HookedScriptRunner()
         {
             lua = new Script(CoreModules.Preset_HardSandbox | CoreModules.Coroutine | CoreModules.OS_Time);
 
@@ -29,10 +29,15 @@
             lua.Globals["RemoveGlobal"] = (Action<string>)RemoveGlobal;
             lua.Globals["ResetGlobals"] = (Action)ResetGlobals;
 
-            //Yielding
+            //Yielding    
             lua.Globals[ScriptConstants.LUA_YIELD] = null;
+            //Global init
+            GlobalScriptBindings.Initialize(lua);
+        }
 
-            ScriptInitializer.Initialize(lua);
+        public HookedScriptRunner(ScriptBindings bindings) : this()
+        {
+            bindings.Initialize(lua);
         }
 
         public void LoadScript(string scriptString)
@@ -44,15 +49,25 @@
                 CurrentTempScript = null;
                 return;
             }
-            var scr = new ScriptContainer(scriptString);
+            var scr = new HookedScriptContainer(scriptString);
             CurrentTempScript = scr;
 
             runningScript = scr;
             lua.DoString(scr.ScriptString);
             runningScript = null;
-            //TODO: uncomment if memory becomes an issue somehow
-            //GC.Collect();
+            //GC.Collect(); <- checked, no memory leaks, but dead objects build up fast without the GC actively collecting
         }
+
+        /// <summary>
+        /// Runs the script immediately without hooking
+        /// </summary>
+        /// <param name="scriptString"></param>
+        /// <param name="hook"></param>
+        public DynValue RunScriptNow(string scriptString)
+        {
+            return lua.DoString(scriptString);
+        }
+
 
         #region callbacks
         void RegisterHook(DynValue del, string name)
@@ -101,22 +116,22 @@
         {
             try
             {
-                if (!Cancelled)
+                //if (!Cancelled)
+                //{
+                foreach (var script in GlobalScripts.Values)
                 {
-                    foreach (var script in GlobalScripts.Values)
-                    {
-                        runningScript = script;
-                        RunLua(script, hookName, args);
-                        runningScript = null;
-                    }
-
-                    if (CurrentTempScript != null)
-                    {
-                        runningScript = CurrentTempScript;
-                        RunLua(CurrentTempScript, hookName, args);
-                        runningScript = null;
-                    }
+                    runningScript = script;
+                    RunLua(script, hookName, args);
+                    runningScript = null;
                 }
+
+                if (CurrentTempScript != null)
+                {
+                    runningScript = CurrentTempScript;
+                    RunLua(CurrentTempScript, hookName, args);
+                    runningScript = null;
+                }
+                //}
             }
             catch(ScriptRuntimeException ex)
             {
@@ -125,7 +140,7 @@
             }
         }
 
-        private void RunLua(ScriptContainer script, string hookName, params object[] args)
+        private void RunLua(HookedScriptContainer script, string hookName, params object[] args)
         {
             var hook = script.GetHook(hookName);
             if (hook != null && hook.CheckYieldStatus())
@@ -144,9 +159,5 @@
             }
         }
 
-        public void Abort()
-        {
-            Cancelled = true;
-        }
     }
 }
