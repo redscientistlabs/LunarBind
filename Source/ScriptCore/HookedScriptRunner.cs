@@ -31,6 +31,32 @@
 
             //Yielding    
             lua.Globals[ScriptConstants.LUA_YIELD] = null;
+
+            //Default code
+            const string defaultCode = @"
+            function waitFrames(frames)
+                LUA_YIELD = WaitForFrames(frames)
+                coroutine.yield()
+            end
+            function waitFrame()
+                LUA_YIELD = WaitForFrames(0)
+                coroutine.yield()
+            end
+
+            function RegisterCoroutine(co, name)
+                local cor = coroutine.create(co)
+
+                local cfunc = function()
+                    if coroutine.status(cor) ~= 'dead' then coroutine.resume(cor) end
+                end
+
+                RegisterHook(cfunc,name)
+            end
+            ";
+
+            lua.DoString(defaultCode);
+
+
             //Global init
             GlobalScriptBindings.Initialize(lua);
         }

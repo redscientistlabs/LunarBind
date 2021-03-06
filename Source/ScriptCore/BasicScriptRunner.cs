@@ -18,6 +18,24 @@ namespace ScriptCore
             GlobalScriptBindings.Initialize(lua);
         }
 
+        public BasicScriptRunner(ScriptBindings bindings) : this()
+        {
+            bindings.Initialize(lua);
+        }
+
+        public BasicScriptRunner(params Delegate[] dels) : this()
+        {
+            ScriptBindings b = new ScriptBindings(dels);
+            b.Initialize(lua);
+        }
+
+        public BasicScriptRunner(params Action[] actions) : this()
+        {
+            ScriptBindings b = new ScriptBindings(actions);
+            b.Initialize(lua);
+        }
+
+
         public void AddBindings(ScriptBindings bindings)
         {
             bindings.Initialize(lua);
@@ -28,10 +46,7 @@ namespace ScriptCore
             bindings.Clean(lua);
         }
 
-        public BasicScriptRunner(ScriptBindings bindings) : this()
-        {
-            bindings.Initialize(lua);
-        }
+
         
         public void Run(string script)
         {

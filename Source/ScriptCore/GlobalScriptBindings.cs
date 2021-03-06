@@ -12,28 +12,6 @@
     {
         static Dictionary<string,CallbackFunc> callbackFunctions = new Dictionary<string,CallbackFunc>();
 
-        const string defaultCode = @"
-            function waitFrames(frames)
-                LUA_YIELD = WaitForFrames(frames)
-                coroutine.yield()
-            end
-            function waitFrame()
-                LUA_YIELD = WaitForFrames(0)
-                coroutine.yield()
-            end
-
-            function RegisterCoroutine(co, name)
-                local cor = coroutine.create(co)
-
-                local cfunc = function()
-                    if coroutine.status(cor) ~= 'dead' then coroutine.resume(cor) end
-                end
-
-                RegisterHook(cfunc,name)
-            end
-        ";
-
-
         static GlobalScriptBindings()
         {
             RegisterAssemblyFuncs(typeof(GlobalScriptBindings).Assembly);
@@ -62,13 +40,23 @@
             foreach (var assembly in assemblies)
             {
                 RegisterAssemblyFuncs(assembly);
+            }
+        }
+
+        /// <summary>
+        /// Register classes as user data (classes tagged with <see cref="MoonSharpUserDataAttribute"/> in an assembly
+        /// </summary>
+        /// <param name="assemblies"></param>
+        public static void RegisterAssemblyUserData(params Assembly[] assemblies)
+        {
+            foreach (var assembly in assemblies)
+            {
                 UserData.RegisterAssembly(assembly);
             }
         }
 
         /// <summary>
-        /// Register all the callback functions for specific assemblies only. This is the preferred method
-        /// </summary>
+        /// Register all the callback functions for specific classes only.
         /// <param name="assemblies"></param>
         public static void HookClasses(params Type[] types)
         {
@@ -79,7 +67,7 @@
         }
 
         /// <summary>
-        /// Manually register a type to use in Lua
+        /// Manually register a type to use in Lua. Only a static form of registration is available.
         /// </summary>
         /// <param name="t"></param>
         public static void RegisterUserDataType(Type t)
@@ -96,7 +84,6 @@
         {
             UserData.RegisterType(t, descriptor);
         }
-
 
         static void RegisterTypeFuncs(Type type)
         {
@@ -135,6 +122,80 @@
             }
         }
 
+        /// <summary>
+        /// Add a specific <see cref="Action"/> to the bindings
+        /// </summary>
+        /// <param name="name"></param>
+        /// <param name="action"></param>
+        /// <param name="documentation"></param>
+        /// <param name="example"></param>
+        public static void AddAction(string name, Action action, string documentation = "", string example = "")
+        {
+            callbackFunctions[name] = new CallbackFunc(name, action, documentation, example);
+        }
+        /// <summary>
+        /// Add a specific <see cref="Action"/> to the bindings, using the method's Name as the name
+        /// </summary>
+        /// <param name="action"></param>
+        /// <param name="documentation"></param>
+        /// <param name="example"></param>
+        public static void AddAction(Action action, string documentation = "", string example = "")
+        {
+            callbackFunctions[action.Method.Name] = new CallbackFunc(action.Method.Name, action, documentation, example);
+        }
+
+        /// <summary>
+        /// Add specific <see cref="Action"/>s to the bindings, using the method's Name as the name for each
+        /// </summary>
+        /// <param name="actions"></param>
+        public static void AddActions(params Action[] actions)
+        {
+            foreach (var action in actions)
+            {
+                callbackFunctions[action.Method.Name] = new CallbackFunc(action.Method.Name, action);
+            }
+        }
+
+        /// <summary>
+        /// Add a specific <see cref="Delegate"/> to the bindings
+        /// </summary>
+        /// <param name="name"></param>
+        /// <param name="del"></param>
+        /// <param name="documentation"></param>
+        /// <param name="example"></param>
+        public static void AddDelegate(string name, Delegate del, string documentation = "", string example = "")
+        {
+            callbackFunctions[name] = new CallbackFunc(name, del, documentation, example);
+        }
+
+        /// <summary>
+        /// Add a specific <see cref="Delegate"/> to the bindings using its Name as the name
+        /// </summary>
+        /// <param name="name"></param>
+        /// <param name="del"></param>
+        /// <param name="documentation"></param>
+        /// <param name="example"></param>
+        public static void AddDelegate(Delegate del, string documentation = "", string example = "")
+        {
+            callbackFunctions[del.Method.Name] = new CallbackFunc(del.Method.Name, del, documentation, example);
+        }
+
+        /// <summary>
+        /// Add a specific <see cref="Delegate"/> to the bindings using its Name as the name
+        /// </summary>
+        /// <param name="name"></param>
+        /// <param name="del"></param>
+        /// <param name="documentation"></param>
+        /// <param name="example"></param>
+        public static void AddDelegates(params Delegate[] dels)
+        {
+            foreach (var del in dels)
+            {
+                callbackFunctions[del.Method.Name] = new CallbackFunc(del.Method.Name, del);
+            }
+        }
+
+
         static void RegisterAssemblyFuncs(Assembly assembly)
         {
             Type[] types = assembly.GetTypes();
@@ -150,7 +211,7 @@
             {
                 lua.Globals[func.Value.Path] = func.Value.Callback;
             }
-            lua.DoString(defaultCode, null, "Lua Helper Code");
+            //lua.DoString(defaultCode, null, "Lua Helper Code");
         }
     }
 

@@ -1,21 +1,17 @@
-﻿using MoonSharp.Interpreter;
-using MoonSharp.Interpreter.Interop;
-using ScriptCore.Attributes;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace ScriptCore
+﻿namespace ScriptCore
 {
+    using MoonSharp.Interpreter;
+    using MoonSharp.Interpreter.Interop;
+    using ScriptCore.Attributes;
+    using System;
+    using System.Collections.Generic;
+    using System.Linq;
+    using System.Reflection;
+    using System.Text;
+    using System.Threading.Tasks;
     public class ScriptBindings
     {
-
-        Dictionary<string, CallbackFunc> callbackFunctions = new Dictionary<string, CallbackFunc>();
-
-        public string InitCode { get; set; } = null;
+        private Dictionary<string, CallbackFunc> callbackFunctions = new Dictionary<string, CallbackFunc>();
 
         public ScriptBindings()
         {
@@ -44,10 +40,89 @@ namespace ScriptCore
             RegisterObjectFuncs(obj);
         }
 
-        public void AddDelegate(string funcIdentifier, Delegate del)
+        public ScriptBindings(params Action[] actions)
         {
-            callbackFunctions[funcIdentifier] = new CallbackFunc(funcIdentifier, del, "", "");
+            AddActions(actions);
         }
+
+        public ScriptBindings(params Delegate[] dels)
+        {
+            AddDelegates(dels);
+        }
+
+        /// <summary>
+        /// Add a specific <see cref="Action"/> to the bindings
+        /// </summary>
+        /// <param name="name"></param>
+        /// <param name="action"></param>
+        /// <param name="documentation"></param>
+        /// <param name="example"></param>
+        public void AddAction(string name, Action action, string documentation = "", string example = "")
+        {
+            callbackFunctions[name] = new CallbackFunc(name, action, documentation, example);
+        }
+        /// <summary>
+        /// Add a specific <see cref="Action"/> to the bindings, using the method's Name as the name
+        /// </summary>
+        /// <param name="action"></param>
+        /// <param name="documentation"></param>
+        /// <param name="example"></param>
+        public void AddAction(Action action, string documentation = "", string example = "")
+        {
+            callbackFunctions[action.Method.Name] = new CallbackFunc(action.Method.Name, action, documentation, example);
+        }
+
+        /// <summary>
+        /// Add specific <see cref="Action"/>s to the bindings, using the method's Name as the name for each
+        /// </summary>
+        /// <param name="actions"></param>
+        public void AddActions(params Action[] actions)
+        {
+            foreach (var action in actions)
+            {
+                callbackFunctions[action.Method.Name] = new CallbackFunc(action.Method.Name, action);
+            }
+        }
+
+        /// <summary>
+        /// Add a specific <see cref="Delegate"/> to the bindings
+        /// </summary>
+        /// <param name="name"></param>
+        /// <param name="del"></param>
+        /// <param name="documentation"></param>
+        /// <param name="example"></param>
+        public void AddDelegate(string name, Delegate del, string documentation = "", string example = "")
+        {
+            callbackFunctions[name] = new CallbackFunc(name, del, documentation, example);
+        }
+
+        /// <summary>
+        /// Add a specific <see cref="Delegate"/> to the bindings using its Name as the name
+        /// </summary>
+        /// <param name="name"></param>
+        /// <param name="del"></param>
+        /// <param name="documentation"></param>
+        /// <param name="example"></param>
+        public void AddDelegate(Delegate del, string documentation = "", string example = "")
+        {
+            callbackFunctions[del.Method.Name] = new CallbackFunc(del.Method.Name, del, documentation, example);
+        }
+
+        /// <summary>
+        /// Add a specific <see cref="Delegate"/> to the bindings using its Name as the name
+        /// </summary>
+        /// <param name="name"></param>
+        /// <param name="del"></param>
+        /// <param name="documentation"></param>
+        /// <param name="example"></param>
+        public void AddDelegates(params Delegate[] dels)
+        {
+            foreach (var del in dels)
+            {
+                callbackFunctions[del.Method.Name] = new CallbackFunc(del.Method.Name, del);
+            }
+        }
+
 
         public void HookActionProps<T0>(object target)
         {
@@ -62,9 +137,8 @@ namespace ScriptCore
                     if (val.GetType().IsAssignableFrom(typeof(Action<T0>)))
                     {
                         var action = ((Action<T0>)val);
-                        var del = Delegate.CreateDelegate(typeof(Action<T0>), action, "Invoke");
                         string name = attr.Name ?? prop.Name;
-                        callbackFunctions[name] = new CallbackFunc(name, del, "", "");
+                        callbackFunctions[name] = new CallbackFunc(name, action, "", "");
                     }
                 }
             }
@@ -82,19 +156,18 @@ namespace ScriptCore
                     if (val.GetType().IsAssignableFrom(typeof(Action<T0>)))
                     {
                         var action = ((Action<T0>)val);
-                        var del = Delegate.CreateDelegate(typeof(Action<T0>), action, "Invoke");
                         string name = attr.Name ?? prop.Name;
-                        callbackFunctions[name] = new CallbackFunc(name, del, "", "");
+                        callbackFunctions[name] = new CallbackFunc(name, action, "", "");
                     }
                 }
             }
         }
 
         /// <summary>
-        /// Register all the callback functions for specific assemblies only. This is the preferred method
+        /// Register all the static functions with <see cref="Attributes.LuaFunctionAttribute"/> for specific assemblies
         /// </summary>
         /// <param name="assemblies"></param>
-        public void HookAssemblies(params Assembly[] assemblies)
+        public void AddAssemblies(params Assembly[] assemblies)
         {
             foreach (var assembly in assemblies)
             {
@@ -104,13 +177,14 @@ namespace ScriptCore
         }
 
         /// <summary>
-        /// Register all the callback functions for specific assemblies only. This is the preferred method
+        /// Automatically register all the instance methods with <see cref="Attributes.LuaFunctionAttribute"/> on an instance of an object.
         /// </summary>
         /// <param name="assemblies"></param>
         public void HookObject(object obj)
         {        
             RegisterObjectFuncs(obj);
         }
+
 
 
         /// <summary>
@@ -180,10 +254,6 @@ namespace ScriptCore
             foreach (var func in callbackFunctions)
             {
                 lua.Globals[func.Value.Path] = func.Value.Callback;
-            }
-            if (InitCode != null)
-            {
-                lua.DoString(InitCode, null, "Lua Binding Helper Code");
             }
         }
 

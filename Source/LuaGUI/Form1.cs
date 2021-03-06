@@ -23,6 +23,8 @@ namespace LuaGUI
 
         HookedScriptRunner testScriptRunner = null;
 
+        BasicScriptRunner basicRunner = null;
+
         [LuaFunction("TestProp2")]
         public static Action<int> TestProp => (t) =>
         {
@@ -51,20 +53,25 @@ namespace LuaGUI
         {
             AllocConsole();
             Console.WriteLine("Is 64 bit process: " + Environment.Is64BitProcess.ToString());
-            var bindings = new ScriptBindings(this);
-            bindings.HookActionProps<int>(this.GetType());
-            QuickScripting.AddBindings(bindings);
-            QuickScripting.Run(@"PrintPlusA('Quick Test')");
+            //var bindings = new ScriptBindings(this);
+            //bindings.HookActionProps<int>(this.GetType());
+            //bindings.AddAction("Noob",this.B);
+            //QuickScripting.AddBindings(bindings);
+            //QuickScripting.Run(@"PrintPlusA('Quick Test')");
+            basicRunner = new BasicScriptRunner((Action<string>)PrintPlusA);
         }
 
-        [LuaDocumentation("Prints (A) + value to the console")]
-        [LuaExample("PrintPlusA('Hello World')")]
-        [LuaFunction("PrintPlusA")]
+        //[LuaDocumentation("Prints (A) + value to the console")]
+        //[LuaExample("PrintPlusA('Hello World')")]
+        //[LuaFunction("PrintPlusA")]
         public void PrintPlusA(string s)
         {
             Console.WriteLine("(A) " + s);
         }
+        public void B()
+        {
 
+        }
         private void bTest_Click(object sender, EventArgs e)
         {
            
@@ -136,7 +143,8 @@ namespace LuaGUI
         private void bTestQuick_Click(object sender, EventArgs e)
         {
             // QuickScripting.Run(@"PrintPlusA('Quick Test')");
-            QuickScripting.Run("TestProp2(3)");
+            //QuickScripting.Run("TestProp2(3)");
+            basicRunner.Run(@"PrintPlusA('Quick Test')");
         }
     }
 }
