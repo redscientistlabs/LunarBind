@@ -22,6 +22,13 @@ namespace LuaGUI
         static extern bool AllocConsole();
 
         HookedScriptRunner testScriptRunner = null;
+
+        [LuaFunction("TestProp2")]
+        public static Action<int> TestProp => (t) =>
+        {
+            Console.WriteLine($"Prop OK, passed: {t}");
+        };
+
         public Form1()
         {
             InitializeComponent();
@@ -44,7 +51,9 @@ namespace LuaGUI
         {
             AllocConsole();
             Console.WriteLine("Is 64 bit process: " + Environment.Is64BitProcess.ToString());
-            QuickScripting.AddBindings(new ScriptBindings(this));
+            var bindings = new ScriptBindings(this);
+            bindings.HookActionProps<int>(this.GetType());
+            QuickScripting.AddBindings(bindings);
             QuickScripting.Run(@"PrintPlusA('Quick Test')");
         }
 
@@ -126,7 +135,8 @@ namespace LuaGUI
 
         private void bTestQuick_Click(object sender, EventArgs e)
         {
-            QuickScripting.Run(@"PrintPlusA('Quick Test')");
+            // QuickScripting.Run(@"PrintPlusA('Quick Test')");
+            QuickScripting.Run("TestProp2(3)");
         }
     }
 }

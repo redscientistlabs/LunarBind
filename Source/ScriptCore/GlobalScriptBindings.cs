@@ -114,6 +114,27 @@
             }           
         }
 
+
+        public static void HookActionProps<T0>(Type type)
+        {
+            PropertyInfo[] props = type.GetProperties(BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic);
+            foreach (var prop in props)
+            {
+                var attr = (LuaFunctionAttribute)Attribute.GetCustomAttribute(prop, typeof(LuaFunctionAttribute));
+                if (attr != null)
+                {
+                    var val = prop.GetValue(null);
+                    if (val.GetType().IsAssignableFrom(typeof(Action<T0>)))
+                    {
+                        var action = ((Action<T0>)val);
+                        var del = Delegate.CreateDelegate(typeof(Action<T0>), action, "Invoke");
+                        string name = attr.Name ?? prop.Name;
+                        callbackFunctions[name] = new CallbackFunc(name, del, "", "");
+                    }
+                }
+            }
+        }
+
         static void RegisterAssemblyFuncs(Assembly assembly)
         {
             Type[] types = assembly.GetTypes();

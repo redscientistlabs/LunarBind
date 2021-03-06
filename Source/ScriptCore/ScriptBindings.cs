@@ -44,6 +44,51 @@ namespace ScriptCore
             RegisterObjectFuncs(obj);
         }
 
+        public void AddDelegate(string funcIdentifier, Delegate del)
+        {
+            callbackFunctions[funcIdentifier] = new CallbackFunc(funcIdentifier, del, "", "");
+        }
+
+        public void HookActionProps<T0>(object target)
+        {
+            Type type = target.GetType();
+            PropertyInfo[] props = type.GetProperties(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
+            foreach (var prop in props)
+            {
+                var attr = (LuaFunctionAttribute)Attribute.GetCustomAttribute(prop, typeof(LuaFunctionAttribute));
+                if (attr != null)
+                {
+                    var val = prop.GetValue(target);
+                    if (val.GetType().IsAssignableFrom(typeof(Action<T0>)))
+                    {
+                        var action = ((Action<T0>)val);
+                        var del = Delegate.CreateDelegate(typeof(Action<T0>), action, "Invoke");
+                        string name = attr.Name ?? prop.Name;
+                        callbackFunctions[name] = new CallbackFunc(name, del, "", "");
+                    }
+                }
+            }
+        }
+
+        public void HookActionProps<T0>(Type type)
+        {
+            PropertyInfo[] props = type.GetProperties(BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic);
+            foreach (var prop in props)
+            {
+                var attr = (LuaFunctionAttribute)Attribute.GetCustomAttribute(prop, typeof(LuaFunctionAttribute));
+                if (attr != null)
+                {
+                    var val = prop.GetValue(null);
+                    if (val.GetType().IsAssignableFrom(typeof(Action<T0>)))
+                    {
+                        var action = ((Action<T0>)val);
+                        var del = Delegate.CreateDelegate(typeof(Action<T0>), action, "Invoke");
+                        string name = attr.Name ?? prop.Name;
+                        callbackFunctions[name] = new CallbackFunc(name, del, "", "");
+                    }
+                }
+            }
+        }
 
         /// <summary>
         /// Register all the callback functions for specific assemblies only. This is the preferred method

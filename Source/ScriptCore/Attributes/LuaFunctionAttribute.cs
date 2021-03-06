@@ -1,7 +1,7 @@
 ﻿namespace ScriptCore.Attributes
 {
     using System;
-    [System.AttributeUsage(AttributeTargets.Method, Inherited = false, AllowMultiple = false)]
+    [System.AttributeUsage(AttributeTargets.Method | AttributeTargets.Property, Inherited = false, AllowMultiple = false)]
     public sealed class LuaFunctionAttribute : Attribute
     {
         readonly string name;
@@ -10,7 +10,7 @@
         {
             get { return name; }
         }
-        public LuaFunctionAttribute(string name)
+        public LuaFunctionAttribute(string name = null)
         {
             this.name = name;
         }
