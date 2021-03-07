@@ -70,7 +70,6 @@
         {
             if (runningScript == null) { return; }
             var coroutine = lua.CreateCoroutine(del);
-            var owner = coroutine.Coroutine.OwnerScript;
             runningScript.Hooks[name] = new ScriptHook(coroutine,true);
         }
 
@@ -148,7 +147,7 @@
             {
                 if (hook.IsCoroutine) 
                 {
-                    if (hook.IsCoroutineDead || !hook.CheckYieldStatus()) //Doesn't run check yield if coroutine is dead
+                    if (hook.LuaFunc.Coroutine.State == CoroutineState.Dead || !hook.CheckYieldStatus()) //Doesn't run check yield if coroutine is dead
                     {
                         return;
                     }

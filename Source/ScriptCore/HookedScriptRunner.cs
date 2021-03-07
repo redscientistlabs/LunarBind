@@ -24,6 +24,7 @@
 
             //Global init
             GlobalScriptBindings.Initialize(lua);
+            GlobalScriptBindings.InitializeYieldables(lua);
         }
 
         public HookedScriptRunner(ScriptBindings bindings) : this()
@@ -44,7 +45,7 @@
         void RegisterCoroutine(DynValue del, string name)
         {
             var coroutine = lua.CreateCoroutine(del);
-            scriptContainer.Hooks[name] = new ScriptHook(coroutine);
+            scriptContainer.Hooks[name] = new ScriptHook(coroutine, true);
         }
 
         void RegisterHook(DynValue del, string name)
@@ -99,7 +100,7 @@
             {
                 if (hook.IsCoroutine)
                 {
-                    if (hook.IsCoroutineDead || !hook.CheckYieldStatus()) //Doesn't run check yield if coroutine is dead
+                    if (hook.LuaFunc.Coroutine.State == CoroutineState.Dead || !hook.CheckYieldStatus()) //Doesn't run check yield if coroutine is dead
                     {
                         return null;
                     }
