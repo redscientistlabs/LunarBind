@@ -45,8 +45,6 @@ namespace ScriptCore
         {
             bindings.Clean(lua);
         }
-
-
         
         public void Run(string script)
         {

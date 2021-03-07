@@ -1,7 +1,6 @@
 ﻿namespace ScriptCore
 {
     using System;
-
     internal struct CallbackFunc
     {
         public string Path { get; private set; }

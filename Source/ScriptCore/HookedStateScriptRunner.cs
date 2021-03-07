@@ -4,14 +4,10 @@
     using System.Collections.Generic;
     using MoonSharp.Interpreter;
     using ScriptCore.Yielding;
-    using System.Linq;
     public class HookedStateScriptRunner
     {
         private Dictionary<string,HookedScriptContainer> GlobalScripts = new Dictionary<string, HookedScriptContainer>();
         private HookedScriptContainer CurrentTempScript = null;
-
-        //Todo: better abort options
-        //private volatile bool Cancelled = false;
 
         private Script lua;
 
@@ -22,7 +18,6 @@
         {
             lua = new Script(CoreModules.Preset_HardSandbox | CoreModules.Coroutine | CoreModules.OS_Time);
 
-            //scriptrunner local methods, will have to hardcode documentation for this
             lua.Globals["RegisterHook"] = (Action<DynValue, string>)RegisterHook;
             lua.Globals["RegisterCoroutine"] = (Action<DynValue, string>)RegisterCoroutine;
             lua.Globals["RemoveHook"] = (Action<string>)RemoveHook;
@@ -56,7 +51,6 @@
             runningScript = scr;
             lua.DoString(scr.ScriptString);
             runningScript = null;
-            //GC.Collect(); <- checked, no memory leaks, but dead objects build up fast without the GC actively collecting
         }
 
         /// <summary>
@@ -77,7 +71,6 @@
             if (runningScript == null) { return; }
             var coroutine = lua.CreateCoroutine(del);
             var owner = coroutine.Coroutine.OwnerScript;
-            //coroutine.Coroutine.OwnerScript
             runningScript.Hooks[name] = new ScriptHook(coroutine,true);
         }
 

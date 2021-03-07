@@ -1,13 +1,12 @@
-﻿using MoonSharp.Interpreter;
-using ScriptCore.Yielding;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace ScriptCore
+﻿namespace ScriptCore
 {
+    using MoonSharp.Interpreter;
+    using ScriptCore.Yielding;
+    using System;
+    using System.Collections.Generic;
+    using System.Linq;
+    using System.Text;
+    using System.Threading.Tasks;
     public class HookedScriptRunner
     {
         private Script lua;

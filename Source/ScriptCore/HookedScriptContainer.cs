@@ -3,7 +3,7 @@
     using System.Collections.Generic;
 
     /// <summary>
-    /// Holds a script to run in stepactions
+    /// Holds a script with lua hooks
     /// </summary>
     internal class HookedScriptContainer
     {

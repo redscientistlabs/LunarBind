@@ -109,7 +109,7 @@
         }
 
         /// <summary>
-        /// Add a specific <see cref="Delegate"/> to the bindings using its Name as the name
+        /// Add specific <see cref="Delegate"/>s to the bindings using the method Name as the name
         /// </summary>
         /// <param name="name"></param>
         /// <param name="del"></param>
@@ -164,10 +164,10 @@
         }
 
         /// <summary>
-        /// Register all the static functions with <see cref="Attributes.LuaFunctionAttribute"/> for specific assemblies
+        /// Automatically register all the static functions with <see cref="Attributes.LuaFunctionAttribute"/> for specific assemblies
         /// </summary>
         /// <param name="assemblies"></param>
-        public void AddAssemblies(params Assembly[] assemblies)
+        public void HookAssemblies(params Assembly[] assemblies)
         {
             foreach (var assembly in assemblies)
             {
@@ -183,27 +183,6 @@
         public void HookObject(object obj)
         {        
             RegisterObjectFuncs(obj);
-        }
-
-
-
-        /// <summary>
-        /// Manually register a type to use in Lua
-        /// </summary>
-        /// <param name="t"></param>
-        public void RegisterUserDataType(Type t)
-        {
-            UserData.RegisterType(t);
-        }
-
-        public void RegisterUserDataType(Type t, InteropAccessMode mode)
-        {
-            UserData.RegisterType(t, mode);
-        }
-
-        public void RegisterUserDataType(Type t, IUserDataDescriptor descriptor)
-        {
-            UserData.RegisterType(t, descriptor);
         }
 
         private void RegisterObjectFuncs(object target)

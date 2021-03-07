@@ -1,10 +1,8 @@
-﻿namespace ScriptCore.Yielding
+﻿namespace ScriptCore
 {
-    using MoonSharp.Interpreter;
-    using ScriptCore.Attributes;
+    using ScriptCore.Yielding;
     using System;
     using System.Collections.Generic;
-    using System.Linq;
 
     public static class Yielders
     {
@@ -16,7 +14,6 @@
             {
                 name = typeof(T).Name;
             }
-            //GlobalScriptBindings.RegisterUserDataType(typeof(T));
             GlobalScriptBindings.RegisterYieldableType(name, typeof(T));
             allYielders[name] = typeof(T);
         }
@@ -25,12 +22,6 @@
         {
             RegisterYielder<WaitFrames>(ReservedGlobals.WaitForFrames);
         }
-
-        //[LuaFunction(nameof(WaitForFrames))]
-        //public static WaitFrames WaitForFrames(long frames)
-        //{
-        //    return new WaitFrames(frames);
-        //}
 
     }
 }

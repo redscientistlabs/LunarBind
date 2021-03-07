@@ -40,7 +40,7 @@
         }
 
         /// <summary>
-        /// Call this to register all the callback functions
+        /// Call this to register all the callback functions in all assemblies in the current app domain. Not recommended.
         /// </summary>
         public static void HookAllAssemblies()
         {
@@ -53,7 +53,7 @@
         }
 
         /// <summary>
-        /// Register all the callback functions for specific assemblies only. This is the preferred method
+        /// Register all the callback functions for specific assemblies only.
         /// </summary>
         /// <param name="assemblies"></param>
         public static void HookAssemblies(params Assembly[] assemblies)
@@ -65,7 +65,19 @@
         }
 
         /// <summary>
-        /// Register classes as user data (classes tagged with <see cref="MoonSharpUserDataAttribute"/> in an assembly
+        /// Automatically register all the static functions with the <see cref="LuaFunctionAttribute"/> for specific types
+        /// </summary>
+        /// <param name="assemblies"></param>
+        public static void HookClasses(params Type[] types)
+        {
+            foreach (var type in types)
+            {
+                RegisterTypeFuncs(type);
+            }
+        }
+
+        /// <summary>
+        /// Automatically register classes as user data (classes tagged with <see cref="MoonSharpUserDataAttribute"/>) in an assembly
         /// </summary>
         /// <param name="assemblies"></param>
         public static void RegisterAssemblyUserData(params Assembly[] assemblies)
@@ -73,17 +85,6 @@
             foreach (var assembly in assemblies)
             {
                 UserData.RegisterAssembly(assembly);
-            }
-        }
-
-        /// <summary>
-        /// Register all the callback functions for specific classes only.
-        /// <param name="assemblies"></param>
-        public static void HookClasses(params Type[] types)
-        {
-            foreach (var type in types)
-            {
-                RegisterTypeFuncs(type);
             }
         }
 
@@ -106,7 +107,7 @@
             UserData.RegisterType(t, descriptor);
         }
 
-        static void RegisterTypeFuncs(Type type)
+        private static void RegisterTypeFuncs(Type type)
         {
             MethodInfo[] mis = type.GetMethods(BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic);
             foreach (var mi in mis)
@@ -122,7 +123,6 @@
                 }
             }           
         }
-
 
         public static void HookActionProps<T0>(Type type)
         {
@@ -191,7 +191,7 @@
         }
 
         /// <summary>
-        /// Add a specific <see cref="Delegate"/> to the bindings using its Name as the name
+        /// Add a specific <see cref="Delegate"/> to the bindings using the method Name as the name
         /// </summary>
         /// <param name="name"></param>
         /// <param name="del"></param>
@@ -203,7 +203,7 @@
         }
 
         /// <summary>
-        /// Add a specific <see cref="Delegate"/> to the bindings using its Name as the name
+        /// Add a specific <see cref="Delegate"/>s to the bindings using the method Names as the name
         /// </summary>
         /// <param name="name"></param>
         /// <param name="del"></param>
@@ -227,6 +227,10 @@
             }
         }
 
+        /// <summary>
+        /// Initializes a script with the callback functions
+        /// </summary>
+        /// <param name="lua"></param>
         internal static void Initialize(Script lua)
         {
             foreach (var func in callbackFunctions)
@@ -263,7 +267,7 @@
                     {
                         if (!item.ParameterType.IsPrimitive && item.ParameterType != typeof(string) && !UserData.IsTypeRegistered(item.ParameterType))
                         {
-                            throw new Exception("Yielder constructor parameters must be added to UserData or be a primitive type or string");
+                            throw new Exception("CLR type constructor parameters must be added to UserData or be a primitive type or string");
                         }
                     }
 
@@ -283,7 +287,10 @@
             return s.ToString();
         }
 
-
+        /// <summary>
+        /// Initializes a script with the newable types
+        /// </summary>
+        /// <param name="lua"></param>
         private static void InitializeNewables(Script lua)
         {
             foreach (var type in newableTypes)
@@ -296,7 +303,11 @@
                 lua.DoString(bakedTypeString);
             }
         }
-
+        
+        /// <summary>
+        /// Initializes a script with the yielder types
+        /// </summary>
+        /// <param name="lua"></param>
         internal static void InitializeYieldables(Script lua)
         {
             foreach (var type in yieldableTypes)

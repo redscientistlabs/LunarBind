@@ -1,15 +1,14 @@
-﻿using MoonSharp.Interpreter;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
+﻿
 namespace ScriptCore
 {
+    using System.Collections.Generic;
+
     public static class QuickScripting
     {
         public static BasicScriptRunner Basic { get; private set; } = new BasicScriptRunner();
+
+        //TODO: make a quick dictionary of basic script runners
+        //public static Dictionary<string, BasicScriptRunner> Runners { get; private set; } = new Dictionary<string, BasicScriptRunner>();
 
         public static void AddBindings(ScriptBindings bindings)
         {

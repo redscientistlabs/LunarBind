@@ -38,13 +38,6 @@ namespace LuaGUI
             Load += Form1_Load;
             FormClosed += Form1_FormClosed;
             Yielders.RegisterYielder<MyYielder>("MyYielder");
-            //GlobalScriptBindings.RegisterUserDataType(typeof(int));
-            //Start script initializer
-            //GlobalScriptBindings.HookAllAssemblies();
-            //Register types you cannot put an attribute on
-            //ScriptInitializer.RegisterType(typeof(Control));
-
-
         }
 
         private void Form1_FormClosed(object sender, FormClosedEventArgs e)
@@ -56,12 +49,9 @@ namespace LuaGUI
         {
             AllocConsole();
             Console.WriteLine("Is 64 bit process: " + Environment.Is64BitProcess.ToString());
-            //var bindings = new ScriptBindings(this);
-            //bindings.HookActionProps<int>(this.GetType());
-            //bindings.AddAction("Noob",this.B);
-            //QuickScripting.AddBindings(bindings);
-            //QuickScripting.Run(@"PrintPlusA('Quick Test')");
+            //Basic runner test
             basicRunner = new BasicScriptRunner((Action<string>)PrintPlusA);
+            basicRunner.Run("PrintPlusA('Hi this is a test from Lua!')");
         }
 
         //[LuaDocumentation("Prints (A) + value to the console")]
@@ -71,10 +61,7 @@ namespace LuaGUI
         {
             Console.WriteLine("(A) " + s);
         }
-        public void B()
-        {
 
-        }
         private void bTest_Click(object sender, EventArgs e)
         {
            
@@ -83,8 +70,6 @@ namespace LuaGUI
         private void bStart_Click(object sender, EventArgs e)
         {
             testScriptRunner = new HookedStateScriptRunner(new ScriptBindings(this));
-            //testScriptRunner.LoadScript(tbStashkey1.Text);
-            //testScriptRunner.SetCurrentScript(0);
             bExecute.Enabled = true;
             bDispose.Enabled = true;
             bAbort.Enabled = true;
@@ -131,10 +116,8 @@ namespace LuaGUI
 
         private void bSetStashkey_Click(object sender, EventArgs e)
         {
-            //testScriptRunner?.SetCurrentScript((int)nmStashkey.Value);
             testScriptRunner?.LoadScript(tbScript.Text);
             Console.WriteLine($"Loaded script");
-            //Console.WriteLine($"Set Stashkey Script to index {((int)nmStashkey.Value)}");
         }
 
         private void bCallHook_Click(object sender, EventArgs e)
@@ -145,7 +128,7 @@ namespace LuaGUI
 
         private void bLoadKeyCoroutine_Click(object sender, EventArgs e)
         {
-            testScriptRunner.Execute("OnStashkeyLoad", 1, "help");
+            testScriptRunner?.Execute("OnStashkeyLoad", 1, "help");
         }
     }
 
