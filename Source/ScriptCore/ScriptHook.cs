@@ -1,17 +1,17 @@
 ﻿namespace ScriptCore
 {
     using MoonSharp.Interpreter;
-    using ScriptCore.Yielders;
+    using ScriptCore.Yielding;
 
-    /// <summary>
-    /// Can be used for caching run strings for performance? if performance gain is negligible, just replace with longs
-    /// </summary>
     internal class ScriptHook
     {
         public Yielder CurYielder { get; set; } = null;
         public DynValue LuaFunc { get; private set; }
-        public ScriptHook(DynValue del)
+        public bool IsCoroutine { get; private set; }
+        public bool IsCoroutineDead { get; set; } = false;
+        public ScriptHook(DynValue del, bool isCoroutine = false)
         {
+            IsCoroutine = isCoroutine;
             LuaFunc = del;
         }
 

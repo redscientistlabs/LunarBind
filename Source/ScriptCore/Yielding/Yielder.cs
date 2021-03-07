@@ -1,12 +1,12 @@
-﻿namespace ScriptCore.Yielders
+﻿namespace ScriptCore.Yielding
 {
     using MoonSharp.Interpreter;
 
     [MoonSharpUserData]
-    internal abstract class Yielder
+    public abstract class Yielder
     {
         /// <summary>
-        /// Returns the state of the yielder
+        /// Returns the state of the yielder. True means complete
         /// </summary>
         /// <returns></returns>
         public abstract bool CheckStatus();

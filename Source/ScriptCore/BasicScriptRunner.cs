@@ -57,6 +57,9 @@ namespace ScriptCore
         {
             return lua.DoString(script);
         }
-
+        public T Query<T>(string script)
+        {
+            return lua.DoString(script).ToObject<T>();
+        }
     }
 }

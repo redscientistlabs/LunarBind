@@ -125,10 +125,10 @@ end
 
 function executeMain()
   print('(lua MAIN SCR) exec0, yield 0 frames')
-  waitFrames(0)
+  coroutine.yield(WaitForFrames(0))
   
   print('(lua MAIN SCR) exec1, yield 1 frame')
-  waitFrames(1)
+  coroutine.yield(WaitForFrames(1))
   
   print('(lua MAIN SCR) exec2, final')
   print('REMOVED PRE EXECUTE HOOK')
@@ -139,13 +139,15 @@ testNumber = 0
 
 
 
-function loadStashKey()
-  print('Load Stashkey')
+function loadStashKeyA(a, b)
+  print(a)
+  coroutine.yield(WaitForFrames(0))
+  print(b)
 end
 
 RegisterHook(preExecuteMain, 'PreExecute')
 RegisterCoroutine(executeMain, 'Execute')
-RegisterHook(loadStashKey, 'OnStashkeyLoad')
+RegisterCoroutine(loadStashKeyA, 'OnStashkeyLoad')
 MakeGlobal('MainScript')</value>
   </data>
 </root>

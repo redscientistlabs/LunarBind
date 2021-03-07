@@ -11,6 +11,7 @@ using System.Windows.Forms;
 using ScriptCore;
 using System.Runtime.InteropServices;
 using ScriptCore.Attributes;
+using ScriptCore.Yielding;
 
 namespace LuaGUI
 {
@@ -21,7 +22,7 @@ namespace LuaGUI
         [return: MarshalAs(UnmanagedType.Bool)]
         static extern bool AllocConsole();
 
-        HookedScriptRunner testScriptRunner = null;
+        HookedStateScriptRunner testScriptRunner = null;
 
         BasicScriptRunner basicRunner = null;
 
@@ -36,6 +37,8 @@ namespace LuaGUI
             InitializeComponent();
             Load += Form1_Load;
             FormClosed += Form1_FormClosed;
+            Yielders.RegisterYielder<MyYielder>("MyYielder");
+            //GlobalScriptBindings.RegisterUserDataType(typeof(int));
             //Start script initializer
             //GlobalScriptBindings.HookAllAssemblies();
             //Register types you cannot put an attribute on
@@ -79,7 +82,7 @@ namespace LuaGUI
 
         private void bStart_Click(object sender, EventArgs e)
         {
-            testScriptRunner = new HookedScriptRunner(new ScriptBindings(this));
+            testScriptRunner = new HookedStateScriptRunner(new ScriptBindings(this));
             //testScriptRunner.LoadScript(tbStashkey1.Text);
             //testScriptRunner.SetCurrentScript(0);
             bExecute.Enabled = true;
@@ -140,11 +143,29 @@ namespace LuaGUI
             testScriptRunner?.Execute(tbHook.Text);
         }
 
-        private void bTestQuick_Click(object sender, EventArgs e)
+        private void bLoadKeyCoroutine_Click(object sender, EventArgs e)
         {
-            // QuickScripting.Run(@"PrintPlusA('Quick Test')");
-            //QuickScripting.Run("TestProp2(3)");
-            basicRunner.Run(@"PrintPlusA('Quick Test')");
+            testScriptRunner.Execute("OnStashkeyLoad", 1, "help");
         }
     }
+
+    class A
+    {
+
+    }
+
+    class MyYielder : Yielder
+    {
+        public MyYielder(int a, string b)
+        {
+            Console.WriteLine("Custom Int" + a.ToString());
+            Console.WriteLine("Custom String" + b);
+        }
+
+        public override bool CheckStatus()
+        {
+            return true;
+        }
+    }
+
 }

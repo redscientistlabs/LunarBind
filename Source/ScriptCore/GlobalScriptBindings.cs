@@ -7,15 +7,36 @@
     using System.Collections.Generic;
     using System.Linq;
     using System.Reflection;
-
+    using System.Text;
+    using Yielding;
     public static class GlobalScriptBindings
     {
-        static Dictionary<string,CallbackFunc> callbackFunctions = new Dictionary<string,CallbackFunc>();
+        private const string NEW_TYPE_PREFIX = nameof(NEW_TYPE_PREFIX) + "_";
 
+        private static Dictionary<string,CallbackFunc> callbackFunctions = new Dictionary<string,CallbackFunc>();
+        private static Dictionary<string, Type> yieldableTypes = new Dictionary<string, Type>();
+        private static Dictionary<string, Type> newableTypes = new Dictionary<string, Type>();
+        private static string bakedTypeString = null;
+        private static string bakedYieldableTypeString = null;
         static GlobalScriptBindings()
         {
             RegisterAssemblyFuncs(typeof(GlobalScriptBindings).Assembly);
             UserData.RegisterAssembly(typeof(GlobalScriptBindings).Assembly);
+            Yielders.Initialize();
+        }
+
+        public static void RegisterYieldableType(string name, Type t)
+        {
+            RegisterUserDataType(t);
+            yieldableTypes[NEW_TYPE_PREFIX + name] = t;
+            BakeYieldables();
+        }
+
+        public static void RegisterNewableType(string name, Type t)
+        {
+            RegisterUserDataType(t);
+            newableTypes[NEW_TYPE_PREFIX + name] = t;
+            BakeNewables();
         }
 
         /// <summary>
@@ -96,7 +117,8 @@
                     var documentation = (LuaDocumentationAttribute)Attribute.GetCustomAttribute(mi, typeof(LuaDocumentationAttribute));
                     var example = (LuaExampleAttribute)Attribute.GetCustomAttribute(mi, typeof(LuaExampleAttribute));
                     var del = HelperFuncs.CreateDelegate(mi);
-                    callbackFunctions[attr.Name] = new CallbackFunc(attr.Name, del, documentation?.Data ?? "", example?.Data ?? "");
+                    string name = attr.Name ?? mi.Name;
+                    callbackFunctions[name] = new CallbackFunc(name, del, documentation?.Data ?? "", example?.Data ?? "");
                 }
             }           
         }
@@ -211,7 +233,81 @@
             {
                 lua.Globals[func.Value.Path] = func.Value.Callback;
             }
-            //lua.DoString(defaultCode, null, "Lua Helper Code");
+            InitializeNewables(lua);
+        }
+
+        private static void BakeNewables()
+        {
+            bakedTypeString = Bake(newableTypes);
+        }
+
+        private static void BakeYieldables()
+        {
+            bakedYieldableTypeString = Bake(yieldableTypes);
+        }
+
+        private static string Bake(Dictionary<string,Type> source)
+        {
+            StringBuilder s = new StringBuilder();
+
+            foreach (var type in source)
+            {
+                string typeName = type.Key;
+                string newFuncName = type.Key.Remove(0, NEW_TYPE_PREFIX.Length);
+                HashSet<int> paramCounts = new HashSet<int>();
+                var ctors = type.Value.GetConstructors();
+                foreach (var ctor in ctors)
+                {
+                    var pars = ctor.GetParameters();
+                    foreach (var item in pars)
+                    {
+                        if (!item.ParameterType.IsPrimitive && item.ParameterType != typeof(string) && !UserData.IsTypeRegistered(item.ParameterType))
+                        {
+                            throw new Exception("Yielder constructor parameters must be added to UserData or be a primitive type or string");
+                        }
+                    }
+
+                    if (!paramCounts.Contains(pars.Length))
+                    {
+                        string parString = "";
+                        paramCounts.Add(pars.Length);
+                        for (int j = 0; j < pars.Length; j++)
+                        {
+                            if (j == 0) { parString += $"t{j}"; }
+                            else { parString += $",t{j}"; }
+                        }
+                        s.AppendLine($"function {newFuncName}({parString}) return {typeName}.__new({parString}) end");
+                    }
+                }
+            }
+            return s.ToString();
+        }
+
+
+        private static void InitializeNewables(Script lua)
+        {
+            foreach (var type in newableTypes)
+            {
+                lua.Globals[type.Key] = type.Value;
+            }
+
+            if (bakedTypeString != null)
+            {
+                lua.DoString(bakedTypeString);
+            }
+        }
+
+        internal static void InitializeYieldables(Script lua)
+        {
+            foreach (var type in yieldableTypes)
+            {
+                lua.Globals[type.Key] = type.Value;
+            }
+
+            if (bakedYieldableTypeString != null)
+            {
+                lua.DoString(bakedYieldableTypeString);
+            }
         }
     }
 
