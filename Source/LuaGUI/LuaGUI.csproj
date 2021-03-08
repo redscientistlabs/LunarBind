@@ -128,7 +128,7 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\ScriptCore\ScriptCore.csproj">
-      <Project>{075e8488-2848-4b09-9b09-5c900f1a09cf}</Project>
+      <Project>{941eed95-ed26-46e3-a096-5a3e95bfe6a2}</Project>
       <Name>ScriptCore</Name>
     </ProjectReference>
   </ItemGroup>
