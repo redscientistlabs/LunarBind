@@ -11,11 +11,12 @@
     using Yielding;
     public static class GlobalScriptBindings
     {
-        private const string NEW_TYPE_PREFIX = nameof(NEW_TYPE_PREFIX) + "_";
+        public const string TYPE_PREFIX = "_";
 
         private static Dictionary<string,CallbackFunc> callbackFunctions = new Dictionary<string,CallbackFunc>();
         private static Dictionary<string, Type> yieldableTypes = new Dictionary<string, Type>();
         private static Dictionary<string, Type> newableTypes = new Dictionary<string, Type>();
+        private static Dictionary<string, Type> staticTypes = new Dictionary<string, Type>();
         private static string bakedTypeString = null;
         private static string bakedYieldableTypeString = null;
         static GlobalScriptBindings()
@@ -28,15 +29,21 @@
         public static void RegisterYieldableType(string name, Type t)
         {
             RegisterUserDataType(t);
-            yieldableTypes[NEW_TYPE_PREFIX + name] = t;
+            yieldableTypes[TYPE_PREFIX + name] = t;
             BakeYieldables();
         }
 
         public static void RegisterNewableType(string name, Type t)
         {
             RegisterUserDataType(t);
-            newableTypes[NEW_TYPE_PREFIX + name] = t;
+            newableTypes[TYPE_PREFIX + name] = t;
             BakeNewables();
+        }
+
+        public static void RegisterStaticType(Type t)
+        {
+            RegisterUserDataType(t);
+            staticTypes[TYPE_PREFIX + t.Name] = t;
         }
 
         /// <summary>
@@ -237,6 +244,11 @@
             {
                 lua.Globals[func.Value.Path] = func.Value.Callback;
             }
+            foreach (var type in staticTypes)
+            {
+                lua.Globals[type.Key] = type.Value;
+            }
+
             InitializeNewables(lua);
         }
 
@@ -257,7 +269,7 @@
             foreach (var type in source)
             {
                 string typeName = type.Key;
-                string newFuncName = type.Key.Remove(0, NEW_TYPE_PREFIX.Length);
+                string newFuncName = type.Key.Remove(0, TYPE_PREFIX.Length);
                 HashSet<int> paramCounts = new HashSet<int>();
                 var ctors = type.Value.GetConstructors();
                 foreach (var ctor in ctors)
