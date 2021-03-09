@@ -36,10 +36,9 @@ namespace ScriptCore
                 }
             }
         }
-        //public static void InitializeForUnity()
-        //{
-            
-        //    Script.DefaultOptions.ScriptLoader = new MoonSharp.Interpreter.Loaders.UnityAssetsScriptLoader(scripts);
-        //}
+        public static void InitializeForUnity(Dictionary<string,string> codeToMap)
+        { 
+           Script.DefaultOptions.ScriptLoader = new MoonSharp.Interpreter.Loaders.UnityAssetsScriptLoader(codeToMap);
+        }
     }
 }
