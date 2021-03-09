@@ -129,7 +129,7 @@
             this.bSetStashkey.TabIndex = 8;
             this.bSetStashkey.Text = "Load Script";
             this.bSetStashkey.UseVisualStyleBackColor = true;
-            this.bSetStashkey.Click += new System.EventHandler(this.bSetStashkey_Click);
+            this.bSetStashkey.Click += new System.EventHandler(this.bloadScript_Click);
             // 
             // nmStashkey
             // 

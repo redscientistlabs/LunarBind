@@ -114,7 +114,7 @@ namespace LuaGUI
             //testScriptRunner.Abort();
         }
 
-        private void bSetStashkey_Click(object sender, EventArgs e)
+        private void bloadScript_Click(object sender, EventArgs e)
         {
             testScriptRunner?.LoadScript(tbScript.Text);
             Console.WriteLine($"Loaded script");
