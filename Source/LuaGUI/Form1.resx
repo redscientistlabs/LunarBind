@@ -148,6 +148,6 @@ end
 RegisterHook(preExecuteMain, 'PreExecute')
 RegisterCoroutine(executeMain, 'Execute')
 RegisterCoroutine(loadStashKeyA, 'OnStashkeyLoad')
-MakeGlobal('MainScript')</value>
+</value>
   </data>
 </root>

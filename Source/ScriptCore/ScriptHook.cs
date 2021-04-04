@@ -2,13 +2,16 @@
 {
     using MoonSharp.Interpreter;
     using ScriptCore.Yielding;
+    using System;
 
-    internal class ScriptHook
+    public class ScriptHook
     {
         public Yielder CurYielder { get; set; } = null;
         public DynValue LuaFunc { get; private set; }
         public bool IsCoroutine { get; private set; }
-        public bool IsCoroutineDead { get; set; } = false;
+
+        public event Action Done;
+
         public ScriptHook(DynValue del, bool isCoroutine = false)
         {
             IsCoroutine = isCoroutine;
@@ -41,6 +44,11 @@
         public void SetYielder(Yielder yielder)
         {
             CurYielder = yielder;
+        }
+
+        public void OnDone()
+        {
+            Done?.Invoke();
         }
 
     }

@@ -18,6 +18,9 @@
             allYielders[name] = typeof(T);
         }
 
+        /// <summary>
+        /// Register yielders for internal use
+        /// </summary>
         internal static void Initialize()
         {
             RegisterYielder<WaitFrames>(ReservedGlobals.WaitForFrames);

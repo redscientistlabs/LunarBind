@@ -6,29 +6,33 @@
     using System.Collections.Generic;
     using System.Linq;
     using System.Text;
+    using System.Threading;
     using System.Threading.Tasks;
-    public class HookedScriptRunner
+    public sealed class HookedScriptRunner
     {
-        private Script lua;
+        public Script Lua { get; private set; }
 
         private HookedScriptContainer scriptContainer = null;
 
         public HookedScriptRunner()
         {
-            lua = new Script(CoreModules.Preset_HardSandbox | CoreModules.Coroutine | CoreModules.OS_Time);
+            Lua = new Script(CoreModules.Preset_HardSandbox | CoreModules.Coroutine | CoreModules.OS_Time);
 
-            lua.Globals["RegisterHook"] = (Action<DynValue, string>)RegisterHook;
-            lua.Globals["RegisterCoroutine"] = (Action<DynValue, string>)RegisterCoroutine;
-            lua.Globals["RemoveHook"] = (Action<string>)RemoveHook;
-
+            Lua.Globals["RegisterHook"] = (Action<DynValue, string>)RegisterHook;
+            Lua.Globals["RegisterCoroutine"] = (Action<DynValue, string>)RegisterCoroutine;
+            Lua.Globals["RemoveHook"] = (Action<string>)RemoveHook;
             //Global init
-            GlobalScriptBindings.Initialize(lua);
-            GlobalScriptBindings.InitializeYieldables(lua);
+            GlobalScriptBindings.Initialize(Lua);
+            //GlobalScriptBindings.InitializeYieldables(Lua);
         }
 
         public HookedScriptRunner(ScriptBindings bindings) : this()
         {
-            bindings.Initialize(lua);
+            bindings.Initialize(Lua);
+        }
+        public void AddBindings(ScriptBindings bindings)
+        {
+            bindings.Initialize(Lua);
         }
 
         public void LoadScript(string scriptString)
@@ -36,25 +40,36 @@
             scriptContainer?.ResetHooks();
             scriptContainer = new HookedScriptContainer(scriptString);
             //Initialize the hookable script
-            lua.DoString(scriptContainer.ScriptString);
+            Lua.DoString(scriptContainer.ScriptString);
         }
 
+        public void RegisterHookDoneCallback(string hook, Action callback)
+        {
+            var h = scriptContainer.GetHook(hook);
+            if (h != null) h.Done += callback;
+        }
+
+        public void UnRegisterHookDoneCallback(string hook, Action callback)
+        {
+            var h = scriptContainer.GetHook(hook);
+            if(h != null) h.Done -= callback;
+        }
 
         #region callbacks
         void RegisterCoroutine(DynValue del, string name)
         {
-            var coroutine = lua.CreateCoroutine(del);
-            scriptContainer.Hooks[name] = new ScriptHook(coroutine, true);
+            var coroutine = Lua.CreateCoroutine(del);
+            scriptContainer.AddHook(name, new ScriptHook(coroutine, true));
         }
 
         void RegisterHook(DynValue del, string name)
         {
-            scriptContainer.Hooks[name] = new ScriptHook(del);
+            scriptContainer.AddHook(name, new ScriptHook(del));
         }
 
         void RemoveHook(string name)
         {
-            scriptContainer.Hooks.Remove(name);
+            scriptContainer.RemoveHook(name);
         }
         #endregion
 
@@ -62,7 +77,7 @@
         {
             try
             {
-                RunLua(scriptContainer, hookName, args);
+                RunLua(scriptContainer, hookName, null, args);
             }
             catch (ScriptRuntimeException ex)
             {
@@ -71,11 +86,25 @@
             }
         }
 
+        public void ExecuteWithCallback(string hookName, Action callback, params object[] args)
+        {
+            try
+            {
+                RunLua(scriptContainer, hookName, callback, args);
+            }
+            catch (ScriptRuntimeException ex)
+            {
+                //Todo: error handling
+                throw ex;
+            }
+        }
+
+
         public T Query<T>(string hookName, params object[] args)
         {
             try
             {
-                var ret = RunLua(scriptContainer, hookName, args);
+                var ret = RunLua(scriptContainer, hookName, null, args);
                 if (ret != null)
                 {
                     return ret.ToObject<T>();
@@ -92,7 +121,7 @@
             }
         }
 
-        private DynValue RunLua(HookedScriptContainer script, string hookName, params object[] args)
+        private DynValue RunLua(HookedScriptContainer script, string hookName, Action callback, object[] args)
         {
             var hook = script.GetHook(hookName);
             if (hook != null)
@@ -104,25 +133,36 @@
                         return null;
                     }
                     DynValue ret = hook.LuaFunc.Coroutine.Resume(args);
-
                     switch (hook.LuaFunc.Coroutine.State)
                     {
                         case CoroutineState.Suspended:
-                            Yielder yielder = ret.ToObject<Yielder>();
-                            hook.CurYielder = yielder;
+
+                            if (ret.IsNotNil())
+                            {
+                                Yielder yielder = ret.ToObject<Yielder>();
+                                hook.CurYielder = yielder;
+                            }
+                            else
+                            {
+                                hook.CurYielder = null;
+                            }
                             break;
                         case CoroutineState.Dead:
                             hook.CurYielder = null;
-                            hook.IsCoroutineDead = true;
+                            callback?.Invoke();
+                            hook.OnDone();
                             break;
                         default:
                             break;
                     }
-                    return null;
+                    return ret;
                 }
                 else
                 {
-                   return lua.Call(hook.LuaFunc, args);
+                    var ret = Lua.Call(hook.LuaFunc, args);
+                    callback?.Invoke();
+                    hook.OnDone();
+                    return ret;
                 }
             }
             else
@@ -130,5 +170,18 @@
                 return null;
             }
         }
+
+        public object this[string id]
+        {
+            get
+            {
+                return Lua.Globals.Get(id);
+            }
+            set
+            {
+                Lua.Globals.Set(id, DynValue.FromObject(Lua, value));
+            }
+        }
+
     }
 }

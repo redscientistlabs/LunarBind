@@ -1,19 +1,23 @@
 ﻿namespace ScriptCore
 {
+    using System;
     using System.Collections.Generic;
 
     /// <summary>
     /// Holds a script with lua hooks
     /// </summary>
-    internal class HookedScriptContainer
+    public class HookedScriptContainer
     {
         public string ScriptString { get; protected set; }
 
-        internal Dictionary<string, ScriptHook> Hooks = new Dictionary<string, ScriptHook>();
+        public Dictionary<string, ScriptHook> Hooks = new Dictionary<string, ScriptHook>();
         
+        //public string Guid { get; private set; }
+
         public HookedScriptContainer(string script)
         {
             ScriptString = script;
+            //Guid = System.Guid.NewGuid().ToString();
         }
 
         public void ResetHooks()
@@ -33,6 +37,14 @@
             }
         }
 
+        public void AddHook(string name, ScriptHook scriptHook)
+        {
+            Hooks[name] = scriptHook;
+        }
 
+        public bool RemoveHook(string name)
+        {
+            return Hooks.Remove(name);
+        }
     }
 }

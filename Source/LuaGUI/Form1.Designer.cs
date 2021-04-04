@@ -46,6 +46,8 @@
             this.tbHook = new System.Windows.Forms.TextBox();
             this.label7 = new System.Windows.Forms.Label();
             this.bLoadKeyCoroutineTest = new System.Windows.Forms.Button();
+            this.bArrayParamTest = new System.Windows.Forms.Button();
+            this.bTest0 = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.nmStashkey)).BeginInit();
             this.SuspendLayout();
             // 
@@ -237,11 +239,33 @@
             this.bLoadKeyCoroutineTest.UseVisualStyleBackColor = true;
             this.bLoadKeyCoroutineTest.Click += new System.EventHandler(this.bLoadKeyCoroutine_Click);
             // 
+            // bArrayParamTest
+            // 
+            this.bArrayParamTest.Location = new System.Drawing.Point(12, 281);
+            this.bArrayParamTest.Name = "bArrayParamTest";
+            this.bArrayParamTest.Size = new System.Drawing.Size(147, 23);
+            this.bArrayParamTest.TabIndex = 20;
+            this.bArrayParamTest.Text = "Array Param Test";
+            this.bArrayParamTest.UseVisualStyleBackColor = true;
+            this.bArrayParamTest.Click += new System.EventHandler(this.bArrayParamTest_Click);
+            // 
+            // bTest0
+            // 
+            this.bTest0.Location = new System.Drawing.Point(151, 39);
+            this.bTest0.Name = "bTest0";
+            this.bTest0.Size = new System.Drawing.Size(75, 23);
+            this.bTest0.TabIndex = 21;
+            this.bTest0.Text = "Test0";
+            this.bTest0.UseVisualStyleBackColor = true;
+            this.bTest0.Click += new System.EventHandler(this.bTest0_Click);
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(835, 553);
+            this.Controls.Add(this.bTest0);
+            this.Controls.Add(this.bArrayParamTest);
             this.Controls.Add(this.bLoadKeyCoroutineTest);
             this.Controls.Add(this.label7);
             this.Controls.Add(this.tbHook);
@@ -287,6 +311,8 @@
         private System.Windows.Forms.TextBox tbHook;
         private System.Windows.Forms.Label label7;
         private System.Windows.Forms.Button bLoadKeyCoroutineTest;
+        private System.Windows.Forms.Button bArrayParamTest;
+        private System.Windows.Forms.Button bTest0;
     }
 }
 

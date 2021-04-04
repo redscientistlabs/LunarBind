@@ -12,7 +12,11 @@
     public class ScriptBindings
     {
         private Dictionary<string, CallbackFunc> callbackFunctions = new Dictionary<string, CallbackFunc>();
-
+        private Dictionary<string, Type> yieldableTypes = new Dictionary<string, Type>();
+        private Dictionary<string, Type> newableTypes = new Dictionary<string, Type>();
+        private Dictionary<string, Type> staticTypes = new Dictionary<string, Type>();
+        private string bakedTypeString = null;
+        private string bakedYieldableTypeString = null;
         public ScriptBindings()
         {
 
@@ -35,20 +39,47 @@
             }
         }
 
-        public ScriptBindings(object obj)
+        public ScriptBindings(params object[] objs)
         {
-            RegisterObjectFuncs(obj);
+            foreach (var obj in objs)
+            {
+                RegisterObjectFuncs(obj);
+            }
         }
 
         public ScriptBindings(params Action[] actions)
         {
-            AddActions(actions);
+            HookActions(actions);
         }
 
         public ScriptBindings(params Delegate[] dels)
         {
-            AddDelegates(dels);
+            HookDelegates(dels);
         }
+
+        public void HookTypes(params Type[] types)
+        {
+            foreach (var type in types)
+            {
+                RegisterTypeFuncs(type);
+            }
+        }
+        public void HookObjects(params object[] objs)
+        {
+            foreach (var obj in objs)
+            {
+                RegisterObjectFuncs(obj);
+            }
+        }
+        public void HookType(Type type)
+        {
+            RegisterTypeFuncs(type);
+        }
+        public void HookObject(object obj)
+        {
+            RegisterObjectFuncs(obj);
+        }
+
 
         /// <summary>
         /// Add a specific <see cref="Action"/> to the bindings
@@ -57,7 +88,7 @@
         /// <param name="action"></param>
         /// <param name="documentation"></param>
         /// <param name="example"></param>
-        public void AddAction(string name, Action action, string documentation = "", string example = "")
+        public void HookAction(string name, Action action, string documentation = "", string example = "")
         {
             callbackFunctions[name] = new CallbackFunc(name, action, documentation, example);
         }
@@ -67,7 +98,7 @@
         /// <param name="action"></param>
         /// <param name="documentation"></param>
         /// <param name="example"></param>
-        public void AddAction(Action action, string documentation = "", string example = "")
+        public void HookAction(Action action, string documentation = "", string example = "")
         {
             callbackFunctions[action.Method.Name] = new CallbackFunc(action.Method.Name, action, documentation, example);
         }
@@ -76,7 +107,7 @@
         /// Add specific <see cref="Action"/>s to the bindings, using the method's Name as the name for each
         /// </summary>
         /// <param name="actions"></param>
-        public void AddActions(params Action[] actions)
+        public void HookActions(params Action[] actions)
         {
             foreach (var action in actions)
             {
@@ -91,7 +122,7 @@
         /// <param name="del"></param>
         /// <param name="documentation"></param>
         /// <param name="example"></param>
-        public void AddDelegate(string name, Delegate del, string documentation = "", string example = "")
+        public void HookDelegate(string name, Delegate del, string documentation = "", string example = "")
         {
             callbackFunctions[name] = new CallbackFunc(name, del, documentation, example);
         }
@@ -103,7 +134,7 @@
         /// <param name="del"></param>
         /// <param name="documentation"></param>
         /// <param name="example"></param>
-        public void AddDelegate(Delegate del, string documentation = "", string example = "")
+        public void HookDelegate(Delegate del, string documentation = "", string example = "")
         {
             callbackFunctions[del.Method.Name] = new CallbackFunc(del.Method.Name, del, documentation, example);
         }
@@ -115,7 +146,7 @@
         /// <param name="del"></param>
         /// <param name="documentation"></param>
         /// <param name="example"></param>
-        public void AddDelegates(params Delegate[] dels)
+        public void HookDelegates(params Delegate[] dels)
         {
             foreach (var del in dels)
             {
@@ -124,6 +155,11 @@
         }
 
 
+        /// <summary>
+        /// Unstable, untested :)
+        /// </summary>
+        /// <typeparam name="T0"></typeparam>
+        /// <param name="target"></param>
         public void HookActionProps<T0>(object target)
         {
             Type type = target.GetType();
@@ -144,6 +180,11 @@
             }
         }
 
+        /// <summary>
+        /// Unstable, untested :)
+        /// </summary>
+        /// <typeparam name="T0"></typeparam>
+        /// <param name="type"></param>
         public void HookActionProps<T0>(Type type)
         {
             PropertyInfo[] props = type.GetProperties(BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic);
@@ -174,15 +215,6 @@
                 RegisterAssemblyFuncs(assembly);
                 UserData.RegisterAssembly(assembly);
             }
-        }
-
-        /// <summary>
-        /// Automatically register all the instance methods with <see cref="Attributes.LuaFunctionAttribute"/> on an instance of an object.
-        /// </summary>
-        /// <param name="assemblies"></param>
-        public void HookObject(object obj)
-        {        
-            RegisterObjectFuncs(obj);
         }
 
         private void RegisterObjectFuncs(object target)
@@ -229,15 +261,147 @@
                 RegisterTypeFuncs(type);
             }
         }
+        public static void RegisterUserDataType(Type t)
+        {
+            UserData.RegisterType(t);
+        }
 
-        internal void Initialize(Script lua)
+        public void RegisterYieldableType(string name, Type t)
+        {
+            RegisterUserDataType(t);
+            yieldableTypes[GlobalScriptBindings.TYPE_PREFIX + name] = t;
+            BakeYieldables();
+        }
+
+        /// <summary>
+        /// Also allows you to access static functions on the type by using _TypeName
+        /// </summary>
+        /// <param name="name"></param>
+        /// <param name="t"></param>
+        public void RegisterNewableType(string name, Type t)
+        {
+            RegisterUserDataType(t);
+            newableTypes[GlobalScriptBindings.TYPE_PREFIX + name] = t;
+            BakeNewables();
+        }
+
+        public void RemoveNewableType(string name, Type t)
+        {
+            newableTypes.Remove(GlobalScriptBindings.TYPE_PREFIX + name);
+            BakeNewables();
+        }
+
+        /// <summary>
+        /// Allows you to access static functions on the type by using _TypeName
+        /// </summary>
+        /// <param name="t"></param>
+        public void RegisterStaticType(Type t)
+        {
+            RegisterUserDataType(t);
+            staticTypes[GlobalScriptBindings.TYPE_PREFIX + t.Name] = t;
+        }
+
+
+        /// <summary>
+        /// Exposed initialize function to initialize non-scriptcore moonsharp scripts
+        /// </summary>
+        /// <param name="lua"></param>
+        public void Initialize(Script lua)
         {
             foreach (var func in callbackFunctions)
             {
                 lua.Globals[func.Value.Path] = func.Value.Callback;
+                if (func.Value.IsYieldable)
+                {
+                    lua.DoString(func.Value.YieldableString);
+                }
+            }
+            InitializeNewables(lua);
+            InitializeYieldables(lua);
+        }
+
+        private static string Bake(Dictionary<string, Type> source)
+        {
+            StringBuilder s = new StringBuilder();
+
+            foreach (var type in source)
+            {
+                string typeName = type.Key;
+                string newFuncName = type.Key.Remove(0, GlobalScriptBindings.TYPE_PREFIX.Length);
+                HashSet<int> paramCounts = new HashSet<int>();
+                var ctors = type.Value.GetConstructors();
+                foreach (var ctor in ctors)
+                {
+                    var pars = ctor.GetParameters();
+                    foreach (var item in pars)
+                    {
+                        if (!item.ParameterType.IsPrimitive && item.ParameterType != typeof(string) && !UserData.IsTypeRegistered(item.ParameterType))
+                        {
+                            throw new Exception("CLR type constructor parameters must be added to UserData or be a primitive type or string");
+                        }
+                    }
+
+                    if (!paramCounts.Contains(pars.Length))
+                    {
+                        string parString = "";
+                        paramCounts.Add(pars.Length);
+                        for (int j = 0; j < pars.Length; j++)
+                        {
+                            if (j == 0) { parString += $"t{j}"; }
+                            else { parString += $",t{j}"; }
+                        }
+                        s.AppendLine($"function {newFuncName}({parString}) return {typeName}.__new({parString}) end");
+                    }
+                }
+            }
+            return s.ToString();
+        }
+
+        private void BakeNewables()
+        {
+            bakedTypeString = Bake(newableTypes);
+        }
+
+        private void BakeYieldables()
+        {
+            bakedYieldableTypeString = Bake(yieldableTypes);
+        }
+
+        /// <summary>
+        /// Initializes a script with the newable types
+        /// </summary>
+        /// <param name="lua"></param>
+        private void InitializeNewables(Script lua)
+        {
+            foreach (var type in newableTypes)
+            {
+                lua.Globals[type.Key] = type.Value;
+            }
+
+            if (bakedTypeString != null)
+            {
+                lua.DoString(bakedTypeString);
             }
         }
 
+        private void InitializeYieldables(Script lua)
+        {
+            foreach (var type in yieldableTypes)
+            {
+                lua.Globals[type.Key] = type.Value;
+            }
+
+            if (bakedYieldableTypeString != null)
+            {
+                lua.DoString(bakedYieldableTypeString);
+            }
+        }
+
+
+        /// <summary>
+        /// Removes all callback functions from a script
+        /// </summary>
+        /// <param name="lua"></param>
         internal void Clean(Script lua)
         {
             foreach (var func in callbackFunctions)

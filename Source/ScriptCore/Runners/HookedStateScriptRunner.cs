@@ -4,36 +4,38 @@
     using System.Collections.Generic;
     using MoonSharp.Interpreter;
     using ScriptCore.Yielding;
-    public class HookedStateScriptRunner
+
+    /// <summary>
+    /// Can run multiple scripts at once
+    /// </summary>
+    public sealed class HookedStateScriptRunner
     {
+        public Script Lua { get; private set; }
         private Dictionary<string,HookedScriptContainer> GlobalScripts = new Dictionary<string, HookedScriptContainer>();
         private HookedScriptContainer CurrentTempScript = null;
 
-        private Script lua;
 
         private HookedScriptContainer runningScript = null;
-        const string COROUTINE_PREFIX_ = nameof(COROUTINE_PREFIX_);
 
         public HookedStateScriptRunner()
         {
-            lua = new Script(CoreModules.Preset_HardSandbox | CoreModules.Coroutine | CoreModules.OS_Time);
+            Lua = new Script(CoreModules.Preset_HardSandbox | CoreModules.Coroutine | CoreModules.OS_Time);
 
-            lua.Globals["RegisterHook"] = (Action<DynValue, string>)RegisterHook;
-            lua.Globals["RegisterCoroutine"] = (Action<DynValue, string>)RegisterCoroutine;
-            lua.Globals["RemoveHook"] = (Action<string>)RemoveHook;
-            lua.Globals["MakeGlobal"] = (Action<string>)MakeGlobal;
-            lua.Globals["RemoveGlobal"] = (Action<string>)RemoveGlobal;
-            lua.Globals["ResetGlobals"] = (Action)ResetGlobals;
-
+            Lua.Globals["RegisterHook"] = (Action<DynValue, string>)RegisterHook;
+            Lua.Globals["RegisterCoroutine"] = (Action<DynValue, string>)RegisterCoroutine;
+            Lua.Globals["RemoveHook"] = (Action<string>)RemoveHook;
+            Lua.Globals["MakeGlobal"] = (Action<string>)MakeGlobal;
+            Lua.Globals["RemoveGlobal"] = (Action<string>)RemoveGlobal;
+            Lua.Globals["ResetGlobals"] = (Action)ResetGlobals;
 
             //Global init
-            GlobalScriptBindings.Initialize(lua);
-            GlobalScriptBindings.InitializeYieldables(lua);
+            GlobalScriptBindings.Initialize(Lua);
+            GlobalScriptBindings.InitializeYieldables(Lua);
         }
 
         public HookedStateScriptRunner(ScriptBindings bindings) : this()
         {
-            bindings.Initialize(lua);
+            bindings.Initialize(Lua);
         }
 
         public void LoadScript(string scriptString)
@@ -49,7 +51,7 @@
             CurrentTempScript = scr;
 
             runningScript = scr;
-            lua.DoString(scr.ScriptString);
+            Lua.DoString(scr.ScriptString);
             runningScript = null;
         }
 
@@ -60,7 +62,7 @@
         /// <param name="hook"></param>
         public DynValue RunScriptNow(string scriptString)
         {
-            return lua.DoString(scriptString);
+            return Lua.DoString(scriptString);
         }
 
 
@@ -69,7 +71,7 @@
         void RegisterCoroutine(DynValue del, string name)
         {
             if (runningScript == null) { return; }
-            var coroutine = lua.CreateCoroutine(del);
+            var coroutine = Lua.CreateCoroutine(del);
             runningScript.Hooks[name] = new ScriptHook(coroutine,true);
         }
 
@@ -115,6 +117,17 @@
 
         #endregion
 
+        /// <summary>
+        /// Call a hooked lua function.
+        /// <para/>
+        /// If you want to pass in a single array and want to access it in a single parameter in lua, convert it to a List first: 
+        /// <para/>
+        /// C#: runner.Execute("func", List&lt;string&gt;);
+        /// <para/>
+        /// Lua: function func(list)
+        /// </summary>
+        /// <param name="hookName"></param>
+        /// <param name="args"></param>
         public void Execute(string hookName, params object[] args)
         {
             try
@@ -157,12 +170,18 @@
                     switch (hook.LuaFunc.Coroutine.State)
                     {
                         case CoroutineState.Suspended:
-                            Yielder yielder = ret.ToObject<Yielder>();
-                            hook.CurYielder = yielder;
+                            if (ret.IsNotNil())
+                            {
+                                Yielder yielder = ret.ToObject<Yielder>();
+                                hook.CurYielder = yielder;
+                            }
+                            else
+                            {
+                                hook.CurYielder = null;
+                            }
                             break;
                         case CoroutineState.Dead:
                             hook.CurYielder = null;
-                            hook.IsCoroutineDead = true;
                             break;
                         default:
                             break;
@@ -170,8 +189,20 @@
                 }
                 else
                 {
-                     lua.Call(hook.LuaFunc, args);
+                     Lua.Call(hook.LuaFunc, args);
                 }
+            }
+        }
+
+        public object this[string id]
+        {
+            get
+            {
+                return Lua.Globals.Get(id);
+            }
+            set
+            {
+                Lua.Globals.Set(id, DynValue.FromObject(Lua, value));
             }
         }
 

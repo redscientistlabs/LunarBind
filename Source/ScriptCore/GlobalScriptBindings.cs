@@ -9,6 +9,8 @@
     using System.Reflection;
     using System.Text;
     using Yielding;
+
+    //Todo: Rename to something more appropriate, since this handles more than just bindings
     public static class GlobalScriptBindings
     {
         public const string TYPE_PREFIX = "_";
@@ -19,6 +21,8 @@
         private static Dictionary<string, Type> staticTypes = new Dictionary<string, Type>();
         private static string bakedTypeString = null;
         private static string bakedYieldableTypeString = null;
+
+        //This must happen before any script is initialized
         static GlobalScriptBindings()
         {
             RegisterAssemblyFuncs(typeof(GlobalScriptBindings).Assembly);
@@ -33,6 +37,11 @@
             BakeYieldables();
         }
 
+        /// <summary>
+        /// Also allows you to access static functions on the type by using _TypeName
+        /// </summary>
+        /// <param name="name"></param>
+        /// <param name="t"></param>
         public static void RegisterNewableType(string name, Type t)
         {
             RegisterUserDataType(t);
@@ -40,6 +49,17 @@
             BakeNewables();
         }
 
+        public static void RemoveNewableType(string name, Type t)
+        {
+            newableTypes.Remove(TYPE_PREFIX + name);
+            BakeNewables();
+        }
+
+
+        /// <summary>
+        /// Allows you to access static functions on the type by using _TypeName
+        /// </summary>
+        /// <param name="t"></param>
         public static void RegisterStaticType(Type t)
         {
             RegisterUserDataType(t);
@@ -224,7 +244,6 @@
             }
         }
 
-
         static void RegisterAssemblyFuncs(Assembly assembly)
         {
             Type[] types = assembly.GetTypes();
@@ -235,14 +254,18 @@
         }
 
         /// <summary>
-        /// Initializes a script with the callback functions
+        /// Initializes a script with C# callback functions, static types, and yieldables
         /// </summary>
         /// <param name="lua"></param>
-        internal static void Initialize(Script lua)
+        public static void Initialize(Script lua)
         {
             foreach (var func in callbackFunctions)
             {
                 lua.Globals[func.Value.Path] = func.Value.Callback;
+                if (func.Value.IsYieldable)
+                {
+                    lua.DoString(func.Value.YieldableString);
+                }
             }
             foreach (var type in staticTypes)
             {
@@ -250,6 +273,7 @@
             }
 
             InitializeNewables(lua);
+            InitializeYieldables(lua);
         }
 
         private static void BakeNewables()
@@ -332,6 +356,32 @@
                 lua.DoString(bakedYieldableTypeString);
             }
         }
+
+        //static StringBuilder paramsSB = new StringBuilder();
+        //private static string ConstructFunction(CallbackFunc func)
+        //{
+        //    paramsSB.Clear();
+        //    int numPars = func.NumParams;
+        //    for (int j = 0; j < numPars; j++)
+        //    {
+        //        if (j == 0) { paramsSB.Append("n0"); }
+        //        else
+        //        {
+        //            paramsSB.Append(",n");
+        //            paramsSB.Append(j);
+        //        }
+        //    }
+        //    string pars = numPars > 0 ? paramsSB.ToString() : "";
+        //    if (func.IsYieldable)
+        //    {
+        //        return $"function {func.Path}({pars}) coroutine.yield() end";
+        //    }
+        //    else
+        //    {
+        //        return $"function {func.Path}({pars})  end";
+        //    }
+        //}
+
     }
 
 }

@@ -4,6 +4,10 @@
     using System;
     using System.Collections.Generic;
     using System.Text;
+
+    /// <summary>
+    /// Automatically hooks functions in a script. Coroutines not supported
+    /// </summary>
     public class AutoHookedScriptRunner
     {
         protected Script lua;

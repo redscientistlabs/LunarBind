@@ -22,7 +22,7 @@ namespace LuaGUI
         [return: MarshalAs(UnmanagedType.Bool)]
         static extern bool AllocConsole();
 
-        HookedStateScriptRunner testScriptRunner = null;
+        HookedScriptRunner testScriptRunner = null;
 
         BasicScriptRunner basicRunner = null;
 
@@ -51,15 +51,22 @@ namespace LuaGUI
             Console.WriteLine("Is 64 bit process: " + Environment.Is64BitProcess.ToString());
             //Basic runner test
             basicRunner = new BasicScriptRunner((Action<string>)PrintPlusA);
+            basicRunner.AddBindings(new ScriptBindings(this));
             basicRunner.Run("PrintPlusA('Hi this is a test from Lua!')");
         }
 
         //[LuaDocumentation("Prints (A) + value to the console")]
         //[LuaExample("PrintPlusA('Hello World')")]
-        //[LuaFunction("PrintPlusA")]
+        [LuaFunction("PrintPlusA")]
         public void PrintPlusA(string s)
         {
             Console.WriteLine("(A) " + s);
+            testScriptRunner["pingas"] = "hello";
+        }
+        [LuaFunction("PrintPlusA")]
+        public void PrintPlusA(string s, string s2)
+        {
+            Console.WriteLine("(A) " + s + " num two: " + s2);
         }
 
         private void bTest_Click(object sender, EventArgs e)
@@ -69,7 +76,7 @@ namespace LuaGUI
 
         private void bStart_Click(object sender, EventArgs e)
         {
-            testScriptRunner = new HookedStateScriptRunner(new ScriptBindings(this));
+            testScriptRunner = new HookedScriptRunner(new ScriptBindings(this));
             bExecute.Enabled = true;
             bDispose.Enabled = true;
             bAbort.Enabled = true;
@@ -108,6 +115,14 @@ namespace LuaGUI
             bCallHook.Enabled = false;
 
         }
+        int a = 0;
+        [LuaFunction("AutoCo")]
+        public WaitUntil AutoCoroutineTest(int amt, string test)
+        {
+            Console.WriteLine("Auto : " + test);
+            a = 0;
+            return new WaitUntil(() => { if (++a > amt) { a = 0; return true; } else { return false; } });
+        }
 
         private void bAbort_Click(object sender, EventArgs e)
         {
@@ -130,11 +145,49 @@ namespace LuaGUI
         {
             testScriptRunner?.Execute("OnStashkeyLoad", 1, "help");
         }
-    }
 
-    class A
-    {
+        private void bArrayParamTest_Click(object sender, EventArgs e)
+        {
+            testScriptRunner?.Execute("ArrayTest", "a", new string[]{ "hi", "bye" } );
+            //testScriptRunner?.Execute("ArrayTest", new string[] { "hi", "bye" });
+        }
+        private void CallbackPass()
+        {
+            Console.WriteLine("Call C# callback in lua");
+        }
 
+        private void bTest0_Click(object sender, EventArgs e)
+        {
+            HookedScriptRunner hsr = new HookedScriptRunner();
+            hsr["text"] = "test";
+            hsr.LoadScript("function a() print('a start') coroutine.yield(WaitForFrames(0)) print(text) end " + 
+                           "function b() print(text) end " +
+                           "RegisterCoroutine(a, 'A') " +
+                           "RegisterHook(b, 'B')");
+            hsr.RegisterHookDoneCallback("A", () => { Console.WriteLine("Should be in A after pingas 0"); });
+            hsr.RegisterHookDoneCallback("A", () => { Console.WriteLine("Should be in A after pingas 1"); });
+            hsr.RegisterHookDoneCallback("A", () => { Console.WriteLine("Should be in A after pingas 2"); });
+            hsr.RegisterHookDoneCallback("B", () => { Console.WriteLine("Should be in B 0"); });
+            Console.WriteLine("========A Start========");
+            hsr.ExecuteWithCallback("A", (Action)CallbackPass);
+            hsr.ExecuteWithCallback("A", (Action)CallbackPass);
+            hsr.ExecuteWithCallback("A", (Action)CallbackPass);
+            Console.WriteLine("========B Start========");
+            hsr.Execute("B");
+
+            //Script s = new Script();
+            //s.Globals["PrintPlusA"]
+            //var a = CallbackFunction.FromDelegate(s, (Action<string>)PrintPlusA);
+
+            //a.
+            //var b = CallbackFunction.FromDelegate(s, (Action<string, string>)PrintPlusA);
+            //s.DoString(@"PrintPlusA(")
+
+            //DynValue.NewCallbackFu(CallbackFunction)
+            //DynValue.NewYieldReq()
+            //Closure c = new Closure();
+            //DynValue.FromObject(s.Globals["test"]).Function.GetUpvalue
+        }
     }
 
     class MyYielder : Yielder
