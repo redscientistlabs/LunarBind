@@ -7,6 +7,6 @@
 
     public static class ReservedGlobals
     {
-        public const string WaitForFrames = nameof(WaitForFrames);
+        //public const string WaitFrames = nameof(WaitFrames);
     }
 }

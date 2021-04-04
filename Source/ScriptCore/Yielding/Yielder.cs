@@ -1,4 +1,4 @@
-﻿namespace ScriptCore.Yielding
+﻿namespace ScriptCore
 {
     using MoonSharp.Interpreter;
 

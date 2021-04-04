@@ -7,9 +7,11 @@ using MoonSharp;
 using MoonSharp.Interpreter;
 namespace ScriptCore
 {
+    /// <summary>
+    /// A 
+    /// </summary>
     public class BasicScriptRunner
     {
-
         public Script lua { get; private set; }
         public Table Globals => lua.Globals;
 

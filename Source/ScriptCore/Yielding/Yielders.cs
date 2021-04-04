@@ -1,12 +1,12 @@
 ﻿namespace ScriptCore
 {
-    using ScriptCore.Yielding;
     using System;
     using System.Collections.Generic;
+    using ScriptCore.Yielding;
 
     public static class Yielders
     {
-        static Dictionary<string, Type> allYielders = new Dictionary<string, Type>();
+        private static Dictionary<string, Type> allYielders = new Dictionary<string, Type>();
 
         public static void RegisterYielder<T>(string name = null) where T : Yielder
         {
@@ -23,7 +23,8 @@
         /// </summary>
         internal static void Initialize()
         {
-            RegisterYielder<WaitFrames>(ReservedGlobals.WaitForFrames);
+            RegisterYielder<WaitFrames>();
+            //The others are not meant for use in lua, instead for C# functions
         }
 
     }

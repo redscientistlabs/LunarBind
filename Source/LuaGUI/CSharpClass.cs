@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using ScriptCore.Attributes;
+using ScriptCore;
 namespace LuaGUI
 {
     public static class CSharpClass

@@ -4,7 +4,7 @@
     using System;
 
     /// <summary>
-    /// Waits X amount of calls
+    /// Waits until the passed in function returns true
     /// </summary>
     [MoonSharpUserData]
     public class WaitUntil : Yielder

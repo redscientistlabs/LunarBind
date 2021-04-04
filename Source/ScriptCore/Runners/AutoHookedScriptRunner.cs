@@ -6,7 +6,7 @@
     using System.Text;
 
     /// <summary>
-    /// Automatically hooks functions in a script. Coroutines not supported
+    /// Automatically hooks all lua functions by name. Coroutines not supported
     /// </summary>
     public class AutoHookedScriptRunner
     {
@@ -17,9 +17,7 @@
         public AutoHookedScriptRunner()
         {
             lua = new Script(CoreModules.Preset_HardSandbox | CoreModules.Coroutine | CoreModules.OS_Time);
-            //Global init
             GlobalScriptBindings.Initialize(lua);
-            GlobalScriptBindings.InitializeYieldables(lua);
         }
 
         public AutoHookedScriptRunner(ScriptBindings bindings) : this()

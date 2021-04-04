@@ -10,7 +10,6 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using ScriptCore;
 using System.Runtime.InteropServices;
-using ScriptCore.Attributes;
 using ScriptCore.Yielding;
 
 namespace LuaGUI

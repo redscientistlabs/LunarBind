@@ -2,14 +2,10 @@
 namespace ScriptCore
 {
     using System.Collections.Generic;
-
+    //Todo: update global bindings on each call?
     public static class QuickScripting
     {
         public static BasicScriptRunner Basic { get; private set; } = new BasicScriptRunner();
-
-        //TODO: make a quick dictionary of basic script runners
-        //public static Dictionary<string, BasicScriptRunner> Runners { get; private set; } = new Dictionary<string, BasicScriptRunner>();
-
         public static void AddBindings(ScriptBindings bindings)
         {
             Basic.AddBindings(bindings);

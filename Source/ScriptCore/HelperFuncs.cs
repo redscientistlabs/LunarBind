@@ -9,8 +9,8 @@ namespace ScriptCore
 {
     internal static class HelperFuncs
     {
-        //Taken from https://stackoverflow.com/a/40579063
-        //Creates a delegate from reflection info
+        //From https://stackoverflow.com/a/40579063
+        //Creates a delegate from reflection info. Very helpful for binding
         public static Delegate CreateDelegate(MethodInfo methodInfo, object target = null)
         {
             Func<Type[], Type> getType;

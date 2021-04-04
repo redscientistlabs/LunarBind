@@ -2,7 +2,6 @@
 {
     using MoonSharp.Interpreter;
     using MoonSharp.Interpreter.Interop;
-    using ScriptCore.Attributes;
     using System;
     using System.Collections.Generic;
     using System.Linq;
@@ -11,14 +10,17 @@
     using Yielding;
 
     //Todo: Rename to something more appropriate, since this handles more than just bindings
+    //Todo: make a sort of shared interface or make this class have an instance of ScriptBindings
     public static class GlobalScriptBindings
     {
+        //Todo: decide on standards for added syntax
         public const string TYPE_PREFIX = "_";
 
-        private static Dictionary<string,CallbackFunc> callbackFunctions = new Dictionary<string,CallbackFunc>();
+        private static Dictionary<string, CallbackFunc> callbackFunctions = new Dictionary<string,CallbackFunc>();
         private static Dictionary<string, Type> yieldableTypes = new Dictionary<string, Type>();
         private static Dictionary<string, Type> newableTypes = new Dictionary<string, Type>();
         private static Dictionary<string, Type> staticTypes = new Dictionary<string, Type>();
+
         private static string bakedTypeString = null;
         private static string bakedYieldableTypeString = null;
 
@@ -46,6 +48,13 @@
         {
             RegisterUserDataType(t);
             newableTypes[TYPE_PREFIX + name] = t;
+            BakeNewables();
+        }
+
+        public static void RegisterNewableType(Type t)
+        {
+            RegisterUserDataType(t);
+            newableTypes[TYPE_PREFIX + t.Name] = t;
             BakeNewables();
         }
 

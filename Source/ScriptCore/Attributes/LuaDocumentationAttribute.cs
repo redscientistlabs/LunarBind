@@ -1,6 +1,4 @@
-﻿
-
-namespace ScriptCore.Attributes
+﻿namespace ScriptCore
 {
     using System;
     [System.AttributeUsage(AttributeTargets.Method, Inherited = false, AllowMultiple = false)]

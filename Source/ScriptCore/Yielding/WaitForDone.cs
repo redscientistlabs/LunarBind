@@ -2,7 +2,10 @@
 namespace ScriptCore.Yielding
 {
     using MoonSharp.Interpreter;
-
+    
+    /// <summary>
+    /// Waits until Done is set to true by an external source
+    /// </summary>
     [MoonSharpUserData]
     public class WaitForDone : Yielder
     {

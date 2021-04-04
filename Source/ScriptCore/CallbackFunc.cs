@@ -1,6 +1,5 @@
 ﻿namespace ScriptCore
 {
-    using MoonSharp.Interpreter;
     using System;
     internal struct CallbackFunc
     {
@@ -15,12 +14,11 @@
         public int NumParams => Callback.Method.GetParameters().Length;
         public CallbackFunc(string path, Delegate callback, string documentation = "", string example = "")
         {
-
             this.Path = path;
             this.Callback = callback;
             this.Documentation = documentation;
             this.Example = example;
-            IsYieldable = typeof(Yielding.Yielder).IsAssignableFrom(callback.Method.ReturnType);
+            IsYieldable = typeof(Yielder).IsAssignableFrom(callback.Method.ReturnType);
             if (IsYieldable)
             {
                 string argString = "";
@@ -36,7 +34,7 @@
                         argString += $",a{j}";
                     }
                 }
-                YieldableString = $"function {Path}({argString}) coroutine.yield(COROUTINE_YIELD_{Path}({argString})) end";
+                YieldableString = $"function {Path}({argString}) return coroutine.yield(COROUTINE_YIELD_{Path}({argString})) end";
                 Path = "COROUTINE_YIELD_" + Path;
 
             }
@@ -45,14 +43,5 @@
                 YieldableString = "";
             }
         }
-
-        //public DynValue InternalCallback(ScriptExecutionContext context, CallbackArguments args)
-        //{
-            
-        //    //DynValue.NewCallback(
-        //    //    )
-        //    //context.
-        //}
-
     }
 }

@@ -2,7 +2,6 @@
 {
     using MoonSharp.Interpreter;
     using MoonSharp.Interpreter.Interop;
-    using ScriptCore.Attributes;
     using System;
     using System.Collections.Generic;
     using System.Linq;
@@ -282,6 +281,13 @@
         {
             RegisterUserDataType(t);
             newableTypes[GlobalScriptBindings.TYPE_PREFIX + name] = t;
+            BakeNewables();
+        }
+
+        public void RegisterNewableType(Type t)
+        {
+            RegisterUserDataType(t);
+            newableTypes[GlobalScriptBindings.TYPE_PREFIX + t.Name] = t;
             BakeNewables();
         }
 
