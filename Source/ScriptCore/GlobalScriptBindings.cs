@@ -16,7 +16,9 @@
         //Todo: decide on standards for added syntax
         public const string TYPE_PREFIX = "_";
 
-        private static Dictionary<string, CallbackFunc> callbackFunctions = new Dictionary<string,CallbackFunc>();
+        //private static Dictionary<string, CallbackFunc> callbackFunctions = new Dictionary<string,CallbackFunc>();
+        private static Dictionary<string, CallbackItem> callbackItems = new Dictionary<string, CallbackItem>();
+        private static Dictionary<string, Table> tableFuncs = new Dictionary<string, Table>();
         private static Dictionary<string, Type> yieldableTypes = new Dictionary<string, Type>();
         private static Dictionary<string, Type> newableTypes = new Dictionary<string, Type>();
         private static Dictionary<string, Type> staticTypes = new Dictionary<string, Type>();
@@ -153,32 +155,34 @@
                 {
                     var documentation = (LuaDocumentationAttribute)Attribute.GetCustomAttribute(mi, typeof(LuaDocumentationAttribute));
                     var example = (LuaExampleAttribute)Attribute.GetCustomAttribute(mi, typeof(LuaExampleAttribute));
-                    var del = HelperFuncs.CreateDelegate(mi);
+                    var del = BindingHelpers.CreateDelegate(mi);
                     string name = attr.Name ?? mi.Name;
-                    callbackFunctions[name] = new CallbackFunc(name, del, documentation?.Data ?? "", example?.Data ?? "");
+                    BindingHelpers.CreateCallbackItem(callbackItems, name, del, documentation?.Data ?? "", example?.Data ?? "");
+                    //callbackItems[name] = new CallbackFunc(name, del, documentation?.Data ?? "", example?.Data ?? "");
                 }
             }           
         }
 
-        public static void HookActionProps<T0>(Type type)
-        {
-            PropertyInfo[] props = type.GetProperties(BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic);
-            foreach (var prop in props)
-            {
-                var attr = (LuaFunctionAttribute)Attribute.GetCustomAttribute(prop, typeof(LuaFunctionAttribute));
-                if (attr != null)
-                {
-                    var val = prop.GetValue(null);
-                    if (val.GetType().IsAssignableFrom(typeof(Action<T0>)))
-                    {
-                        var action = ((Action<T0>)val);
-                        var del = Delegate.CreateDelegate(typeof(Action<T0>), action, "Invoke");
-                        string name = attr.Name ?? prop.Name;
-                        callbackFunctions[name] = new CallbackFunc(name, del, "", "");
-                    }
-                }
-            }
-        }
+        //public static void HookActionProps<T0>(Type type)
+        //{
+        //    PropertyInfo[] props = type.GetProperties(BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic);
+        //    foreach (var prop in props)
+        //    {
+        //        var attr = (LuaFunctionAttribute)Attribute.GetCustomAttribute(prop, typeof(LuaFunctionAttribute));
+        //        if (attr != null)
+        //        {
+        //            var val = prop.GetValue(null);
+        //            if (val.GetType().IsAssignableFrom(typeof(Action<T0>)))
+        //            {
+        //                var action = ((Action<T0>)val);
+        //                var del = Delegate.CreateDelegate(typeof(Action<T0>), action, "Invoke");
+        //                string name = attr.Name ?? prop.Name;
+        //                BindingHelpers.CreateCallbackItem(callbackItems, name, del, documentation?.Data ?? "", example?.Data ?? "");
+        //                //callbackItems[name] = new CallbackFunc(name, del, "", "");
+        //            }
+        //        }
+        //    }
+        //}
 
         /// <summary>
         /// Add a specific <see cref="Action"/> to the bindings
@@ -189,7 +193,8 @@
         /// <param name="example"></param>
         public static void AddAction(string name, Action action, string documentation = "", string example = "")
         {
-            callbackFunctions[name] = new CallbackFunc(name, action, documentation, example);
+            BindingHelpers.CreateCallbackItem(callbackItems, name, action, documentation ?? "", example ?? "");
+            //callbackItems[name] = new CallbackFunc(name, action, documentation, example);
         }
         /// <summary>
         /// Add a specific <see cref="Action"/> to the bindings, using the method's Name as the name
@@ -199,7 +204,8 @@
         /// <param name="example"></param>
         public static void AddAction(Action action, string documentation = "", string example = "")
         {
-            callbackFunctions[action.Method.Name] = new CallbackFunc(action.Method.Name, action, documentation, example);
+            BindingHelpers.CreateCallbackItem(callbackItems, action.Method.Name, action, documentation ?? "", example ?? "");
+            //callbackItems[action.Method.Name] = new CallbackFunc(action.Method.Name, action, documentation, example);
         }
 
         /// <summary>
@@ -210,7 +216,8 @@
         {
             foreach (var action in actions)
             {
-                callbackFunctions[action.Method.Name] = new CallbackFunc(action.Method.Name, action);
+                BindingHelpers.CreateCallbackItem(callbackItems, action.Method.Name, action, "", "");
+                //callbackItems[action.Method.Name] = new CallbackFunc(action.Method.Name, action);
             }
         }
 
@@ -223,7 +230,8 @@
         /// <param name="example"></param>
         public static void AddDelegate(string name, Delegate del, string documentation = "", string example = "")
         {
-            callbackFunctions[name] = new CallbackFunc(name, del, documentation, example);
+            BindingHelpers.CreateCallbackItem(callbackItems, name, del, documentation ?? "", example ?? "");
+            //callbackItems[name] = new CallbackFunc(name, del, documentation, example);
         }
 
         /// <summary>
@@ -235,7 +243,8 @@
         /// <param name="example"></param>
         public static void AddDelegate(Delegate del, string documentation = "", string example = "")
         {
-            callbackFunctions[del.Method.Name] = new CallbackFunc(del.Method.Name, del, documentation, example);
+            BindingHelpers.CreateCallbackItem(callbackItems, del.Method.Name, del, documentation ?? "", example ?? "");
+            //callbackItems[del.Method.Name] = new CallbackFunc(del.Method.Name, del, documentation, example);
         }
 
         /// <summary>
@@ -249,7 +258,8 @@
         {
             foreach (var del in dels)
             {
-                callbackFunctions[del.Method.Name] = new CallbackFunc(del.Method.Name, del);
+                BindingHelpers.CreateCallbackItem(callbackItems, del.Method.Name, del, "", "");
+                //callbackItems[del.Method.Name] = new CallbackFunc(del.Method.Name, del);
             }
         }
 
@@ -268,13 +278,15 @@
         /// <param name="lua"></param>
         public static void Initialize(Script lua)
         {
-            foreach (var func in callbackFunctions)
+            //TODO: more stuff
+            foreach (var item in callbackItems.Values)
             {
-                lua.Globals[func.Value.Path] = func.Value.Callback;
-                if (func.Value.IsYieldable)
-                {
-                    lua.DoString(func.Value.YieldableString);
-                }
+                item.AddToScript(lua);
+                //lua.Globals[func.Value.Name] = func.Value.Callback;
+                //if (func.Value.IsYieldable)
+                //{
+                //    lua.DoString(func.Value.YieldableString);
+                //}
             }
             foreach (var type in staticTypes)
             {

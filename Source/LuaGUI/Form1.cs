@@ -41,7 +41,7 @@ namespace LuaGUI
 
         private void Form1_FormClosed(object sender, FormClosedEventArgs e)
         {
-            QuickScripting.RemoveBindings(new ScriptBindings(this));
+            //QuickScripting.RemoveBindings(new ScriptBindings(this));
         }
 
         private void Form1_Load(object sender, EventArgs e)
@@ -60,12 +60,20 @@ namespace LuaGUI
         public void PrintPlusA(string s)
         {
             Console.WriteLine("(A) " + s);
-            testScriptRunner["pingas"] = "hello";
+            //testScriptRunner["pingas"] = "hello";
         }
-        [LuaFunction("PrintPlusA")]
+
+        [LuaFunction("Test.MyTables.PrintPlusA")]
         public void PrintPlusA(string s, string s2)
         {
             Console.WriteLine("(A) " + s + " num two: " + s2);
+        }
+
+        [LuaFunction("Test.MyTables.YieldPls")]
+        public MyYielder YieldPls(string a)
+        {
+            Console.WriteLine($"My Yielder Go: {a}");
+            return new MyYielder(1, "Test");
         }
 
         private void bTest_Click(object sender, EventArgs e)
@@ -158,21 +166,33 @@ namespace LuaGUI
         private void bTest0_Click(object sender, EventArgs e)
         {
             HookedScriptRunner hsr = new HookedScriptRunner();
+            ScriptBindings b = new ScriptBindings(this);
+            b.HookDelegate("Test.YieldPls", (Func<int,string,WaitUntil>)AutoCoroutineTest, "", "");
+            hsr.AddBindings(b);
             hsr["text"] = "test";
-            hsr.LoadScript("function a() print('a start') coroutine.yield(WaitForFrames(0)) print(text) end " + 
-                           "function b() print(text) end " +
-                           "RegisterCoroutine(a, 'A') " +
-                           "RegisterHook(b, 'B')");
-            hsr.RegisterHookDoneCallback("A", () => { Console.WriteLine("Should be in A after pingas 0"); });
-            hsr.RegisterHookDoneCallback("A", () => { Console.WriteLine("Should be in A after pingas 1"); });
-            hsr.RegisterHookDoneCallback("A", () => { Console.WriteLine("Should be in A after pingas 2"); });
-            hsr.RegisterHookDoneCallback("B", () => { Console.WriteLine("Should be in B 0"); });
-            Console.WriteLine("========A Start========");
-            hsr.ExecuteWithCallback("A", (Action)CallbackPass);
-            hsr.ExecuteWithCallback("A", (Action)CallbackPass);
-            hsr.ExecuteWithCallback("A", (Action)CallbackPass);
-            Console.WriteLine("========B Start========");
-            hsr.Execute("B");
+            hsr.LoadScript("function a() Test.MyTables.PrintPlusA('one', 'two') end " +
+                           "function b() " +
+                           "print(1)" +
+                           "print(Test)" + 
+                           "print(Test.MyTables)" +
+                           "print(Test.YieldPls)" +
+                           "print(Test.MyTables.YieldPls)" +
+                           "Test.MyTables.YieldPls('one', 'two') " +
+                           "print(2)" + 
+                           "Test.YieldPls(1, 'two') " +
+                           "print(3)" + 
+                           "end " +
+                           "RegisterHook(a, 'A') " +
+                           "RegisterCoroutine(b, 'B') ");
+            hsr.Execute("A");
+
+            for (int j = 0; j < 10; j++)
+            {
+                Console.WriteLine($"==========C# {j + 1}");
+                hsr.Execute("B");
+            }
+
+
 
             //Script s = new Script();
             //s.Globals["PrintPlusA"]
@@ -189,7 +209,7 @@ namespace LuaGUI
         }
     }
 
-    class MyYielder : Yielder
+    public class MyYielder : Yielder
     {
         public MyYielder(int a, string b)
         {
