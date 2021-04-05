@@ -282,7 +282,7 @@ IEnumerator MyUnityCoroutine(string text)
 }
 
 //Implement in an extension class
-WaitForDone RunUnityCoroutineFromLua(this MonoBehaviour behaviour, IEnumerator toRun)
+public static WaitForDone RunUnityCoroutineFromLua(this MonoBehaviour behaviour, IEnumerator toRun)
 {
   //WaitForDone is an included Yielder class in ScriptCore
   var yielder = new WaitForDone();
