@@ -48,18 +48,54 @@ namespace ScriptCore
             bindings.Clean(lua);
         }
         
-        public void Run(string script)
+        public void Run(string script, string scriptName = "User Code")
         {
-            lua.DoString(script);
+            try
+            {
+                lua.DoString(script, null, scriptName);
+            }
+            catch (Exception ex)
+            {
+                if (ex is InterpreterException e)
+                {
+                    throw new Exception(e.DecoratedMessage);
+                }
+
+                throw ex;
+            }
         }
 
-        public DynValue Query(string script)
+        public DynValue Query(string script, string scriptName = "User Code")
         {
-            return lua.DoString(script);
+            try
+            {
+                return lua.DoString(script, null, scriptName);
+            }
+            catch (Exception ex)
+            {
+                if (ex is InterpreterException e)
+                {
+                    throw new Exception(e.DecoratedMessage);
+                }
+
+                throw ex;
+            }
         }
-        public T Query<T>(string script)
+        public T Query<T>(string script, string scriptName = "User Code")
         {
-            return lua.DoString(script).ToObject<T>();
+            try
+            {
+                return lua.DoString(script, null, scriptName).ToObject<T>();
+            }
+            catch (Exception ex)
+            {
+                if (ex is InterpreterException e)
+                {
+                    throw new Exception(e.DecoratedMessage);
+                }
+
+                throw ex;
+            }
         }
     }
 }

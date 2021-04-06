@@ -10,49 +10,65 @@
     /// </summary>
     public class AutoHookedScriptRunner
     {
-        protected Script lua;
+        public Script Lua { get; private set; }
 
-        private HookedScriptContainer scriptContainer = null;
+        private HookedScriptContainer scriptContainer = new HookedScriptContainer();
 
         public AutoHookedScriptRunner()
         {
-            lua = new Script(CoreModules.Preset_HardSandbox | CoreModules.Coroutine | CoreModules.OS_Time);
-            GlobalScriptBindings.Initialize(lua);
+            Lua = new Script(CoreModules.Preset_HardSandbox | CoreModules.Coroutine | CoreModules.OS_Time);
+            GlobalScriptBindings.Initialize(Lua);
         }
 
         public AutoHookedScriptRunner(ScriptBindings bindings) : this()
         {
-            bindings.Initialize(lua);
+            bindings.Initialize(Lua);
         }
 
-        public AutoHookedScriptRunner(string script) : this()
+        public AutoHookedScriptRunner(string script) 
         {
+            Lua = new Script(CoreModules.Preset_HardSandbox | CoreModules.Coroutine | CoreModules.OS_Time);
             LoadScript(script);
+
+            GlobalScriptBindings.Initialize(Lua);
         }
 
         public AutoHookedScriptRunner(string script, ScriptBindings bindings) : this()
         {
-            bindings.Initialize(lua);
+            bindings.Initialize(Lua);
             LoadScript(script);
         }
 
-        public void LoadScript(string scriptString)
+        public void LoadScript(string scriptString, string scriptName = "User Code")
         {
-            scriptContainer?.ResetHooks();
-            scriptContainer = new HookedScriptContainer(scriptString);
-            lua.DoString(scriptContainer.ScriptString);
+            scriptContainer.ResetHooks();
+            scriptContainer.SetScript(scriptString);
+            try
+            {
+                Lua.DoString(scriptContainer.ScriptString, null, scriptName);
+            }
+            catch (Exception ex)
+            {
+                if (ex is InterpreterException e)
+                {
+                    throw new Exception(e.DecoratedMessage);
+                }
+
+                throw ex;
+            }
             AutoHook();
         }
 
         private void AutoHook()
         {
-            var g = lua.Globals;
+            var g = Lua.Globals;
             g.CollectDeadKeys();
             foreach (var key in g.Keys)
             {
                 var item = g.Get(key);
                 if(item.Type == DataType.Function)
                 {
+                    Console.WriteLine(key.ToString());
                     RegisterHook(item, key.String);
                 }
             }
@@ -71,9 +87,13 @@
             {
                 RunLua(scriptContainer, hookName, args);
             }
-            catch (ScriptRuntimeException ex)
+            catch (Exception ex)
             {
-                //Todo: error handling
+                if (ex is InterpreterException e)
+                {
+                    throw new Exception(e.DecoratedMessage);
+                }
+
                 throw ex;
             }
         }
@@ -92,9 +112,13 @@
                     return default;
                 }
             }
-            catch (ScriptRuntimeException ex)
+            catch (Exception ex)
             {
-                //Todo: error handling
+                if (ex is InterpreterException e)
+                {
+                    throw new Exception(e.DecoratedMessage);
+                }
+
                 throw ex;
             }
         }
@@ -104,7 +128,7 @@
             var hook = script.GetHook(hookName);
             if (hook != null)
             {
-                return lua.Call(hook.LuaFunc, args);
+                return Lua.Call(hook.LuaFunc, args);
             }
             else
             {

@@ -83,7 +83,7 @@ namespace LuaGUI
 
         private void bStart_Click(object sender, EventArgs e)
         {
-            testScriptRunner = new HookedScriptRunner(new ScriptBindings(this));
+            testScriptRunner = new HookedScriptRunner(new ScriptBindings(this)) { AutoRefreshInterval = 1 };
             bExecute.Enabled = true;
             bDispose.Enabled = true;
             bAbort.Enabled = true;
@@ -165,28 +165,44 @@ namespace LuaGUI
 
         private void bTest0_Click(object sender, EventArgs e)
         {
-            HookedScriptRunner hsr = new HookedScriptRunner();
+
+            string s = "function A() Test.MyTables.PrintPlusA('one', 'two') end " +
+                            "function B() " +
+                            "print(1)" +
+                            "coroutine.yield()" +
+                            "print(2)" +
+                            "coroutine.yield()" +
+                            "print(3)" +
+                            "end " +
+                            "RegisterCoroutine(A, 'A', true) " +
+                            //"RegisterCoroutine(b, 'B', true) " +
+                            "";
+
+            bool isCoroutine = true;
+            bool autoResetCoroutine = true;
+            HookStandard standard = new HookStandard(
+                new FuncStandard("A", FuncType.AutoCoroutine | FuncType.AllowAny),
+                new FuncStandard("B", FuncType.AutoCoroutine | FuncType.AllowAnyCoroutine)
+                );
+
+            HookedScriptRunner hsr = new HookedScriptRunner(standard);
+
+
             ScriptBindings b = new ScriptBindings(this);
             b.HookDelegate("Test.YieldPls", (Func<int,string,WaitUntil>)AutoCoroutineTest, "", "");
             hsr.AddBindings(b);
             hsr["text"] = "test";
-            hsr.LoadScript("function a() Test.MyTables.PrintPlusA('one', 'two') end " +
-                           "function b() " +
-                           "print(1)" +
-                           "print(Test)" + 
-                           "print(Test.MyTables)" +
-                           "print(Test.YieldPls)" +
-                           "print(Test.MyTables.YieldPls)" +
-                           "Test.MyTables.YieldPls('one', 'two') " +
-                           "print(2)" + 
-                           "Test.YieldPls(1, 'two') " +
-                           "print(3)" + 
-                           "end " +
-                           "RegisterHook(a, 'A') " +
-                           "RegisterCoroutine(b, 'B') ");
+            hsr.LoadScript(s);
+            hsr.LoadScript(s);
+            hsr.LoadScript(s);
+            hsr.LoadScript(s);
+            hsr.LoadScript(s);
+            hsr.LoadScript(s);
+            hsr.RefreshLua();
+
             hsr.Execute("A");
 
-            for (int j = 0; j < 10; j++)
+            for (int j = 0; j < 30; j++)
             {
                 Console.WriteLine($"==========C# {j + 1}");
                 hsr.Execute("B");
@@ -206,6 +222,13 @@ namespace LuaGUI
             //DynValue.NewYieldReq()
             //Closure c = new Closure();
             //DynValue.FromObject(s.Globals["test"]).Function.GetUpvalue
+        }
+
+        private void bRefreshLua_Click(object sender, EventArgs e)
+        {
+            //testScriptRunner.RefreshLua();
+            GC.Collect();
+            //Task.Run(async () => { await Task.Delay(1000); GC.Collect(); });
         }
     }
 

@@ -70,6 +70,14 @@
                 RegisterObjectFuncs(obj);
             }
         }
+        public void HookObjects<T>(params T[] objs)
+        {
+            foreach (var obj in objs)
+            {
+                RegisterObjectFuncs(obj);
+            }
+        }
+
         public void HookType(Type type)
         {
             RegisterTypeFuncs(type);

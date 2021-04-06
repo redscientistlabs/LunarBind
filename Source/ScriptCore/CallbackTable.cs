@@ -50,12 +50,25 @@
             if (index + 1 >= path.Length)
             {
                 //At lowest level, add callback func
+                if (callbackTables.ContainsKey(path[index]))
+                {
+                    throw new Exception($"Cannot add {string.Join(".",path)} ({func.Name}), a Table with that key exists");
+                }
+                else if (callbackFunctions.ContainsKey(path[index]))
+                {
+                    throw new Exception($"Cannot add {string.Join(".", path)} ({func.Name}), a Function with that key exists");
+                }
                 callbackFunctions[path[index]] = func;
             }
             else
             {
-                CallbackTable nextTable;
 
+                if (callbackFunctions.ContainsKey(path[index]))
+                {
+                    throw new Exception($"Cannot add {string.Join(".", path)} ({func.Name}), a Function with the key ({path[index]}) exists in the path");
+                }
+
+                CallbackTable nextTable;
                 if (callbackTables.TryGetValue(path[index], out nextTable))
                 {
                     nextTable.AddCallbackFunc(path, index + 1, func);
@@ -73,7 +86,6 @@
         {
             Table table = new Table(script);
 
-            List<DynValue> vals = new List<DynValue>();
             //Tables
             foreach (var t in callbackTables.Values)
             {

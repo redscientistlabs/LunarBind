@@ -54,6 +54,10 @@
             if (path.Length == 1)
             {
                 //Simple global function
+                if (dict.ContainsKey(root))
+                {
+                    throw new Exception($"Cannot add {pathString} ({callback.Method.Name}), a {(dict[root].GetType() == typeof(CallbackFunc) ? "Function" : "Table" )} with that key already exists");
+                }
                 dict[root] = func;
             }
             else
@@ -68,7 +72,7 @@
                     }
                     else
                     {
-                        throw new Exception($"Cannot add {pathString} ({callback.Method.Name}), One or more members in the path is assigned to a function");
+                        throw new Exception($"Cannot add {pathString} ({callback.Method.Name}), One or more keys in the path is assigned to a function");
                     }
                 }
                 else

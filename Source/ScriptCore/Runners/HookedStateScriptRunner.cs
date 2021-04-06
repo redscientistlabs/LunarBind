@@ -5,6 +5,9 @@
     using MoonSharp.Interpreter;
     using ScriptCore.Yielding;
 
+    //TODO: make this a collection of HookedScriptRunners instead of one runner?
+    //TODO: make comply with
+
     /// <summary>
     /// Can run multiple scripts at once
     /// </summary>
@@ -22,7 +25,7 @@
             Lua = new Script(CoreModules.Preset_HardSandbox | CoreModules.Coroutine | CoreModules.OS_Time);
 
             Lua.Globals["RegisterHook"] = (Action<DynValue, string>)RegisterHook;
-            Lua.Globals["RegisterCoroutine"] = (Action<DynValue, string>)RegisterCoroutine;
+            Lua.Globals["RegisterCoroutine"] = (Action<DynValue, string, bool>)RegisterCoroutine;
             Lua.Globals["RemoveHook"] = (Action<string>)RemoveHook;
             Lua.Globals["MakeGlobal"] = (Action<string>)MakeGlobal;
             Lua.Globals["RemoveGlobal"] = (Action<string>)RemoveGlobal;
@@ -51,28 +54,32 @@
             CurrentTempScript = scr;
 
             runningScript = scr;
-            Lua.DoString(scr.ScriptString);
-            runningScript = null;
-        }
+            try
+            {
+                Lua.DoString(scr.ScriptString);
+            }
+            catch (Exception ex)
+            {
+                if (ex is InterpreterException e)
+                {
+                    throw new Exception(e.DecoratedMessage);
+                }
 
-        /// <summary>
-        /// Runs the script immediately without hooking
-        /// </summary>
-        /// <param name="scriptString"></param>
-        /// <param name="hook"></param>
-        public DynValue RunScriptNow(string scriptString)
-        {
-            return Lua.DoString(scriptString);
+                throw ex;
+            }
+            finally
+            {
+                runningScript = null;
+            }
         }
-
 
         #region callbacks
 
-        void RegisterCoroutine(DynValue del, string name)
+        void RegisterCoroutine(DynValue del, string name, bool autoResetCoroutine = false)
         {
             if (runningScript == null) { return; }
             var coroutine = Lua.CreateCoroutine(del);
-            runningScript.Hooks[name] = new ScriptHook(coroutine,true);
+            runningScript.Hooks[name] = new ScriptHook(del, coroutine, autoResetCoroutine);
         }
 
         void RegisterHook(DynValue del, string name)
@@ -146,10 +153,18 @@
                     runningScript = null;
                 }
             }
-            catch (ScriptRuntimeException ex)
+            catch (Exception ex)
             {
-                //Todo: error handling
+                if (ex is InterpreterException e)
+                {
+                    throw new Exception(e.DecoratedMessage);
+                }
+
                 throw ex;
+            }
+            finally
+            {
+                runningScript = null;
             }
         }
 
@@ -160,14 +175,14 @@
             {
                 if (hook.IsCoroutine) 
                 {
-                    if (hook.LuaFunc.Coroutine.State == CoroutineState.Dead || !hook.CheckYieldStatus()) //Doesn't run check yield if coroutine is dead
+                    if (hook.Coroutine.Coroutine.State == CoroutineState.Dead || !hook.CheckYieldStatus()) //Doesn't run check yield if coroutine is dead
                     {
                         return;
                     }
 
-                    DynValue ret = hook.LuaFunc.Coroutine.Resume(args);
+                    DynValue ret = hook.Coroutine.Coroutine.Resume(args);
 
-                    switch (hook.LuaFunc.Coroutine.State)
+                    switch (hook.Coroutine.Coroutine.State)
                     {
                         case CoroutineState.Suspended:
                             if (ret.IsNotNil())
@@ -182,6 +197,10 @@
                             break;
                         case CoroutineState.Dead:
                             hook.CurYielder = null;
+                            if (hook.AutoResetCoroutine)
+                            {
+                                hook.Coroutine.Assign(Lua.CreateCoroutine(hook.LuaFunc));
+                            }
                             break;
                         default:
                             break;

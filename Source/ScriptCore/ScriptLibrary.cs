@@ -8,6 +8,8 @@ using System.Threading.Tasks;
 
 namespace ScriptCore
 {
+
+    //TODO: add better functionality
     public static class ScriptLibrary
     {
         static Dictionary<string, string> scripts = new Dictionary<string, string>();

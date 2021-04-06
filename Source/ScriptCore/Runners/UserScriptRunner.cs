@@ -52,7 +52,7 @@
         void RegisterCoroutine(DynValue del, string name)
         {
             var coroutine = Lua.CreateCoroutine(del);
-            scriptContainer.AddHook(name, new ScriptHook(coroutine, true));
+            scriptContainer.AddHook(name, new ScriptHook(del, coroutine, true));
         }
 
         void RegisterHook(DynValue del, string name)
@@ -118,7 +118,7 @@
         void RegisterCoroutine(DynValue del, string name)
         {
             var coroutine = Lua.CreateCoroutine(del);
-            scriptContainer.AddHook(name, new ScriptHook(coroutine, true));
+            scriptContainer.AddHook(name, new ScriptHook(del, coroutine));
         }
 
         void RegisterHook(DynValue del, string name)

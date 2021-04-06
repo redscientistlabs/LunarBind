@@ -48,6 +48,7 @@
             this.bLoadKeyCoroutineTest = new System.Windows.Forms.Button();
             this.bArrayParamTest = new System.Windows.Forms.Button();
             this.bTest0 = new System.Windows.Forms.Button();
+            this.bRefreshLua = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.nmStashkey)).BeginInit();
             this.SuspendLayout();
             // 
@@ -55,7 +56,7 @@
             // 
             this.bTest.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.bTest.Location = new System.Drawing.Point(20, 636);
-            this.bTest.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.bTest.Margin = new System.Windows.Forms.Padding(4);
             this.bTest.Name = "bTest";
             this.bTest.Size = new System.Drawing.Size(131, 28);
             this.bTest.TabIndex = 0;
@@ -67,7 +68,7 @@
             // bStart
             // 
             this.bStart.Location = new System.Drawing.Point(17, 63);
-            this.bStart.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.bStart.Margin = new System.Windows.Forms.Padding(4);
             this.bStart.Name = "bStart";
             this.bStart.Size = new System.Drawing.Size(100, 28);
             this.bStart.TabIndex = 1;
@@ -79,7 +80,7 @@
             // 
             this.bExecute.Enabled = false;
             this.bExecute.Location = new System.Drawing.Point(17, 134);
-            this.bExecute.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.bExecute.Margin = new System.Windows.Forms.Padding(4);
             this.bExecute.Name = "bExecute";
             this.bExecute.Size = new System.Drawing.Size(100, 28);
             this.bExecute.TabIndex = 2;
@@ -91,7 +92,7 @@
             // 
             this.bDispose.Enabled = false;
             this.bDispose.Location = new System.Drawing.Point(16, 170);
-            this.bDispose.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.bDispose.Margin = new System.Windows.Forms.Padding(4);
             this.bDispose.Name = "bDispose";
             this.bDispose.Size = new System.Drawing.Size(100, 28);
             this.bDispose.TabIndex = 3;
@@ -106,7 +107,7 @@
             | System.Windows.Forms.AnchorStyles.Right)));
             this.tbScript.Font = new System.Drawing.Font("Consolas", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.tbScript.Location = new System.Drawing.Point(324, 48);
-            this.tbScript.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.tbScript.Margin = new System.Windows.Forms.Padding(4);
             this.tbScript.Multiline = true;
             this.tbScript.Name = "tbScript";
             this.tbScript.ScrollBars = System.Windows.Forms.ScrollBars.Both;
@@ -119,7 +120,7 @@
             // 
             this.bAbort.Enabled = false;
             this.bAbort.Location = new System.Drawing.Point(125, 134);
-            this.bAbort.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.bAbort.Margin = new System.Windows.Forms.Padding(4);
             this.bAbort.Name = "bAbort";
             this.bAbort.Size = new System.Drawing.Size(100, 28);
             this.bAbort.TabIndex = 5;
@@ -132,7 +133,7 @@
             // 
             this.bSetStashkey.Enabled = false;
             this.bSetStashkey.Location = new System.Drawing.Point(17, 98);
-            this.bSetStashkey.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.bSetStashkey.Margin = new System.Windows.Forms.Padding(4);
             this.bSetStashkey.Name = "bSetStashkey";
             this.bSetStashkey.Size = new System.Drawing.Size(100, 28);
             this.bSetStashkey.TabIndex = 8;
@@ -143,7 +144,7 @@
             // nmStashkey
             // 
             this.nmStashkey.Location = new System.Drawing.Point(29, 546);
-            this.nmStashkey.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.nmStashkey.Margin = new System.Windows.Forms.Padding(4);
             this.nmStashkey.Maximum = new decimal(new int[] {
             2,
             0,
@@ -218,7 +219,7 @@
             // 
             this.bCallHook.Enabled = false;
             this.bCallHook.Location = new System.Drawing.Point(171, 252);
-            this.bCallHook.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.bCallHook.Margin = new System.Windows.Forms.Padding(4);
             this.bCallHook.Name = "bCallHook";
             this.bCallHook.Size = new System.Drawing.Size(100, 28);
             this.bCallHook.TabIndex = 16;
@@ -229,7 +230,7 @@
             // tbHook
             // 
             this.tbHook.Location = new System.Drawing.Point(29, 256);
-            this.tbHook.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.tbHook.Margin = new System.Windows.Forms.Padding(4);
             this.tbHook.Name = "tbHook";
             this.tbHook.Size = new System.Drawing.Size(132, 22);
             this.tbHook.TabIndex = 17;
@@ -248,7 +249,7 @@
             // bLoadKeyCoroutineTest
             // 
             this.bLoadKeyCoroutineTest.Location = new System.Drawing.Point(16, 310);
-            this.bLoadKeyCoroutineTest.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.bLoadKeyCoroutineTest.Margin = new System.Windows.Forms.Padding(4);
             this.bLoadKeyCoroutineTest.Name = "bLoadKeyCoroutineTest";
             this.bLoadKeyCoroutineTest.Size = new System.Drawing.Size(196, 28);
             this.bLoadKeyCoroutineTest.TabIndex = 19;
@@ -259,7 +260,7 @@
             // bArrayParamTest
             // 
             this.bArrayParamTest.Location = new System.Drawing.Point(16, 346);
-            this.bArrayParamTest.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.bArrayParamTest.Margin = new System.Windows.Forms.Padding(4);
             this.bArrayParamTest.Name = "bArrayParamTest";
             this.bArrayParamTest.Size = new System.Drawing.Size(196, 28);
             this.bArrayParamTest.TabIndex = 20;
@@ -270,7 +271,7 @@
             // bTest0
             // 
             this.bTest0.Location = new System.Drawing.Point(201, 48);
-            this.bTest0.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.bTest0.Margin = new System.Windows.Forms.Padding(4);
             this.bTest0.Name = "bTest0";
             this.bTest0.Size = new System.Drawing.Size(100, 28);
             this.bTest0.TabIndex = 21;
@@ -278,11 +279,23 @@
             this.bTest0.UseVisualStyleBackColor = true;
             this.bTest0.Click += new System.EventHandler(this.bTest0_Click);
             // 
+            // bRefreshLua
+            // 
+            this.bRefreshLua.Location = new System.Drawing.Point(125, 98);
+            this.bRefreshLua.Margin = new System.Windows.Forms.Padding(4);
+            this.bRefreshLua.Name = "bRefreshLua";
+            this.bRefreshLua.Size = new System.Drawing.Size(100, 28);
+            this.bRefreshLua.TabIndex = 22;
+            this.bRefreshLua.Text = "Refresh";
+            this.bRefreshLua.UseVisualStyleBackColor = true;
+            this.bRefreshLua.Click += new System.EventHandler(this.bRefreshLua_Click);
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1113, 681);
+            this.Controls.Add(this.bRefreshLua);
             this.Controls.Add(this.bTest0);
             this.Controls.Add(this.bArrayParamTest);
             this.Controls.Add(this.bLoadKeyCoroutineTest);
@@ -302,7 +315,7 @@
             this.Controls.Add(this.bExecute);
             this.Controls.Add(this.bStart);
             this.Controls.Add(this.bTest);
-            this.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.Margin = new System.Windows.Forms.Padding(4);
             this.MinimumSize = new System.Drawing.Size(1129, 720);
             this.Name = "Form1";
             this.Text = "Scriptcore Test GUI";
@@ -333,6 +346,7 @@
         private System.Windows.Forms.Button bLoadKeyCoroutineTest;
         private System.Windows.Forms.Button bArrayParamTest;
         private System.Windows.Forms.Button bTest0;
+        private System.Windows.Forms.Button bRefreshLua;
     }
 }
 

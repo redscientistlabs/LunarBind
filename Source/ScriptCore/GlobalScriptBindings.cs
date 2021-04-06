@@ -18,7 +18,6 @@
 
         //private static Dictionary<string, CallbackFunc> callbackFunctions = new Dictionary<string,CallbackFunc>();
         private static Dictionary<string, CallbackItem> callbackItems = new Dictionary<string, CallbackItem>();
-        private static Dictionary<string, Table> tableFuncs = new Dictionary<string, Table>();
         private static Dictionary<string, Type> yieldableTypes = new Dictionary<string, Type>();
         private static Dictionary<string, Type> newableTypes = new Dictionary<string, Type>();
         private static Dictionary<string, Type> staticTypes = new Dictionary<string, Type>();
@@ -29,6 +28,7 @@
         //This must happen before any script is initialized
         static GlobalScriptBindings()
         {
+            Script.WarmUp();
             RegisterAssemblyFuncs(typeof(GlobalScriptBindings).Assembly);
             UserData.RegisterAssembly(typeof(GlobalScriptBindings).Assembly);
             Yielders.Initialize();

@@ -14,10 +14,15 @@
         
         //public string Guid { get; private set; }
 
-        public HookedScriptContainer(string script)
+        public HookedScriptContainer(string script = "")
         {
             ScriptString = script;
             //Guid = System.Guid.NewGuid().ToString();
+        }
+
+        public void SetScript(string script)
+        {
+            ScriptString = script;
         }
 
         public void ResetHooks()
