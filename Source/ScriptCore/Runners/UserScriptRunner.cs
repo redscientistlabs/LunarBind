@@ -9,9 +9,9 @@
     /// <summary>
     /// Provides a sandboxed lua runner that utilizes GlobalScriptBindings and ScriptBindings
     /// </summary>
-    public abstract class UserScriptRunner<T>
+    public abstract class UserScriptRunner<T> : ScriptRunnerBase
     {
-        public Script Lua { get; private set; }
+        //public Script Lua { get; private set; }
 
         protected HookedScriptContainer scriptContainer = null;
 
@@ -22,7 +22,7 @@
             Lua.Globals["RegisterCoroutine"] = (Action<DynValue, string>)RegisterCoroutine;
             Lua.Globals["RemoveHook"] = (Action<string>)RemoveHook;
             GlobalScriptBindings.Initialize(Lua);
-            GlobalScriptBindings.InitializeYieldables(Lua);
+            //GlobalScriptBindings.InitializeYieldables(Lua);
         }
 
         public UserScriptRunner(ScriptBindings bindings = null)
@@ -32,7 +32,7 @@
             Lua.Globals["RegisterCoroutine"] = (Action<DynValue, string>)RegisterCoroutine;
             Lua.Globals["RemoveHook"] = (Action<string>)RemoveHook;
             GlobalScriptBindings.Initialize(Lua);
-            GlobalScriptBindings.InitializeYieldables(Lua);
+            //GlobalScriptBindings.InitializeYieldables(Lua);
             bindings?.Initialize(Lua);
         }
 
@@ -52,12 +52,12 @@
         void RegisterCoroutine(DynValue del, string name)
         {
             var coroutine = Lua.CreateCoroutine(del);
-            scriptContainer.AddHook(name, new ScriptHook(del, coroutine, true));
+            scriptContainer.AddHook(name, new ScriptHook(Lua, del, coroutine, true));
         }
 
         void RegisterHook(DynValue del, string name)
         {
-            scriptContainer.AddHook(name, new ScriptHook(del));
+            scriptContainer.AddHook(name, new ScriptHook(Lua, del));
         }
 
         void RemoveHook(string name)
@@ -75,9 +75,9 @@
     }
 
 
-    public abstract class UserScriptRunner
+    public abstract class UserScriptRunner : ScriptRunnerBase
     {
-        public Script Lua { get; private set; }
+        //public Script Lua { get; private set; }
 
         protected HookedScriptContainer scriptContainer = null;
 
@@ -88,7 +88,7 @@
             Lua.Globals["RegisterCoroutine"] = (Action<DynValue, string>)RegisterCoroutine;
             Lua.Globals["RemoveHook"] = (Action<string>)RemoveHook;
             GlobalScriptBindings.Initialize(Lua);
-            GlobalScriptBindings.InitializeYieldables(Lua);
+            //GlobalScriptBindings.InitializeYieldables(Lua);
         }
 
         public UserScriptRunner(ScriptBindings bindings = null)
@@ -98,7 +98,7 @@
             Lua.Globals["RegisterCoroutine"] = (Action<DynValue, string>)RegisterCoroutine;
             Lua.Globals["RemoveHook"] = (Action<string>)RemoveHook;
             GlobalScriptBindings.Initialize(Lua);
-            GlobalScriptBindings.InitializeYieldables(Lua);
+            //GlobalScriptBindings.InitializeYieldables(Lua);
             bindings?.Initialize(Lua);
         }
 
@@ -118,12 +118,12 @@
         void RegisterCoroutine(DynValue del, string name)
         {
             var coroutine = Lua.CreateCoroutine(del);
-            scriptContainer.AddHook(name, new ScriptHook(del, coroutine));
+            scriptContainer.AddHook(name, new ScriptHook(Lua, del, coroutine));
         }
 
         void RegisterHook(DynValue del, string name)
         {
-            scriptContainer.AddHook(name, new ScriptHook(del));
+            scriptContainer.AddHook(name, new ScriptHook(Lua, del));
         }
 
         void RemoveHook(string name)

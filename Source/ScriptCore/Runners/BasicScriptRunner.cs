@@ -10,49 +10,48 @@ namespace ScriptCore
     /// <summary>
     /// A 
     /// </summary>
-    public class BasicScriptRunner
-    {
-        public Script lua { get; private set; }
-        public Table Globals => lua.Globals;
+    public class BasicScriptRunner : ScriptRunnerBase
+    {   
+        public Table Globals => Lua.Globals;
 
         public BasicScriptRunner() {
-            lua = new Script(CoreModules.Preset_HardSandbox | CoreModules.Coroutine | CoreModules.OS_Time);
-            GlobalScriptBindings.Initialize(lua);
+            Lua = new Script(CoreModules.Preset_HardSandbox | CoreModules.Coroutine | CoreModules.OS_Time);
+            GlobalScriptBindings.Initialize(Lua);
         }
 
         public BasicScriptRunner(ScriptBindings bindings) : this()
         {
-            bindings.Initialize(lua);
+            bindings.Initialize(Lua);
         }
 
         public BasicScriptRunner(params Delegate[] dels) : this()
         {
             ScriptBindings b = new ScriptBindings(dels);
-            b.Initialize(lua);
+            b.Initialize(Lua);
         }
 
         public BasicScriptRunner(params Action[] actions) : this()
         {
             ScriptBindings b = new ScriptBindings(actions);
-            b.Initialize(lua);
+            b.Initialize(Lua);
         }
 
 
         public void AddBindings(ScriptBindings bindings)
         {
-            bindings.Initialize(lua);
+            bindings.Initialize(Lua);
         }
 
         public void RemoveBindings(ScriptBindings bindings)
         {
-            bindings.Clean(lua);
+            bindings.Clean(Lua);
         }
         
         public void Run(string script, string scriptName = "User Code")
         {
             try
             {
-                lua.DoString(script, null, scriptName);
+                Lua.DoString(script, null, scriptName);
             }
             catch (Exception ex)
             {
@@ -69,7 +68,7 @@ namespace ScriptCore
         {
             try
             {
-                return lua.DoString(script, null, scriptName);
+                return Lua.DoString(script, null, scriptName);
             }
             catch (Exception ex)
             {
@@ -85,7 +84,7 @@ namespace ScriptCore
         {
             try
             {
-                return lua.DoString(script, null, scriptName).ToObject<T>();
+                return Lua.DoString(script, null, scriptName).ToObject<T>();
             }
             catch (Exception ex)
             {

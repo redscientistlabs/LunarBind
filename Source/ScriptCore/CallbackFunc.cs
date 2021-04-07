@@ -21,7 +21,7 @@
             this.Documentation = documentation;
             this.Example = example;
             IsYieldable = typeof(Yielder).IsAssignableFrom(callback.Method.ReturnType);
-            if (IsYieldable) { Name = COROUTINE_YIELD_ + name; }
+            if (IsYieldable && GlobalScriptBindings.AutoYield) { Name = COROUTINE_YIELD_ + name; }
             else { Name = name; }
             YieldableString = "";
         }
@@ -65,7 +65,7 @@
         internal override void AddToScript(Script script)
         {
             script.Globals[Name] = Callback;
-            if (IsYieldable)
+            if (IsYieldable && GlobalScriptBindings.AutoYield)
             {
                 script.DoString(YieldableString);
             }

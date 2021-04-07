@@ -25,6 +25,9 @@
         private static string bakedTypeString = null;
         private static string bakedYieldableTypeString = null;
 
+        public static bool AutoYield { get; set; } = true;
+
+
         //This must happen before any script is initialized
         static GlobalScriptBindings()
         {
@@ -273,7 +276,7 @@
         }
 
         /// <summary>
-        /// Initializes a script with C# callback functions, static types, and yieldables
+        /// Initializes a script with C# callback functions, static types, newable types, and yieldables
         /// </summary>
         /// <param name="lua"></param>
         public static void Initialize(Script lua)
@@ -296,6 +299,27 @@
             InitializeNewables(lua);
             InitializeYieldables(lua);
         }
+
+        /// <summary>
+        /// Initializes a script with C# callback functions, static types, and newable types
+        /// </summary>
+        /// <param name="lua"></param>
+        public static void InitializeLight(Script lua)
+        {
+            //TODO: more stuff
+            foreach (var item in callbackItems.Values)
+            {
+                item.AddToScript(lua);
+            }
+            foreach (var type in staticTypes)
+            {
+                lua.Globals[type.Key] = type.Value;
+            }
+
+            InitializeNewables(lua);
+            //InitializeYieldables(lua);
+        }
+
 
         private static void BakeNewables()
         {

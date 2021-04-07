@@ -143,16 +143,16 @@
                             var funcType = Standards[i].FuncType;
                             if (funcType.HasFlag(FuncType.Function))
                             {
-                                container.AddHook(Standards[i].Path, new ScriptHook(globalItem));
+                                container.AddHook(Standards[i].Path, new ScriptHook(script, globalItem));
                             }
                             else if (funcType.HasFlag(FuncType.SingleUseCoroutine))
                             {
-                                container.AddHook(Standards[i].Path, new ScriptHook(globalItem, script.CreateCoroutine(globalItem), false));
+                                container.AddHook(Standards[i].Path, new ScriptHook(script, globalItem, script.CreateCoroutine(globalItem), false));
 
                             }
                             else if (funcType.HasFlag(FuncType.AutoCoroutine))
                             {
-                                container.AddHook(Standards[i].Path, new ScriptHook(globalItem, script.CreateCoroutine(globalItem), true));
+                                container.AddHook(Standards[i].Path, new ScriptHook(script, globalItem, script.CreateCoroutine(globalItem), true));
                             }
                         }
 

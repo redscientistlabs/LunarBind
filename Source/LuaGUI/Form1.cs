@@ -83,7 +83,7 @@ namespace LuaGUI
 
         private void bStart_Click(object sender, EventArgs e)
         {
-            testScriptRunner = new HookedScriptRunner(new ScriptBindings(this)) { AutoRefreshInterval = 1 };
+            testScriptRunner = new HookedScriptRunner(new ScriptBindings(this));// { AutoRefreshInterval = 1 };
             bExecute.Enabled = true;
             bDispose.Enabled = true;
             bAbort.Enabled = true;
@@ -167,7 +167,7 @@ namespace LuaGUI
         {
 
             string s = "function A() Test.MyTables.PrintPlusA('one', 'two') end " +
-                            "function B() " +
+                            "function B()" +
                             "print(1)" +
                             "coroutine.yield()" +
                             "print(2)" +
@@ -178,6 +178,16 @@ namespace LuaGUI
                             //"RegisterCoroutine(b, 'B', true) " +
                             "";
 
+            string s2 =     " function() " +
+                            "print(4)" +
+                            "coroutine.yield()" +
+                            "print(5)" +
+                            "coroutine.yield()" +
+                            "print(6)" +
+                            "end ";
+            
+
+
             bool isCoroutine = true;
             bool autoResetCoroutine = true;
             HookStandard standard = new HookStandard(
@@ -186,19 +196,36 @@ namespace LuaGUI
                 );
 
             HookedScriptRunner hsr = new HookedScriptRunner(standard);
-
-
             ScriptBindings b = new ScriptBindings(this);
-            b.HookDelegate("Test.YieldPls", (Func<int,string,WaitUntil>)AutoCoroutineTest, "", "");
+            b.HookDelegate("Test.YieldPls", (Func<int, string, WaitUntil>)AutoCoroutineTest, "", "");
             hsr.AddBindings(b);
             hsr["text"] = "test";
             hsr.LoadScript(s);
+
+
+            ScriptHook hook = new ScriptHook(hsr.Lua, s2, true, true);
+            for (int j = 0; j < 30; j++)
+            {
+                hook.Execute();
+            }
+            ScriptHook shb = hsr.GetHook("B");
+            for (int j = 0; j < 30; j++)
+            {
+                shb.Execute();
+            }
+            Console.WriteLine("Clone:");
+            ScriptHook shb2 = new ScriptHook(shb) { AutoResetCoroutine = false };
+            for (int j = 0; j < 30; j++)
+            {
+                shb2.Execute();
+            }
+
             hsr.LoadScript(s);
             hsr.LoadScript(s);
             hsr.LoadScript(s);
             hsr.LoadScript(s);
             hsr.LoadScript(s);
-            hsr.RefreshLua();
+            //hsr.RefreshLua();
 
             hsr.Execute("A");
 

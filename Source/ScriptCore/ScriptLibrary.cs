@@ -25,7 +25,6 @@ namespace ScriptCore
             }
         }
 
-
         public static void LoadScriptsFromDir(string dir, string searchPattern = "*.txt")
         {
             if (Directory.Exists(dir))

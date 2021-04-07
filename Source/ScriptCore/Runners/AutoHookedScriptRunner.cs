@@ -8,9 +8,9 @@
     /// <summary>
     /// Automatically hooks all lua functions by name. Coroutines not supported
     /// </summary>
-    public class AutoHookedScriptRunner
+    public class AutoHookedScriptRunner : ScriptRunnerBase
     {
-        public Script Lua { get; private set; }
+        //public Script Lua { get; private set; }
 
         private HookedScriptContainer scriptContainer = new HookedScriptContainer();
 
@@ -77,7 +77,7 @@
         #region callbacks
         void RegisterHook(DynValue del, string name)
         {
-            scriptContainer.Hooks[name] = new ScriptHook(del);
+            scriptContainer.Hooks[name] = new ScriptHook(Lua,del);
         }
         #endregion
 

@@ -11,9 +11,9 @@
     /// <summary>
     /// Can run multiple scripts at once
     /// </summary>
-    public sealed class HookedStateScriptRunner
+    public sealed class HookedStateScriptRunner : ScriptRunnerBase
     {
-        public Script Lua { get; private set; }
+        //public Script Lua { get; private set; }
         private Dictionary<string,HookedScriptContainer> GlobalScripts = new Dictionary<string, HookedScriptContainer>();
         private HookedScriptContainer CurrentTempScript = null;
 
@@ -33,7 +33,7 @@
 
             //Global init
             GlobalScriptBindings.Initialize(Lua);
-            GlobalScriptBindings.InitializeYieldables(Lua);
+            //GlobalScriptBindings.InitializeYieldables(Lua);
         }
 
         public HookedStateScriptRunner(ScriptBindings bindings) : this()
@@ -79,13 +79,13 @@
         {
             if (runningScript == null) { return; }
             var coroutine = Lua.CreateCoroutine(del);
-            runningScript.Hooks[name] = new ScriptHook(del, coroutine, autoResetCoroutine);
+            runningScript.Hooks[name] = new ScriptHook(Lua, del, coroutine, autoResetCoroutine);
         }
 
         void RegisterHook(DynValue del, string name)
         {
             if (runningScript == null) { return; }
-            runningScript.Hooks[name] = new ScriptHook(del);
+            runningScript.Hooks[name] = new ScriptHook(Lua, del);
         }
 
         void RemoveHook(string name)

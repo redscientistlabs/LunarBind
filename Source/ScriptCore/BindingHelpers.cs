@@ -49,7 +49,7 @@
             var path = pathString.Split('.');
             string root = path[0];
             CallbackFunc func = new CallbackFunc(path[path.Length-1], callback, documentation, example);
-            if (func.IsYieldable) { func.GenerateYieldableString(pathString); }
+            if (func.IsYieldable && GlobalScriptBindings.AutoYield) { func.GenerateYieldableString(pathString); }
 
             if (path.Length == 1)
             {
