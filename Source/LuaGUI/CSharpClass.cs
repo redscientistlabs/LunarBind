@@ -8,8 +8,8 @@ namespace LuaGUI
 {
     public static class CSharpClass
     {
-        [LuaDocumentation("Peeks bytes, demonstration function")]
-        [LuaFunction("PeekByte")]
+        [ScriptCoreDocumentation("Peeks bytes, demonstration function")]
+        [ScriptCoreFunction("PeekByte")]
         public static byte PeekByte(string domain, long address)
         {
             Console.WriteLine("(From C# Method) " + domain);

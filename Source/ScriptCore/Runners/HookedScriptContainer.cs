@@ -10,7 +10,7 @@
     {
         public string ScriptString { get; protected set; }
 
-        public Dictionary<string, ScriptHook> Hooks = new Dictionary<string, ScriptHook>();
+        public Dictionary<string, ScriptFunction> Hooks = new Dictionary<string, ScriptFunction>();
         
         //public string Guid { get; private set; }
 
@@ -30,9 +30,9 @@
             Hooks.Clear();
         }
 
-        public ScriptHook GetHook(string name)
+        public ScriptFunction GetHook(string name)
         {
-            if(Hooks.TryGetValue(name, out ScriptHook value))
+            if(Hooks.TryGetValue(name, out ScriptFunction value))
             {
                 return value;
             }
@@ -42,7 +42,7 @@
             }
         }
 
-        public void AddHook(string name, ScriptHook scriptHook)
+        public void AddHook(string name, ScriptFunction scriptHook)
         {
             Hooks[name] = scriptHook;
         }

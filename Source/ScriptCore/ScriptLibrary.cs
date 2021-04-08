@@ -12,7 +12,7 @@ namespace ScriptCore
     //TODO: add better functionality
     public static class ScriptLibrary
     {
-        static Dictionary<string, string> scripts = new Dictionary<string, string>();
+        private static readonly Dictionary<string, string> scripts = new Dictionary<string, string>();
         public static string GetScript(string name)
         {
             if(scripts.TryGetValue(name, out string value))

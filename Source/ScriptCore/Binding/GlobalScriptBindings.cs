@@ -17,10 +17,10 @@
         public const string TYPE_PREFIX = "_";
 
         //private static Dictionary<string, CallbackFunc> callbackFunctions = new Dictionary<string,CallbackFunc>();
-        private static Dictionary<string, CallbackItem> callbackItems = new Dictionary<string, CallbackItem>();
-        private static Dictionary<string, Type> yieldableTypes = new Dictionary<string, Type>();
-        private static Dictionary<string, Type> newableTypes = new Dictionary<string, Type>();
-        private static Dictionary<string, Type> staticTypes = new Dictionary<string, Type>();
+        private static readonly Dictionary<string, BindItem> callbackItems = new Dictionary<string, BindItem>();
+        private static readonly Dictionary<string, Type> yieldableTypes = new Dictionary<string, Type>();
+        private static readonly Dictionary<string, Type> newableTypes = new Dictionary<string, Type>();
+        private static readonly Dictionary<string, Type> staticTypes = new Dictionary<string, Type>();
 
         private static string bakedTypeString = null;
         private static string bakedYieldableTypeString = null;
@@ -63,7 +63,7 @@
             BakeNewables();
         }
 
-        public static void RemoveNewableType(string name, Type t)
+        public static void RemoveNewableType(string name)
         {
             newableTypes.Remove(TYPE_PREFIX + name);
             BakeNewables();
@@ -106,7 +106,7 @@
         }
 
         /// <summary>
-        /// Automatically register all the static functions with the <see cref="LuaFunctionAttribute"/> for specific types
+        /// Automatically register all the static functions with the <see cref="ScriptCoreFunctionAttribute"/> for specific types
         /// </summary>
         /// <param name="assemblies"></param>
         public static void HookClasses(params Type[] types)
@@ -153,11 +153,11 @@
             MethodInfo[] mis = type.GetMethods(BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic);
             foreach (var mi in mis)
             {
-                var attr = (LuaFunctionAttribute)Attribute.GetCustomAttribute(mi, typeof(LuaFunctionAttribute));
+                var attr = (ScriptCoreFunctionAttribute)Attribute.GetCustomAttribute(mi, typeof(ScriptCoreFunctionAttribute));
                 if (attr != null)
                 {
-                    var documentation = (LuaDocumentationAttribute)Attribute.GetCustomAttribute(mi, typeof(LuaDocumentationAttribute));
-                    var example = (LuaExampleAttribute)Attribute.GetCustomAttribute(mi, typeof(LuaExampleAttribute));
+                    var documentation = (ScriptCoreDocumentationAttribute)Attribute.GetCustomAttribute(mi, typeof(ScriptCoreDocumentationAttribute));
+                    var example = (ScriptCoreExampleAttribute)Attribute.GetCustomAttribute(mi, typeof(ScriptCoreExampleAttribute));
                     var del = BindingHelpers.CreateDelegate(mi);
                     string name = attr.Name ?? mi.Name;
                     BindingHelpers.CreateCallbackItem(callbackItems, name, del, documentation?.Data ?? "", example?.Data ?? "");

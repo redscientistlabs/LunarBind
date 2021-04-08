@@ -10,10 +10,10 @@
     using System.Threading.Tasks;
     public class ScriptBindings
     {
-        private Dictionary<string, CallbackItem> callbackItems = new Dictionary<string, CallbackItem>();
-        private Dictionary<string, Type> yieldableTypes = new Dictionary<string, Type>();
-        private Dictionary<string, Type> newableTypes = new Dictionary<string, Type>();
-        private Dictionary<string, Type> staticTypes = new Dictionary<string, Type>();
+        private readonly Dictionary<string, BindItem> callbackItems = new Dictionary<string, BindItem>();
+        private readonly Dictionary<string, Type> yieldableTypes = new Dictionary<string, Type>();
+        private readonly Dictionary<string, Type> newableTypes = new Dictionary<string, Type>();
+        private readonly Dictionary<string, Type> staticTypes = new Dictionary<string, Type>();
         private string bakedTypeString = null;
         private string bakedYieldableTypeString = null;
         public ScriptBindings()
@@ -238,11 +238,11 @@
             MethodInfo[] mis = type.GetMethods(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
             foreach (var mi in mis)
             {
-                var attr = (LuaFunctionAttribute)Attribute.GetCustomAttribute(mi, typeof(LuaFunctionAttribute));
+                var attr = (ScriptCoreFunctionAttribute)Attribute.GetCustomAttribute(mi, typeof(ScriptCoreFunctionAttribute));
                 if (attr != null)
                 {
-                    var documentation = (LuaDocumentationAttribute)Attribute.GetCustomAttribute(mi, typeof(LuaDocumentationAttribute));
-                    var example = (LuaExampleAttribute)Attribute.GetCustomAttribute(mi, typeof(LuaExampleAttribute));
+                    var documentation = (ScriptCoreDocumentationAttribute)Attribute.GetCustomAttribute(mi, typeof(ScriptCoreDocumentationAttribute));
+                    var example = (ScriptCoreExampleAttribute)Attribute.GetCustomAttribute(mi, typeof(ScriptCoreExampleAttribute));
                     var del = BindingHelpers.CreateDelegate(mi, target);
                     string name = attr.Name ?? mi.Name;
                     BindingHelpers.CreateCallbackItem(callbackItems, name, del, documentation?.Data ?? "", example?.Data ?? "");
@@ -256,11 +256,11 @@
             MethodInfo[] mis = type.GetMethods(BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic);
             foreach (var mi in mis)
             {
-                var attr = (LuaFunctionAttribute)Attribute.GetCustomAttribute(mi, typeof(LuaFunctionAttribute));
+                var attr = (ScriptCoreFunctionAttribute)Attribute.GetCustomAttribute(mi, typeof(ScriptCoreFunctionAttribute));
                 if (attr != null)
                 {
-                    var documentation = (LuaDocumentationAttribute)Attribute.GetCustomAttribute(mi, typeof(LuaDocumentationAttribute));
-                    var example = (LuaExampleAttribute)Attribute.GetCustomAttribute(mi, typeof(LuaExampleAttribute));
+                    var documentation = (ScriptCoreDocumentationAttribute)Attribute.GetCustomAttribute(mi, typeof(ScriptCoreDocumentationAttribute));
+                    var example = (ScriptCoreExampleAttribute)Attribute.GetCustomAttribute(mi, typeof(ScriptCoreExampleAttribute));
                     var del = BindingHelpers.CreateDelegate(mi);
                     string name = attr.Name ?? mi.Name;
                     BindingHelpers.CreateCallbackItem(callbackItems, name, del, documentation?.Data ?? "", example?.Data ?? "");
@@ -308,7 +308,7 @@
             BakeNewables();
         }
 
-        public void RemoveNewableType(string name, Type t)
+        public void RemoveNewableType(string name)
         {
             newableTypes.Remove(GlobalScriptBindings.TYPE_PREFIX + name);
             BakeNewables();

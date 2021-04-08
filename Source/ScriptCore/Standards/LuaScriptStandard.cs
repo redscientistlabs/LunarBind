@@ -1,4 +1,4 @@
-﻿namespace ScriptCore
+﻿namespace ScriptCore.Standards
 {
     using System;
     using System.Collections.Generic;
@@ -8,14 +8,14 @@
     /// <summary>
     /// A class for defining and extracting a standard for lua functions
     /// </summary>
-    public class HookStandard
+    public class LuaScriptStandard
     {
-        public List<FuncStandard> Standards { get; private set; } = new List<FuncStandard>();
+        public List<LuaFuncStandard> Standards { get; private set; } = new List<LuaFuncStandard>();
         
-        public HookStandard()
+        public LuaScriptStandard()
         {
         }
-        public HookStandard(params FuncStandard[] standards)
+        public LuaScriptStandard(params LuaFuncStandard[] standards)
         {
             if (standards != null)
             {
@@ -34,21 +34,21 @@
         /// <param name="name"></param>
         /// <param name="isCoroutine"></param>
         /// <param name="autoResetCoroutine"></param>
-        public HookStandard(string path, bool isCoroutine = false, bool autoResetCoroutine = false)
+        public LuaScriptStandard(string path, bool isCoroutine = false, bool autoResetCoroutine = false)
         {
-            Standards.Add(new FuncStandard(path, isCoroutine, autoResetCoroutine));
+            Standards.Add(new LuaFuncStandard(path, isCoroutine, autoResetCoroutine));
         }
 
         public void AddStandard(string path, bool isCoroutine = false, bool autoResetCoroutine = false)
         {
-            Standards.Add(new FuncStandard(path, isCoroutine, autoResetCoroutine));
+            Standards.Add(new LuaFuncStandard(path, isCoroutine, autoResetCoroutine));
         }
 
-        public void AddStandard(FuncStandard standard)
+        public void AddStandard(LuaFuncStandard standard)
         {
             Standards.Add(standard);
         }
-        public void AddStandards(params FuncStandard[] standards)
+        public void AddStandards(params LuaFuncStandard[] standards)
         {
             if (standards != null)
             {
@@ -56,35 +56,53 @@
             }
         }
 
-        public Dictionary<string, DynValue> ExtractHooks(Script script, List<string> errors = null)
+        public void AddStandards(IEnumerable<LuaFuncStandard> standards)
         {
-            Dictionary<string, DynValue> hooks = new Dictionary<string, DynValue>();
+            if (standards != null)
+            {
+                Standards.AddRange(standards);
+            }
+        }
+
+        public Dictionary<string, ScriptFunction> ExtractFunctions(Script script, List<string> errors = null)
+        {
+            Dictionary<string, ScriptFunction> hooks = new Dictionary<string, ScriptFunction>();
             var g = script.Globals;
-            bool ok = true;
             for (int i = 0; i < Standards.Count; i++)
             {
                 try
                 {
-                    //foreach (var key in g.Keys)
-                    //{
-                    //    if (key.ToString() == Standards[i].Path) {
-                    //        var globalItem = g.Get(key);
-                    //        if (globalItem.Type != DataType.Function)
-                    //        {
-                    //            ok = false;
-                    //            errors.Add($"Script contains [{Standards[i].Path}], but it is not a function");
-                    //        }
-                    //        else
-                    //        {
-                    //            hooks[Standards[i].Path] = globalItem;
-                    //        }
-                    //    }
-                    //}
-
                     var globalItem = g.Get(Standards[i].Path);
                     if (globalItem.Type != DataType.Function)
                     {
-                        ok = false;
+                        errors?.Add($"Script contains [{Standards[i].Path}], but it is not a lua function");
+                    }
+                    else
+                    {
+                        hooks[Standards[i].Path] = new ScriptFunction(script, globalItem, 
+                            !Standards[i].FuncType.HasFlag(LuaFuncType.Function), 
+                            Standards[i].FuncType.HasFlag(LuaFuncType.AutoCoroutine));
+                    }
+                }
+                catch
+                {
+                    errors?.Add($"Script does not contain [{Standards[i].Path}]");
+                }
+            }
+            return hooks;
+        }
+
+        public Dictionary<string, DynValue> ExtractFunctionsRaw(Script script, List<string> errors = null)
+        {
+            Dictionary<string, DynValue> hooks = new Dictionary<string, DynValue>();
+            var g = script.Globals;
+            for (int i = 0; i < Standards.Count; i++)
+            {
+                try
+                {
+                    var globalItem = g.Get(Standards[i].Path);
+                    if (globalItem.Type != DataType.Function)
+                    {
                         errors?.Add($"Script contains [{Standards[i].Path}], but it is not a lua function");
                     }
                     else
@@ -94,15 +112,13 @@
                 }
                 catch
                 {
-                    ok = false;
                     errors?.Add($"Script does not contain [{Standards[i].Path}]");
                 } 
-
             }
             return hooks;
         }
 
-        public bool ApplyStandard(Script script, HookedScriptContainer container, List<string> errors = null)
+        public bool ApplyStandard(Script script, HookedScriptContainer container, List<string> messages = null)
         {
             var g = script.Globals;
             bool ok = true;
@@ -122,10 +138,12 @@
                             {
                                 //It is required, add error
                                 ok = false;
-                                errors?.Add($"Script does not contain [{Standards[i].Path}]");
+                                messages?.Add($"Script does not contain [{Standards[i].Path}]");
                             }
                             else
                             {
+                                //It is not required, add warning
+                                messages?.Add($"WARNING: Script does not contain [{Standards[i].Path}], but it is not required");
                                 continue;
                             }
                         }
@@ -135,24 +153,24 @@
                             if (Standards[i].Required)
                             {
                                 ok = false;
-                                errors?.Add($"Script contains [{Standards[i].Path}], but it is not a lua function");
+                                messages?.Add($"Script contains [{Standards[i].Path}], but it is not a lua function");
                             }
                         }
                         else
                         {
                             var funcType = Standards[i].FuncType;
-                            if (funcType.HasFlag(FuncType.Function))
+                            if (funcType.HasFlag(LuaFuncType.Function))
                             {
-                                container.AddHook(Standards[i].Path, new ScriptHook(script, globalItem));
+                                container.AddHook(Standards[i].Path, new ScriptFunction(script, globalItem, false));
                             }
-                            else if (funcType.HasFlag(FuncType.SingleUseCoroutine))
+                            else if (funcType.HasFlag(LuaFuncType.SingleUseCoroutine))
                             {
-                                container.AddHook(Standards[i].Path, new ScriptHook(script, globalItem, script.CreateCoroutine(globalItem), false));
+                                container.AddHook(Standards[i].Path, new ScriptFunction(script, globalItem, true, false));
 
                             }
-                            else if (funcType.HasFlag(FuncType.AutoCoroutine))
+                            else if (funcType.HasFlag(LuaFuncType.AutoCoroutine))
                             {
-                                container.AddHook(Standards[i].Path, new ScriptHook(script, globalItem, script.CreateCoroutine(globalItem), true));
+                                container.AddHook(Standards[i].Path, new ScriptFunction(script, globalItem, true, true));
                             }
                         }
 
@@ -161,43 +179,43 @@
                     {
                         //Is it already set up?
                         var funcType = Standards[i].FuncType;
-                        if (funcType.HasFlag(FuncType.AllowAny))
+                        if (funcType.HasFlag(LuaFuncType.AllowAny))
                         {
                             continue;
                         }
-                        else if (funcType.HasFlag(FuncType.AllowAnyCoroutine))
+                        else if (funcType.HasFlag(LuaFuncType.AllowAnyCoroutine))
                         {
                             if (hook.IsCoroutine) { continue; }
                             else
                             {
                                 ok = false;
-                                errors?.Add($"User defined hook contains [{Standards[i].Path}], but it is not a coroutine");
+                                messages?.Add($"User defined hook contains [{Standards[i].Path}], but it is not a coroutine");
                             }
                         }
-                        else if (funcType == FuncType.Function)
+                        else if (funcType == LuaFuncType.Function)
                         {
                             if (!hook.IsCoroutine) { continue; }
                             else
                             {
                                 ok = false;
-                                errors?.Add($"User defined hook contains [{Standards[i].Path}], but it is not a normal function");
+                                messages?.Add($"User defined hook contains [{Standards[i].Path}], but it is not a normal function");
                             }
                         }
-                        else if (funcType == FuncType.SingleUseCoroutine)
+                        else if (funcType == LuaFuncType.SingleUseCoroutine)
                         {
                             if (!hook.IsCoroutine || hook.AutoResetCoroutine)
                             {
                                 ok = false;
-                                errors?.Add($"User defined hook contains [{Standards[i].Path}], but it is not a single-use coroutine");
+                                messages?.Add($"User defined hook contains [{Standards[i].Path}], but it is not a single-use coroutine");
                             }
                             else { continue; }
                         }
-                        else if (funcType == FuncType.AutoCoroutine)
+                        else if (funcType == LuaFuncType.AutoCoroutine)
                         {
                             if (!hook.IsCoroutine || !hook.AutoResetCoroutine)
                             {
                                 ok = false;
-                                errors?.Add($"User defined hook contains [{Standards[i].Path}], but it is not an automatic coroutine");
+                                messages?.Add($"User defined hook contains [{Standards[i].Path}], but it is not an automatic coroutine");
                             }
                         }
                     }
@@ -205,7 +223,7 @@
                 catch
                 {
                     ok = false;
-                    errors?.Add($"Script does not contain [{Standards[i].Path}]");
+                    messages?.Add($"Script does not contain [{Standards[i].Path}]");
                 }
 
                 //Todo: Eventually do Tables too
@@ -232,84 +250,58 @@
             }
             return ok;
         }
-        
-
     }
 
-    [System.Flags]
-    public enum FuncType
-    {
-        /// <summary>
-        /// A non-coroutine function
-        /// </summary>
-        Function = 1,
-        /// <summary>
-        /// A coroutine which automatically restarts after completing
-        /// </summary>
-        AutoCoroutine = 2,
-        /// <summary>
-        /// A coroutine which does not automatically restart after completing
-        /// </summary>
-        SingleUseCoroutine = 4,
-        /// <summary>
-        /// Allow User-Registered hooks, which must be coroutines.<para/> Must also provide either <see cref="AutoCoroutine"/> or <see cref="SingleUseCoroutine"/> for automatic hooking if you use this flag
-        /// </summary>
-        AllowAnyCoroutine = 8,
-        /// <summary>
-        /// Allow user-registered hooks of any type.<para/> Must provide another type besides <see cref="AllowAnyCoroutine"/> for automatic hooking if you use this flag.
-        /// </summary>
-        AllowAny = 16
-    }
 
-    public class FuncStandard
+    public class LuaFuncStandard
     {
         public string Path;
-        //public string[] SplitPath;
-        //public bool IsCoroutine;
-        //public bool AutoResetCoroutine;
         public bool Required { get; set; }
 
-        internal FuncType FuncType { get; private set; }
+        internal LuaFuncType FuncType { get; private set; }
 
-        public FuncStandard(string path, bool isCoroutine = false, bool autoResetCoroutine = false, bool required = true)
+        /// <summary>
+        /// Creates a <see cref="LuaFuncStandard"/>
+        /// </summary>
+        /// <param name="path">The global function name. Paths not yet implemented, but this can be bypassed by registering the function manually</param>
+        /// <param name="isCoroutine">Is it a coroutine</param>
+        /// <param name="autoResetCoroutine">Should the coroutine automatically reset? (create a new coroutine when it dies?)</param>
+        /// <param name="required">Does this function have to be implemented?</param>
+        public LuaFuncStandard(string path, bool isCoroutine = false, bool autoResetCoroutine = false, bool required = true)
         {
             Path = path;
             Required = required;
-
-            //SplitPath = path.Split('.');
-            //IsCoroutine = isCoroutine;
-            // AutoResetCoroutine = autoResetCoroutine;
 
             if (isCoroutine)
             {
                 if (autoResetCoroutine)
                 {
-                    FuncType = FuncType.AutoCoroutine;
+                    FuncType = LuaFuncType.AutoCoroutine;
                 }
                 else
                 {
-                    FuncType = FuncType.SingleUseCoroutine;
+                    FuncType = LuaFuncType.SingleUseCoroutine;
                 }
             }
             else
             {
-                FuncType = FuncType.Function;
+                FuncType = LuaFuncType.Function;
             }
 
         }
 
-        public FuncStandard(string path, FuncType type, bool required = true)
+        public LuaFuncStandard(string path, LuaFuncType type, bool required = true)
         {
             Path = path;
             FuncType = type;
             Required = required;
 
-            if(FuncType.HasFlag(FuncType.AllowAny) && (((int)FuncType & 0b0111) < 1))
+            if(FuncType.HasFlag(LuaFuncType.AllowAny) && (((int)FuncType & 0b0111) < 1))
             {
                 throw new ArgumentException("Type must also contain FuncType.Function, FuncType.SingleUseCoroutine, or FuncType.AutoCoroutine", "type");
             }
 
-            if (FuncType.HasFlag(FuncType.AllowAnyCoroutine) && (((int)FuncType & 0b0110) < 1))
+            if (FuncType.HasFlag(LuaFuncType.AllowAnyCoroutine) && (((int)FuncType & 0b0110) < 1))
             {
                 throw new ArgumentException("Type must also contain FuncType.SingleUseCoroutine or FuncType.AutoCoroutine", "type");
             }

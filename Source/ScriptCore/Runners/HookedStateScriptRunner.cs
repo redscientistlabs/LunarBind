@@ -14,7 +14,7 @@
     public sealed class HookedStateScriptRunner : ScriptRunnerBase
     {
         //public Script Lua { get; private set; }
-        private Dictionary<string,HookedScriptContainer> GlobalScripts = new Dictionary<string, HookedScriptContainer>();
+        private readonly Dictionary<string,HookedScriptContainer> GlobalScripts = new Dictionary<string, HookedScriptContainer>();
         private HookedScriptContainer CurrentTempScript = null;
 
 
@@ -78,14 +78,14 @@
         void RegisterCoroutine(DynValue del, string name, bool autoResetCoroutine = false)
         {
             if (runningScript == null) { return; }
-            var coroutine = Lua.CreateCoroutine(del);
-            runningScript.Hooks[name] = new ScriptHook(Lua, del, coroutine, autoResetCoroutine);
+            //var coroutine = Lua.CreateCoroutine(del);
+            runningScript.Hooks[name] = new ScriptFunction(Lua, del, true, autoResetCoroutine);
         }
 
         void RegisterHook(DynValue del, string name)
         {
             if (runningScript == null) { return; }
-            runningScript.Hooks[name] = new ScriptHook(Lua, del);
+            runningScript.Hooks[name] = new ScriptFunction(Lua, del, false);
         }
 
         void RemoveHook(string name)

@@ -2,7 +2,7 @@
 {
     using System;
     [System.AttributeUsage(AttributeTargets.Method, Inherited = false, AllowMultiple = false)]
-    public sealed class LuaDocumentationAttribute : Attribute
+    public sealed class ScriptCoreDocumentationAttribute : Attribute
     {
         readonly string data;
 
@@ -10,7 +10,7 @@
         {
             get { return data; }
         }
-        public LuaDocumentationAttribute(string data)
+        public ScriptCoreDocumentationAttribute(string data)
         {
             this.data = data;
         }

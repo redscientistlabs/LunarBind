@@ -2,7 +2,7 @@
 {
     using MoonSharp.Interpreter;
     using System;
-    internal class CallbackFunc : CallbackItem
+    internal class BindFunc : BindItem
     {
         //public override string Name { get; private set; }
         public Delegate Callback { get; private set; } 
@@ -15,7 +15,7 @@
 
         const string COROUTINE_YIELD_ = "COROUTINE_YIELD_";
 
-        public CallbackFunc(string name, Delegate callback, string documentation = "", string example = "")
+        public BindFunc(string name, Delegate callback, string documentation = "", string example = "")
         {
             this.Callback = callback;
             this.Documentation = documentation;

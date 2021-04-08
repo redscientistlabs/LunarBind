@@ -19,7 +19,7 @@
         {
             Lua = new Script(CoreModules.Preset_HardSandbox | CoreModules.Coroutine | CoreModules.OS_Time);
             Lua.Globals["RegisterHook"] = (Action<DynValue, string>)RegisterHook;
-            Lua.Globals["RegisterCoroutine"] = (Action<DynValue, string>)RegisterCoroutine;
+            Lua.Globals["RegisterCoroutine"] = (Action<DynValue, string, bool>)RegisterCoroutine;
             Lua.Globals["RemoveHook"] = (Action<string>)RemoveHook;
             GlobalScriptBindings.Initialize(Lua);
             //GlobalScriptBindings.InitializeYieldables(Lua);
@@ -29,7 +29,7 @@
         {
             Lua = new Script(CoreModules.Preset_HardSandbox | CoreModules.Coroutine | CoreModules.OS_Time);
             Lua.Globals["RegisterHook"] = (Action<DynValue, string>)RegisterHook;
-            Lua.Globals["RegisterCoroutine"] = (Action<DynValue, string>)RegisterCoroutine;
+            Lua.Globals["RegisterCoroutine"] = (Action<DynValue, string, bool>)RegisterCoroutine;
             Lua.Globals["RemoveHook"] = (Action<string>)RemoveHook;
             GlobalScriptBindings.Initialize(Lua);
             //GlobalScriptBindings.InitializeYieldables(Lua);
@@ -49,15 +49,15 @@
             Lua.DoString(scriptContainer.ScriptString);
         }
 
-        void RegisterCoroutine(DynValue del, string name)
+        void RegisterCoroutine(DynValue del, string name, bool autoReset)
         {
-            var coroutine = Lua.CreateCoroutine(del);
-            scriptContainer.AddHook(name, new ScriptHook(Lua, del, coroutine, true));
+            //var coroutine = Lua.CreateCoroutine(del);
+            scriptContainer.AddHook(name, new ScriptFunction(Lua, del, true, autoReset));
         }
 
         void RegisterHook(DynValue del, string name)
         {
-            scriptContainer.AddHook(name, new ScriptHook(Lua, del));
+            scriptContainer.AddHook(name, new ScriptFunction(Lua, del, false));
         }
 
         void RemoveHook(string name)
@@ -117,13 +117,13 @@
 
         void RegisterCoroutine(DynValue del, string name)
         {
-            var coroutine = Lua.CreateCoroutine(del);
-            scriptContainer.AddHook(name, new ScriptHook(Lua, del, coroutine));
+            //var coroutine = Lua.CreateCoroutine(del);
+            scriptContainer.AddHook(name, new ScriptFunction(Lua, del, true));
         }
 
         void RegisterHook(DynValue del, string name)
         {
-            scriptContainer.AddHook(name, new ScriptHook(Lua, del));
+            scriptContainer.AddHook(name, new ScriptFunction(Lua, del, false));
         }
 
         void RemoveHook(string name)

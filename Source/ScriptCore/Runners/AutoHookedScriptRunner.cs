@@ -12,7 +12,7 @@
     {
         //public Script Lua { get; private set; }
 
-        private HookedScriptContainer scriptContainer = new HookedScriptContainer();
+        private readonly HookedScriptContainer scriptContainer = new HookedScriptContainer();
 
         public AutoHookedScriptRunner()
         {
@@ -77,7 +77,7 @@
         #region callbacks
         void RegisterHook(DynValue del, string name)
         {
-            scriptContainer.Hooks[name] = new ScriptHook(Lua,del);
+            scriptContainer.Hooks[name] = new ScriptFunction(Lua,del,false);
         }
         #endregion
 

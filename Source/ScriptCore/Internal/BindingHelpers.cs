@@ -40,7 +40,7 @@
         /// </summary>
         /// <param name="dict"></param>
         /// <param name="pathString"></param>
-        public static void CreateCallbackItem(Dictionary<string, CallbackItem> dict, string pathString, Delegate callback, string documentation, string example)
+        public static void CreateCallbackItem(Dictionary<string, BindItem> dict, string pathString, Delegate callback, string documentation, string example)
         {
             if (string.IsNullOrWhiteSpace(pathString))
             {
@@ -48,7 +48,7 @@
             }
             var path = pathString.Split('.');
             string root = path[0];
-            CallbackFunc func = new CallbackFunc(path[path.Length-1], callback, documentation, example);
+            BindFunc func = new BindFunc(path[path.Length-1], callback, documentation, example);
             if (func.IsYieldable && GlobalScriptBindings.AutoYield) { func.GenerateYieldableString(pathString); }
 
             if (path.Length == 1)
@@ -56,16 +56,16 @@
                 //Simple global function
                 if (dict.ContainsKey(root))
                 {
-                    throw new Exception($"Cannot add {pathString} ({callback.Method.Name}), a {(dict[root].GetType() == typeof(CallbackFunc) ? "Function" : "Table" )} with that key already exists");
+                    throw new Exception($"Cannot add {pathString} ({callback.Method.Name}), a {(dict[root].GetType() == typeof(BindFunc) ? "Function" : "Table" )} with that key already exists");
                 }
                 dict[root] = func;
             }
             else
             {
                 //Recursion time
-                if(dict.TryGetValue(root, out CallbackItem item))
+                if(dict.TryGetValue(root, out BindItem item))
                 {
-                    if(item is CallbackTable t)
+                    if(item is BindTable t)
                     {
                         t.AddCallbackFunc(path, 1, func);
                         t.GenerateYieldableString(); //Bake the yieldable string
@@ -78,7 +78,7 @@
                 else
                 {
                     //Create new
-                    CallbackTable t = new CallbackTable(root);
+                    BindTable t = new BindTable(root);
                     dict[root] = t;
                     t.AddCallbackFunc(path, 1, func);
                     t.GenerateYieldableString(); //Bake the yieldable string

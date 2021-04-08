@@ -6,7 +6,7 @@
 
     public static class Yielders
     {
-        private static Dictionary<string, Type> allYielders = new Dictionary<string, Type>();
+        private static readonly Dictionary<string, Type> allYielders = new Dictionary<string, Type>();
 
         public static void RegisterYielder<T>(string name = null) where T : Yielder
         {

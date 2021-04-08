@@ -11,7 +11,7 @@ using System.Windows.Forms;
 using ScriptCore;
 using System.Runtime.InteropServices;
 using ScriptCore.Yielding;
-
+using ScriptCore.Standards;
 namespace LuaGUI
 {
     public partial class Form1 : Form
@@ -25,11 +25,11 @@ namespace LuaGUI
 
         BasicScriptRunner basicRunner = null;
 
-        [LuaFunction("TestProp2")]
-        public static Action<int> TestProp => (t) =>
-        {
-            Console.WriteLine($"Prop OK, passed: {t}");
-        };
+        //[ScriptCoreFunction("TestProp2")]
+        //public static Action<int> TestProp => (t) =>
+        //{
+        //    Console.WriteLine($"Prop OK, passed: {t}");
+        //};
 
         public Form1()
         {
@@ -56,20 +56,20 @@ namespace LuaGUI
 
         //[LuaDocumentation("Prints (A) + value to the console")]
         //[LuaExample("PrintPlusA('Hello World')")]
-        [LuaFunction("PrintPlusA")]
+        [ScriptCoreFunction("PrintPlusA")]
         public void PrintPlusA(string s)
         {
             Console.WriteLine("(A) " + s);
             //testScriptRunner["pingas"] = "hello";
         }
 
-        [LuaFunction("Test.MyTables.PrintPlusA")]
+        [ScriptCoreFunction("Test.MyTables.PrintPlusA")]
         public void PrintPlusA(string s, string s2)
         {
             Console.WriteLine("(A) " + s + " num two: " + s2);
         }
 
-        [LuaFunction("Test.MyTables.YieldPls")]
+        [ScriptCoreFunction("Test.MyTables.YieldPls")]
         public MyYielder YieldPls(string a)
         {
             Console.WriteLine($"My Yielder Go: {a}");
@@ -123,7 +123,7 @@ namespace LuaGUI
 
         }
         int a = 0;
-        [LuaFunction("AutoCo")]
+        [ScriptCoreFunction("AutoCo")]
         public WaitUntil AutoCoroutineTest(int amt, string test)
         {
             Console.WriteLine("Auto : " + test);
@@ -167,15 +167,16 @@ namespace LuaGUI
         {
 
             string s = "function A() Test.MyTables.PrintPlusA('one', 'two') end " +
-                            "function B()" +
-                            "print(1)" +
-                            "coroutine.yield()" +
-                            "print(2)" +
-                            "coroutine.yield()" +
-                            "print(3)" +
+                            "function B(l,m)" +
+                            "print(l) " +
+                            "print(m) " +
+                            "coroutine.yield() " +
+                            "print(2) " +
+                            "coroutine.yield() " +
+                            "print(3) " +
                             "end " +
                             "RegisterCoroutine(A, 'A', true) " +
-                            //"RegisterCoroutine(b, 'B', true) " +
+                            "RegisterCoroutine(B, 'B', true) " +
                             "";
 
             string s2 =     " function() " +
@@ -190,9 +191,9 @@ namespace LuaGUI
 
             bool isCoroutine = true;
             bool autoResetCoroutine = true;
-            HookStandard standard = new HookStandard(
-                new FuncStandard("A", FuncType.AutoCoroutine | FuncType.AllowAny),
-                new FuncStandard("B", FuncType.AutoCoroutine | FuncType.AllowAnyCoroutine)
+            LuaScriptStandard standard = new LuaScriptStandard(
+                new LuaFuncStandard("A", LuaFuncType.AutoCoroutine | LuaFuncType.AllowAny),
+                new LuaFuncStandard("B", LuaFuncType.AutoCoroutine | LuaFuncType.AllowAnyCoroutine)
                 );
 
             HookedScriptRunner hsr = new HookedScriptRunner(standard);
@@ -203,28 +204,25 @@ namespace LuaGUI
             hsr.LoadScript(s);
 
 
-            ScriptHook hook = new ScriptHook(hsr.Lua, s2, true, true);
-            for (int j = 0; j < 30; j++)
-            {
-                hook.Execute();
-            }
-            ScriptHook shb = hsr.GetHook("B");
-            for (int j = 0; j < 30; j++)
-            {
-                shb.Execute();
-            }
-            Console.WriteLine("Clone:");
-            ScriptHook shb2 = new ScriptHook(shb) { AutoResetCoroutine = false };
-            for (int j = 0; j < 30; j++)
-            {
-                shb2.Execute();
-            }
+            //ScriptHook hook = new ScriptHook(hsr.Lua, s2, true, true);
+            //for (int j = 0; j < 30; j++)
+            //{
+            //    hook.Execute();
+            //}
+            //ScriptHook shb = hsr.GetHook("B");
+            //for (int j = 0; j < 30; j++)
+            //{
+            //    shb.Execute();
+            //}
+            //Console.WriteLine("Clone:");
+            //ScriptHook shb2 = new ScriptHook(shb) { AutoResetCoroutine = false };
+            //for (int j = 0; j < 30; j++)
+            //{
+            //    shb2.Execute();
+            //}
 
             hsr.LoadScript(s);
-            hsr.LoadScript(s);
-            hsr.LoadScript(s);
-            hsr.LoadScript(s);
-            hsr.LoadScript(s);
+
             //hsr.RefreshLua();
 
             hsr.Execute("A");
@@ -232,10 +230,10 @@ namespace LuaGUI
             for (int j = 0; j < 30; j++)
             {
                 Console.WriteLine($"==========C# {j + 1}");
-                hsr.Execute("B");
+                hsr.Execute("B", j+1, j+2);
             }
 
-
+            new object();
 
             //Script s = new Script();
             //s.Globals["PrintPlusA"]

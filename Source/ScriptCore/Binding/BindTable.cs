@@ -5,13 +5,13 @@
     using System.Text;
     using MoonSharp.Interpreter;
     using System.Reflection;
-    internal class CallbackTable : CallbackItem
+    internal class BindTable : BindItem
     {
         //internal string
-        internal Dictionary<string, CallbackTable> callbackTables = new Dictionary<string, CallbackTable>();
-        internal Dictionary<string, CallbackFunc> callbackFunctions = new Dictionary<string, CallbackFunc>();
+        internal Dictionary<string, BindTable> callbackTables = new Dictionary<string, BindTable>();
+        internal Dictionary<string, BindFunc> callbackFunctions = new Dictionary<string, BindFunc>();
         
-        public CallbackTable(string name)
+        public BindTable(string name)
         {
             this.Name = name;
         }
@@ -45,7 +45,7 @@
             }
         }
 
-        internal void AddCallbackFunc(string[] path, int index, CallbackFunc func)
+        internal void AddCallbackFunc(string[] path, int index, BindFunc func)
         {
             if (index + 1 >= path.Length)
             {
@@ -68,14 +68,14 @@
                     throw new Exception($"Cannot add {string.Join(".", path)} ({func.Name}), a Function with the key ({path[index]}) exists in the path");
                 }
 
-                CallbackTable nextTable;
+                BindTable nextTable;
                 if (callbackTables.TryGetValue(path[index], out nextTable))
                 {
                     nextTable.AddCallbackFunc(path, index + 1, func);
                 }
                 else
                 {
-                    nextTable = new CallbackTable(path[index]);
+                    nextTable = new BindTable(path[index]);
                     callbackTables.Add(path[index], nextTable);
                     nextTable.AddCallbackFunc(path, index + 1, func);
                 }
