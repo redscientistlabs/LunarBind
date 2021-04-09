@@ -20,14 +20,14 @@
         /// <summary>
         /// A standard all loaded scripts must follow
         /// </summary>
-        public LuaScriptStandard HookStandard { get; private set; } = null;
+        public LuaScriptStandard ScriptStandard { get; private set; } = null;
         public bool AutoResetCoroutines { get; set; } = false;
 
-        public List<ScriptFunction> GetHooks()
+        public List<ScriptFunction> GetFunctions()
         {
             return scriptContainer.Hooks.Values.ToList();
         }
-        public ScriptFunction GetHook(string name)
+        public ScriptFunction GetFunction(string name)
         {
             return scriptContainer.GetHook(name);
         }
@@ -45,13 +45,13 @@
         public HookedScriptRunner(ScriptBindings bindings, LuaScriptStandard standard = null) : this()
         {
             bindings.Initialize(Lua);
-            HookStandard = standard;
+            ScriptStandard = standard;
         }
 
         public HookedScriptRunner(LuaScriptStandard standard, ScriptBindings bindings = null) : this()
         {
             bindings?.Initialize(Lua);
-            HookStandard = standard;
+            ScriptStandard = standard;
         }
 
         public void AddBindings(ScriptBindings bindings)
@@ -61,7 +61,7 @@
 
         public void SetStandard(LuaScriptStandard standard)
         {
-            HookStandard = standard;
+            ScriptStandard = standard;
         }
 
         public void LoadScript(string scriptString, string scriptName = "User Code")
@@ -72,10 +72,10 @@
 
             Lua.DoString(scriptContainer.ScriptString, null, scriptName);
                 
-            if (HookStandard != null)
+            if (ScriptStandard != null)
             {
                 List<string> errors = new List<string>();
-                bool res = HookStandard.ApplyStandard(Lua, scriptContainer, errors);
+                bool res = ScriptStandard.ApplyStandard(Lua, scriptContainer, errors);
                 if (!res)
                 {
                     //Todo: new type of exception with info
