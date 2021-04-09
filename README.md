@@ -18,7 +18,7 @@ class Program
 {
   static void Main(string[] args)
   {
-    //Register functions marked with the LuaFunction attribute
+    //Register functions marked with the ScriptCoreFunction attribute
     GlobalScriptBindings.HookClasses(typeof(Program));
 
     //All runners are initialized with global script bindings on creation
@@ -38,7 +38,7 @@ class Program
   }
 
   //Mark a static method as a function that can be called from MoonSharp
-  [LuaFunction("HelloWorld")]
+  [ScriptCoreFunction("HelloWorld")]
   static void PrintHelloWorld()
   {
     Console.WriteLine("Hello World!");
@@ -72,7 +72,7 @@ class Program
     Console.ReadKey();
   }
 
-  [LuaFunction("AddCS")]
+  [ScriptCoreFunction("AddCS")]
   static int Add(int a, int b)
   {
     return a + b;
@@ -86,6 +86,7 @@ Note: it is highly recommended to only bind instances to ScriptBindings and not 
 ```csharp
 using System;
 using ScriptCore;
+
 class Program
 {
   static void Main(string[] args)
@@ -110,7 +111,7 @@ class Program
     Console.ReadKey();
   }
 
-  [LuaFunction("HelloWorld")]
+  [ScriptCoreFunction("HelloWorld")]
   static void PrintHelloWorld()
   {
     Console.WriteLine("Hello World!");
@@ -121,7 +122,7 @@ class ExampleClass
 {
   public int MyNumber { get; set; } = 0;
 
-  [LuaFunction("PrintMyNumber")]
+  [ScriptCoreFunction("PrintMyNumber")]
   private void PrintMyNumber()
   {
     Console.WriteLine($"My Number is: {MyNumber}");
@@ -204,7 +205,7 @@ class Program
   static void Main(string[] args)
   {
     GlobalScriptBindings.HookClasses(typeof(Program));
-	//Register custom Yielder class
+  //Register custom Yielder class
     Yielders.RegisterYielder<MyYielder>();
 
     HookedScriptRunner runner = new HookedScriptRunner();
@@ -244,7 +245,7 @@ class Program
     Console.ReadKey();
   }
 
-  [LuaFunction("AutoYieldOneCall")]
+  [ScriptCoreFunction("AutoYieldOneCall")]
   static Yielder AutoYieldOneCall()
   {
     return new WaitFrames(1);
@@ -262,10 +263,10 @@ class MyYielder : Yielder
 }
 ```
 
-For use with starting Unity coroutines and continuing only when they are completed, the following technique can be used:
+For use with starting Unity coroutines from Lua and continuing only when they are completed, the following technique can be used:
 
 ```csharp
-[LuaFunction("TestMethod")]
+[ScriptCoreFunction("TestMethod")]
 Yielder TestMethod(string text)
 {
   return this.RunUnityCoroutineFromLua(MyUnityCoroutine(text));
@@ -293,5 +294,124 @@ public static WaitForDone RunUnityCoroutineFromLua(this MonoBehaviour behaviour,
   }
   behaviour.StartCoroutine(Routine(yielder));
   return yielder;
+}
+```
+
+You can also create a Unity coroutine from any ScriptFunction, or through HookedScriptRunner<br/>
+These coroutines will yield return null on yielding or forced yields (moonsharp coroutine auto yield)
+
+```csharp
+using System;
+using ScriptCore;
+
+class MyMonoBehaviour : MonoBehaviour
+{
+  void Start()
+  {
+    //Only set up GlobalScriptBindings and Yielders once in a static initializer class
+    GlobalScriptBindings.HookClasses(typeof(MyMonoBehaviour));
+    //Register custom Yielder class
+    Yielders.RegisterYielder<MyYielder>();
+    
+    HookedScriptRunner runner = new HookedScriptRunner();
+    string script =
+      "function foo(callNumber) " +
+      "  print('Call '..tostring(callNumber)..', yielding 0 calls with WaitFrames')" +
+      "  local r = coroutine.yield(WaitFrames(0))" +
+      "  print('Call '..tostring(r)..', yielding 1 calls with auto yielder')" +
+      "  r = AutoYieldOneCall()" +
+      "  print('Call '..tostring(r)..', yielding 3 calls with MyYielder')" +
+      "  r = coroutine.yield(MyYielder())" +
+      "  print('Call '..tostring(r)..', done. Coroutine is now dead')" +
+      "  " +
+      "end " +
+      "RegisterCoroutine(foo,'FooCoroutine')"; //RegisterCoroutine instead of RegisterHook
+    runner.LoadScript(script);
+    
+    var func = runner.GetFunction("FooCoroutine");
+    StartCoroutine(func.AsUnityCoroutine(3));
+    StartCoroutine(runner.CreateUnityCoroutine("FooCoroutine", 3));
+    }
+    
+    [ScriptCoreFunction("AutoYieldOneCall")]
+    static Yielder AutoYieldOneCall()
+    {
+      return new WaitFrames(1);
+    }
+
+}
+
+class MyYielder : Yielder
+{
+  int yieldCountDown = 3;
+  public override bool CheckStatus()
+  {
+    return yieldCountDown-- <= 0;
+  }
+}
+```
+
+<h2>Using your own Scripts</h2>
+
+You can use the binding functionality of ScriptCore on any moonsharp Script object. 
+
+```csharp
+using System;
+using ScriptCore;
+using ScriptCore.Yielding;
+using MoonSharp.Interpreter;
+class Program
+{
+  static void Main(string[] args)
+  {
+    GlobalScriptBindings.HookClasses(typeof(Program));
+    Yielders.RegisterYielder<MyYielder>();
+
+    Script script = new Script();
+    string scriptString = "function foo(callNumber) " +
+      "  print('Call '..tostring(callNumber)..', yielding 0 calls with WaitFrames')" +
+      "  local r = coroutine.yield(WaitFrames(0))" +
+      "  print('Call '..tostring(r)..', yielding 1 calls with auto yielder')" +
+      "  r = AutoYieldOneCall()" +
+      "  print('Call '..tostring(r)..', yielding 3 calls with MyYielder')" +
+      "  r = coroutine.yield(MyYielder())" +
+      "  print('Call '..tostring(r)..', done. Coroutine is now restarting')" +
+      "  " +
+      "end ";
+
+    //Initialize the script
+    GlobalScriptBindings.Initialize(script);
+	//Run the string
+    script.DoString(scriptString);
+
+    //Create a ScriptFunction targeting a global function named "foo", as a coroutine
+    bool isCoroutine = true;
+    bool autoResetCoroutine = true;
+    ScriptFunction func = new ScriptFunction("foo", script, isCoroutine, autoResetCoroutine);
+    
+    for (int i = 0; i < 16; i++)
+    {
+      Console.WriteLine();
+      Console.WriteLine($"[C#: Call {i + 1}]");
+      func.Execute(i+1);
+    }
+
+    Console.ReadKey();
+  }
+
+  [ScriptCoreFunction("AutoYieldOneCall")]
+  static Yielder AutoYieldOneCall()
+  {
+    return new WaitFrames(1);
+  }
+}
+
+class MyYielder : Yielder
+{
+  int yieldCountDown = 3;
+  public override bool CheckStatus()
+  {
+    return yieldCountDown-- <= 0;
+  }
 }
 ```
