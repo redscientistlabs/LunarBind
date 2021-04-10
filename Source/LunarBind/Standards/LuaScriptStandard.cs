@@ -64,6 +64,14 @@
             }
         }
 
+        public void Scrub(HookedScriptContainer container)
+        {
+            foreach (var item in container.ScriptFunctions)
+            {
+                item.Value.LuaFunc.Assign(DynValue.NewNil());
+            }
+        }
+
         
         /// <summary>
         /// Extracts functions from a <see cref="MoonSharp"/> <see cref="Script"/> that are contained in the standard

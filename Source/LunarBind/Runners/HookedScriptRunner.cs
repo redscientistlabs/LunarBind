@@ -66,9 +66,15 @@
 
         public void LoadScript(string scriptString, string scriptName = "User Code")
         {
-            scriptContainer.ResetHooks();
             //scriptContainer.ScriptString = scriptString;
             //Lua.Globals.CollectDeadKeys();
+
+            if(ScriptStandard != null)
+            {
+                ScriptStandard.Scrub(scriptContainer);
+            }
+
+            scriptContainer.ResetHooks();
 
             Lua.DoString(scriptString, null, scriptName);
                 
