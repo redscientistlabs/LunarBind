@@ -81,7 +81,7 @@
   <ItemGroup>
     <Reference Include="MoonSharp.Interpreter, Version=2.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\ScriptCore\bin\Release\netstandard2.0\MoonSharp.Interpreter.dll</HintPath>
+      <HintPath>..\LunarBind\bin\Release\netstandard2.0\MoonSharp.Interpreter.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
@@ -131,9 +131,9 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\ScriptCore\ScriptCore.csproj">
+    <ProjectReference Include="..\LunarBind\LunarBind.csproj">
       <Project>{941eed95-ed26-46e3-a096-5a3e95bfe6a2}</Project>
-      <Name>ScriptCore</Name>
+      <Name>LunarBind</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

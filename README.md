@@ -1,7 +1,8 @@
-# ScriptCore
+# LuaBind
 A .NET Standard 2.0 MoonSharp wrapper library for easy binding and quickly running synchronous Lua scripts. Extended Coroutine functionality is also added
 
-Readme under development
+Readme under development, may have errors in examples
+
 <br/>
 All ScriptRunners currently have MoonSharp sandboxed (CoreModules.Preset_HardSandbox | CoreModules.Coroutine | CoreModules.OS_Time)
 <br/>
@@ -12,14 +13,14 @@ Sandboxing options will be added at a later date
 
 ```csharp
 using System;
-using ScriptCore;
+using LuaBind;
 
 class Program
 {
   static void Main(string[] args)
   {
-    //Register functions marked with the ScriptCoreFunction attribute
-    GlobalScriptBindings.HookClasses(typeof(Program));
+    //Register functions marked with the LuaBindFunction attribute
+    GlobalScriptBindings.AddTypes(typeof(Program));
 
     //All runners are initialized with global script bindings on creation
     HookedScriptRunner runner = new HookedScriptRunner();
@@ -38,7 +39,7 @@ class Program
   }
 
   //Mark a static method as a function that can be called from MoonSharp
-  [ScriptCoreFunction("HelloWorld")]
+  [LuaBindFunction("HelloWorld")]
   static void PrintHelloWorld()
   {
     Console.WriteLine("Hello World!");
@@ -52,13 +53,13 @@ Note: Only supported in HookedScriptRunner and BasicScriptRunner
 
 ```csharp
 using System;
-using ScriptCore;
+using LuaBind;
 
 class Program
 {
   static void Main(string[] args)
   {
-    GlobalScriptBindings.HookClasses(typeof(Program));
+    GlobalScriptBindings.AddTypes(typeof(Program));
     HookedScriptRunner runner = new HookedScriptRunner();
     runner.LoadScript(
       "function foo(a, b) " +
@@ -72,7 +73,7 @@ class Program
     Console.ReadKey();
   }
 
-  [ScriptCoreFunction("AddCS")]
+  [LuaBindFunction("AddCS")]
   static int Add(int a, int b)
   {
     return a + b;
@@ -85,13 +86,13 @@ Note: it is highly recommended to only bind instances to ScriptBindings and not 
 
 ```csharp
 using System;
-using ScriptCore;
+using LuaBind;
 
 class Program
 {
   static void Main(string[] args)
   {
-    GlobalScriptBindings.HookClasses(typeof(Program));
+    GlobalScriptBindings.AddTypes(typeof(Program));
 
     ExampleClass instanceObject = new ExampleClass() { MyNumber = 27 };
 
@@ -111,7 +112,7 @@ class Program
     Console.ReadKey();
   }
 
-  [ScriptCoreFunction("HelloWorld")]
+  [LuaBindFunction("HelloWorld")]
   static void PrintHelloWorld()
   {
     Console.WriteLine("Hello World!");
@@ -122,7 +123,7 @@ class ExampleClass
 {
   public int MyNumber { get; set; } = 0;
 
-  [ScriptCoreFunction("PrintMyNumber")]
+  [LuaBindFunction("PrintMyNumber")]
   private void PrintMyNumber()
   {
     Console.WriteLine($"My Number is: {MyNumber}");
@@ -138,14 +139,14 @@ Use MoonSharp's [UserData](https://www.moonsharp.org/objects.html) attributes to
 
 ```csharp
 using System;
-using ScriptCore;
+using LuaBind;
 
 class Program
 {
   static void Main(string[] args)
   {
-    GlobalScriptBindings.RegisterNewableType(typeof(ExampleClass));
-    GlobalScriptBindings.RegisterStaticType(typeof(ExampleStaticClass));
+    GlobalScriptBindings.AddNewableType(typeof(ExampleClass));
+    GlobalScriptBindings.AddStaticType(typeof(ExampleStaticClass));
     HookedScriptRunner runner = new HookedScriptRunner();
 
     runner.LoadScript(
@@ -191,22 +192,22 @@ static class ExampleStaticClass
 
 <h3>Coroutines</h3>
 Coroutines are supported on HookedScriptRunner and HookedStateScriptRunner <br/>
-ScriptCore has an extended coroutine system, similar to Unity's <br/>
+LuaBind has an extended coroutine system, similar to Unity's <br/>
 There is one built in Yielder, WaitFrames. WaitFrames yields and then waits X amount of frames before allowing continuation <br/>
 The Yielder class can be extended and Yielder subclasses can be registered for use in Lua <br/>
 When hooking a C# function in GlobalScriptBindings or ScriptBindings, any hooked method that returns a subclass of Yielder will automatically be wrapped in a coroutine.yield() statement.
 
 ```csharp
 using System;
-using ScriptCore;
-using ScriptCore.Yielding;
+using LuaBind;
+using LuaBind.Yielding;
 class Program
 {
   static void Main(string[] args)
   {
-    GlobalScriptBindings.HookClasses(typeof(Program));
+    GlobalScriptBindings.AddTypes(typeof(Program));
   //Register custom Yielder class
-    Yielders.RegisterYielder<MyYielder>();
+    GlobalScriptBindings.AddYieldableType<MyYielder>();
 
     HookedScriptRunner runner = new HookedScriptRunner();
     string script =
@@ -245,7 +246,7 @@ class Program
     Console.ReadKey();
   }
 
-  [ScriptCoreFunction("AutoYieldOneCall")]
+  [LuaBindFunction("AutoYieldOneCall")]
   static Yielder AutoYieldOneCall()
   {
     return new WaitFrames(1);
@@ -266,7 +267,7 @@ class MyYielder : Yielder
 For use with starting Unity coroutines from Lua and continuing only when they are completed, the following technique can be used:
 
 ```csharp
-[ScriptCoreFunction("TestMethod")]
+[LuaBindFunction("TestMethod")]
 Yielder TestMethod(string text)
 {
   return this.RunUnityCoroutineFromLua(MyUnityCoroutine(text));
@@ -285,7 +286,7 @@ IEnumerator MyUnityCoroutine(string text)
 //Implement in an extension class
 public static WaitForDone RunUnityCoroutineFromLua(this MonoBehaviour behaviour, IEnumerator toRun)
 {
-  //WaitForDone is an included Yielder class in ScriptCore
+  //WaitForDone is an included Yielder class in LuaBind
   var yielder = new WaitForDone();
   IEnumerator Routine(WaitForDone waitForDone)
   {
@@ -302,16 +303,16 @@ These coroutines will yield return null on yielding or forced yields (moonsharp 
 
 ```csharp
 using System;
-using ScriptCore;
+using LuaBind;
 
 class MyMonoBehaviour : MonoBehaviour
 {
   void Start()
   {
-    //Only set up GlobalScriptBindings and Yielders once in a static initializer class
-    GlobalScriptBindings.HookClasses(typeof(MyMonoBehaviour));
+    //Only set up GlobalScriptBindings once in a static initializer class
+    GlobalScriptBindings.AddTypes(typeof(MyMonoBehaviour));
     //Register custom Yielder class
-    Yielders.RegisterYielder<MyYielder>();
+    GlobalScriptBindings.AddYieldableType<MyYielder>();
     
     HookedScriptRunner runner = new HookedScriptRunner();
     string script =
@@ -333,7 +334,7 @@ class MyMonoBehaviour : MonoBehaviour
     StartCoroutine(runner.CreateUnityCoroutine("FooCoroutine", 3));
     }
     
-    [ScriptCoreFunction("AutoYieldOneCall")]
+    [LuaBindFunction("AutoYieldOneCall")]
     static Yielder AutoYieldOneCall()
     {
       return new WaitFrames(1);
@@ -353,19 +354,19 @@ class MyYielder : Yielder
 
 <h2>Using your own Scripts</h2>
 
-You can use the binding functionality of ScriptCore on any moonsharp Script object. 
+You can use the binding functionality of LuaBind on any moonsharp Script object. 
 
 ```csharp
 using System;
-using ScriptCore;
-using ScriptCore.Yielding;
+using LuaBind;
+using LuaBind.Yielding;
 using MoonSharp.Interpreter;
 class Program
 {
   static void Main(string[] args)
   {
-    GlobalScriptBindings.HookClasses(typeof(Program));
-    Yielders.RegisterYielder<MyYielder>();
+    GlobalScriptBindings.AddTypes(typeof(Program));
+    GlobalScriptBindings.AddYieldableType<MyYielder>();
 
     Script script = new Script();
     string scriptString = "function foo(callNumber) " +
@@ -399,7 +400,7 @@ class Program
     Console.ReadKey();
   }
 
-  [ScriptCoreFunction("AutoYieldOneCall")]
+  [LuaBindFunction("AutoYieldOneCall")]
   static Yielder AutoYieldOneCall()
   {
     return new WaitFrames(1);

@@ -8,10 +8,10 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-using ScriptCore;
+using LunarBind;
 using System.Runtime.InteropServices;
-using ScriptCore.Yielding;
-using ScriptCore.Standards;
+using LunarBind.Yielding;
+using LunarBind.Standards;
 namespace LuaGUI
 {
     public partial class Form1 : Form
@@ -25,7 +25,7 @@ namespace LuaGUI
 
         BasicScriptRunner basicRunner = null;
 
-        //[ScriptCoreFunction("TestProp2")]
+        //[LunarBindFunction("TestProp2")]
         //public static Action<int> TestProp => (t) =>
         //{
         //    Console.WriteLine($"Prop OK, passed: {t}");
@@ -36,7 +36,7 @@ namespace LuaGUI
             InitializeComponent();
             Load += Form1_Load;
             FormClosed += Form1_FormClosed;
-            Yielders.RegisterYielder<MyYielder>("MyYielder");
+            GlobalScriptBindings.AddYieldableType<MyYielder>("MyYielder");
         }
 
         private void Form1_FormClosed(object sender, FormClosedEventArgs e)
@@ -54,22 +54,19 @@ namespace LuaGUI
             basicRunner.Run("PrintPlusA('Hi this is a test from Lua!')");
         }
 
-        //[LuaDocumentation("Prints (A) + value to the console")]
-        //[LuaExample("PrintPlusA('Hello World')")]
-        [ScriptCoreFunction("PrintPlusA")]
+        [LunarBindFunction("PrintPlusA")]
         public void PrintPlusA(string s)
         {
             Console.WriteLine("(A) " + s);
-            //testScriptRunner["pingas"] = "hello";
         }
 
-        [ScriptCoreFunction("Test.MyTables.PrintPlusA")]
+        [LunarBindFunction("Test.MyTables.PrintPlusA")]
         public void PrintPlusA(string s, string s2)
         {
             Console.WriteLine("(A) " + s + " num two: " + s2);
         }
 
-        [ScriptCoreFunction("Test.MyTables.YieldPls")]
+        [LunarBindFunction("Test.MyTables.YieldPls")]
         public MyYielder YieldPls(string a)
         {
             Console.WriteLine($"My Yielder Go: {a}");
@@ -123,7 +120,7 @@ namespace LuaGUI
 
         }
         int a = 0;
-        [ScriptCoreFunction("AutoCo")]
+        [LunarBindFunction("AutoCo")]
         public WaitUntil AutoCoroutineTest(int amt, string test)
         {
             Console.WriteLine("Auto : " + test);
@@ -198,7 +195,7 @@ namespace LuaGUI
 
             HookedScriptRunner hsr = new HookedScriptRunner(standard);
             ScriptBindings b = new ScriptBindings(this);
-            b.HookDelegate("Test.YieldPls", (Func<int, string, WaitUntil>)AutoCoroutineTest, "", "");
+            b.AddDelegate("Test.YieldPls", (Func<int, string, WaitUntil>)AutoCoroutineTest, "", "");
             hsr.AddBindings(b);
             hsr["text"] = "test";
             hsr.LoadScript(s);

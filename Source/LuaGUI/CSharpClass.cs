@@ -3,13 +3,13 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using ScriptCore;
+using LunarBind;
 namespace LuaGUI
 {
     public static class CSharpClass
     {
-        [ScriptCoreDocumentation("Peeks bytes, demonstration function")]
-        [ScriptCoreFunction("PeekByte")]
+        [LunarBindDocumentation("Peeks bytes, demonstration function")]
+        [LunarBindFunction("PeekByte")]
         public static byte PeekByte(string domain, long address)
         {
             Console.WriteLine("(From C# Method) " + domain);
