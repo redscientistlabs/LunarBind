@@ -1,9 +1,8 @@
 # LunarBind
 A .NET Standard 2.0 MoonSharp wrapper library for easy binding and quickly running synchronous Lua scripts. Extended Coroutine functionality is also added
 
-Readme under development, may have errors in examples
-
-<br/>
+Library is currently under development.<br/>
+Readme also under development, may have errors in examples.<br/>
 All ScriptRunners currently have MoonSharp sandboxed (CoreModules.Preset_HardSandbox | CoreModules.Coroutine | CoreModules.OS_Time)
 <br/>
 Sandboxing options will be added at a later date
@@ -13,13 +12,13 @@ Sandboxing options will be added at a later date
 
 ```csharp
 using System;
-using LuaBind;
+using LunarBind;
 
 class Program
 {
   static void Main(string[] args)
   {
-    //Register functions marked with the LuaBindFunction attribute
+    //Register functions marked with the LunarBindFunction attribute
     GlobalScriptBindings.AddTypes(typeof(Program));
 
     //All runners are initialized with global script bindings on creation
@@ -39,7 +38,7 @@ class Program
   }
 
   //Mark a static method as a function that can be called from MoonSharp
-  [LuaBindFunction("HelloWorld")]
+  [LunarBindFunction("HelloWorld")]
   static void PrintHelloWorld()
   {
     Console.WriteLine("Hello World!");
@@ -47,13 +46,66 @@ class Program
 }
 ```
 
+<h3>Applying Standards</h3>
+
+```csharp
+using System;
+using LunarBind;
+using LunarBind.Standards;
+class Program
+{
+  static void Main(string[] args)
+  {
+    GlobalScriptBindings.AddTypes(typeof(Program));
+
+    //Create a standard that any script must follow
+    LuaScriptStandard standard = new LuaScriptStandard(
+      new LuaFuncStandard(path: "Foo", isCoroutine: false, autoResetCoroutine: false, required: true)
+      );
+    HookedScriptRunner runner = new HookedScriptRunner(standard);
+
+    //No error
+    runner.LoadScript(
+      "function Foo() " +
+      "  HelloWorld()" +
+      "end "
+      );
+    runner.Execute("Foo");
+
+    //No error
+    runner.LoadScript(
+      "function Foo() " +
+      "  print('Hello to you too!')" +
+      "end "
+      );
+    runner.Execute("Foo");
+
+    //Throws error on loading
+    runner.LoadScript(
+      "function Bar() " +
+      "  HelloWorld()" +
+      "end "
+      );
+
+    runner.Execute("Foo");
+
+    Console.ReadKey();
+  }
+
+  [LunarBindFunction("HelloWorld")]
+  static void PrintHelloWorld()
+  {
+    Console.WriteLine("Hello World!");
+  }
+}
+```
 
 <h3>Querying Results</h3>
 Note: Only supported in HookedScriptRunner and BasicScriptRunner
 
 ```csharp
 using System;
-using LuaBind;
+using LunarBind;
 
 class Program
 {
@@ -73,7 +125,7 @@ class Program
     Console.ReadKey();
   }
 
-  [LuaBindFunction("AddCS")]
+  [LunarBindFunction("AddCS")]
   static int Add(int a, int b)
   {
     return a + b;
@@ -86,7 +138,7 @@ Note: it is highly recommended to only bind instances to ScriptBindings and not 
 
 ```csharp
 using System;
-using LuaBind;
+using LunarBind;
 
 class Program
 {
@@ -112,7 +164,7 @@ class Program
     Console.ReadKey();
   }
 
-  [LuaBindFunction("HelloWorld")]
+  [LunarBindFunction("HelloWorld")]
   static void PrintHelloWorld()
   {
     Console.WriteLine("Hello World!");
@@ -123,7 +175,7 @@ class ExampleClass
 {
   public int MyNumber { get; set; } = 0;
 
-  [LuaBindFunction("PrintMyNumber")]
+  [LunarBindFunction("PrintMyNumber")]
   private void PrintMyNumber()
   {
     Console.WriteLine($"My Number is: {MyNumber}");
@@ -139,7 +191,7 @@ Use MoonSharp's [UserData](https://www.moonsharp.org/objects.html) attributes to
 
 ```csharp
 using System;
-using LuaBind;
+using LunarBind;
 
 class Program
 {
@@ -192,15 +244,15 @@ static class ExampleStaticClass
 
 <h3>Coroutines</h3>
 Coroutines are supported on HookedScriptRunner and HookedStateScriptRunner <br/>
-LuaBind has an extended coroutine system, similar to Unity's <br/>
+LunarBind has an extended coroutine system, similar to Unity's <br/>
 There is one built in Yielder, WaitFrames. WaitFrames yields and then waits X amount of frames before allowing continuation <br/>
 The Yielder class can be extended and Yielder subclasses can be registered for use in Lua <br/>
 When hooking a C# function in GlobalScriptBindings or ScriptBindings, any hooked method that returns a subclass of Yielder will automatically be wrapped in a coroutine.yield() statement.
 
 ```csharp
 using System;
-using LuaBind;
-using LuaBind.Yielding;
+using LunarBind;
+using LunarBind.Yielding;
 class Program
 {
   static void Main(string[] args)
@@ -246,7 +298,7 @@ class Program
     Console.ReadKey();
   }
 
-  [LuaBindFunction("AutoYieldOneCall")]
+  [LunarBindFunction("AutoYieldOneCall")]
   static Yielder AutoYieldOneCall()
   {
     return new WaitFrames(1);
@@ -267,7 +319,7 @@ class MyYielder : Yielder
 For use with starting Unity coroutines from Lua and continuing only when they are completed, the following technique can be used:
 
 ```csharp
-[LuaBindFunction("TestMethod")]
+[LunarBindFunction("TestMethod")]
 Yielder TestMethod(string text)
 {
   return this.RunUnityCoroutineFromLua(MyUnityCoroutine(text));
@@ -286,7 +338,7 @@ IEnumerator MyUnityCoroutine(string text)
 //Implement in an extension class
 public static WaitForDone RunUnityCoroutineFromLua(this MonoBehaviour behaviour, IEnumerator toRun)
 {
-  //WaitForDone is an included Yielder class in LuaBind
+  //WaitForDone is an included Yielder class in LunarBind
   var yielder = new WaitForDone();
   IEnumerator Routine(WaitForDone waitForDone)
   {
@@ -303,7 +355,7 @@ These coroutines will yield return null on yielding or forced yields (moonsharp 
 
 ```csharp
 using System;
-using LuaBind;
+using LunarBind;
 
 class MyMonoBehaviour : MonoBehaviour
 {
@@ -334,7 +386,7 @@ class MyMonoBehaviour : MonoBehaviour
     StartCoroutine(runner.CreateUnityCoroutine("FooCoroutine", 3));
     }
     
-    [LuaBindFunction("AutoYieldOneCall")]
+    [LunarBindFunction("AutoYieldOneCall")]
     static Yielder AutoYieldOneCall()
     {
       return new WaitFrames(1);
@@ -354,12 +406,12 @@ class MyYielder : Yielder
 
 <h2>Using your own Scripts</h2>
 
-You can use the binding functionality of LuaBind on any moonsharp Script object. 
+You can use the binding functionality of LunarBind on any moonsharp Script object. 
 
 ```csharp
 using System;
-using LuaBind;
-using LuaBind.Yielding;
+using LunarBind;
+using LunarBind.Yielding;
 using MoonSharp.Interpreter;
 class Program
 {
@@ -400,7 +452,7 @@ class Program
     Console.ReadKey();
   }
 
-  [LuaBindFunction("AutoYieldOneCall")]
+  [LunarBindFunction("AutoYieldOneCall")]
   static Yielder AutoYieldOneCall()
   {
     return new WaitFrames(1);
