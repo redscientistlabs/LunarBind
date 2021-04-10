@@ -168,9 +168,9 @@ namespace LuaGUI
                             "print(l) " +
                             "print(m) " +
                             "coroutine.yield() " +
-                            "print(2) " +
+                            "print(l+1) " +
                             "coroutine.yield() " +
-                            "print(3) " +
+                            "print(m+1) " +
                             "end " +
                             "RegisterCoroutine(A, 'A', true) " +
                             "RegisterCoroutine(B, 'B', true) " +

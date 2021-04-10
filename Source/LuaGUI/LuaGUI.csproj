@@ -79,9 +79,8 @@
     <Prefer32Bit>true</Prefer32Bit>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="MoonSharp.Interpreter, Version=2.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\LunarBind\bin\Release\netstandard2.0\MoonSharp.Interpreter.dll</HintPath>
+    <Reference Include="MoonSharp.Interpreter">
+      <HintPath>..\LunarBindNetFramework\bin\Release\MoonSharp.Interpreter.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
@@ -131,9 +130,9 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\LunarBind\LunarBind.csproj">
-      <Project>{941eed95-ed26-46e3-a096-5a3e95bfe6a2}</Project>
-      <Name>LunarBind</Name>
+    <ProjectReference Include="..\LunarBindNetFramework\LunarBindNetFramework.csproj">
+      <Project>{0ad5d929-b842-4df4-bd29-80d9c406a2e0}</Project>
+      <Name>LunarBindNetFramework</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

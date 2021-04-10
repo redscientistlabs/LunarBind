@@ -19,6 +19,9 @@
         /// A reference to the original MoonSharp function
         /// </summary>
         public DynValue LuaFunc { get; private set; }
+
+        //internal Table TableAssignedTo { get; private set; }
+
         /// <summary>
         /// A reference the internally created Coroutine dynval
         /// </summary>
@@ -258,7 +261,7 @@
                             }
                             catch
                             {
-
+                                //TODO: throw error?
                             }
                         }
                         break;
