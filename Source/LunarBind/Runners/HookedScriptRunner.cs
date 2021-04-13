@@ -112,41 +112,17 @@
             hook.Coroutine.Assign(Lua.CreateCoroutine(hook.LuaFunc));
         }
 
-        public void Execute(string hookName, params object[] args)
+        public DynValue Execute(string hookName, params object[] args)
         {
-            //try
-            //{
-                scriptContainer.GetHook(hookName)?.Execute(args);
-                //RunLua(scriptContainer, hookName, null, args);
-            //}
-            //catch (Exception ex)
-            //{
-            //    if (ex is InterpreterException e)
-            //    {
-            //        throw new Exception(e.DecoratedMessage);
-            //    }
-
-            //    throw ex;
-            //}
+            return scriptContainer.GetHook(hookName)?.Execute(args);
         }
 
         public void ExecuteWithCallback(string hookName, Action callback, params object[] args)
         {
-            //try
-            //{
-                scriptContainer.GetHook(hookName)?.ExecuteWithCallback(callback, args);
-                //RunLua(scriptContainer, hookName, callback, args);
-            //}
-            //catch (Exception ex)
-            //{
-            //    if (ex is InterpreterException e)
-            //    {
-            //        throw new Exception(e.DecoratedMessage);
-            //    }
-
-            //    throw ex;
-            //}
+            scriptContainer.GetHook(hookName)?.ExecuteWithCallback(callback, args);
         }
+
+        
 
         public IEnumerator CreateUnityCoroutine(string hookName, params object[] args)
         {

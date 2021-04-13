@@ -20,8 +20,6 @@
         /// </summary>
         public DynValue LuaFunc { get; private set; }
 
-        //internal Table TableAssignedTo { get; private set; }
-
         /// <summary>
         /// A reference the internally created Coroutine dynval
         /// </summary>
@@ -61,7 +59,7 @@
 
 
         /// <summary>
-        /// The current coroutine yielder. When running as a unity coroutine 
+        /// The current coroutine yielder. When running as a unity coroutine, this field will not be useful
         /// </summary>
         public Yielder CurYielder { get; set; } = null;
 
@@ -184,50 +182,8 @@
 
         public void ResetCoroutine()
         {
+            CurYielder = null;
             Coroutine.Assign(ScriptRef.CreateCoroutine(LuaFunc));
-        }
-
-        public DynValue ExecuteWithCallback(Action callback, params object[] args)
-        {
-            if (IsCoroutine)
-            {
-                if (Coroutine.Coroutine.State == CoroutineState.Dead || !CheckYieldStatus()) //Doesn't run check yield if coroutine is dead
-                {
-                    return null;
-                }
-                DynValue ret = Coroutine.Coroutine.Resume(args);
-                switch (Coroutine.Coroutine.State)
-                {
-                    case CoroutineState.Suspended:
-
-                        if (ret.IsNotNil())
-                        {
-                            CurYielder = ret.ToObject<Yielder>();
-                        }
-                        else
-                        {
-                            CurYielder = null;
-                        }
-                        break;
-                    case CoroutineState.Dead:
-                        CurYielder = null;
-                        callback?.Invoke();
-                        if (AutoResetCoroutine)
-                        {
-                            Coroutine.Assign(ScriptRef.CreateCoroutine(LuaFunc));
-                        }
-                        break;
-                    default:
-                        break;
-                }
-                return ret;
-            }
-            else
-            {
-                var ret = ScriptRef.Call(LuaFunc, args);
-                callback?.Invoke();
-                return ret;
-            }
         }
 
         public DynValue Execute(params object[] args)
@@ -239,7 +195,7 @@
                 {
                     return DynValue.Nil;
                 }
-                DynValue ret;// = co.Resume(args);
+                DynValue ret;
 
                 if (co.State == CoroutineState.NotStarted)
                 {
@@ -286,13 +242,206 @@
             }
         }
 
+        public DynValue ExecuteWithCallback(Action callback, params object[] args)
+        {
+            if (IsCoroutine)
+            {
+                if (Coroutine.Coroutine.State == CoroutineState.Dead || !CheckYieldStatus()) //Doesn't run check yield if coroutine is dead
+                {
+                    return null;
+                }
+                DynValue ret = Coroutine.Coroutine.Resume(args);
+                switch (Coroutine.Coroutine.State)
+                {
+                    case CoroutineState.Suspended:
+
+                        if (ret.IsNotNil())
+                        {
+                            CurYielder = ret.ToObject<Yielder>();
+                        }
+                        else
+                        {
+                            CurYielder = null;
+                        }
+                        break;
+                    case CoroutineState.Dead:
+                        CurYielder = null;
+                        callback?.Invoke();
+                        if (AutoResetCoroutine)
+                        {
+                            Coroutine.Assign(ScriptRef.CreateCoroutine(LuaFunc));
+                        }
+                        break;
+                    default:
+                        break;
+                }
+                return ret;
+            }
+            else
+            {
+                var ret = ScriptRef.Call(LuaFunc, args);
+                callback?.Invoke();
+                return ret;
+            }
+        }
+
         /// <summary>
-        /// Returns an IEnumerator with a clone of this ScriptFunction that yield returns null every frame. If it is a normal function it will call once and yield break.<para/>
+        /// Executes, returning the coroutine state. You may call <see cref="Execute(object[])"/> if you do not care whether it is a coroutine or not
+        /// </summary>
+        /// <param name="args"></param>
+        /// <returns></returns>
+        public CoroutineState ExecuteAsCoroutine(object[] args)
+        {
+            Coroutine co = Coroutine.Coroutine;
+            if (co.State == CoroutineState.Dead)
+            {
+                return CoroutineState.Dead;
+            }
+            else if (!CheckYieldStatus())
+            {
+                return CoroutineState.Suspended;
+            }
+            else
+            {
+                //Do coroutine
+                DynValue ret = co.Resume(args);
+                switch (co.State)
+                {
+                    case CoroutineState.Suspended:
+
+                        if (ret.IsNotNil())
+                        {
+                            
+                            try
+                            {
+                                Yielder yielder = ret.ToObject<Yielder>();
+                                CurYielder = yielder;
+                            }
+                            catch //TODO: specific catches to ignore
+                            {
+                                //Moonsharp does not have a good way of testing the user data type without throwing errors so we have to use try/catch
+                            }
+                        }
+                        return CoroutineState.Suspended;
+                    case CoroutineState.Dead:
+                        if (AutoResetCoroutine)
+                        {
+                            ResetCoroutine();
+                        }
+                        return CoroutineState.Dead;
+                    default:
+                        //ForceSuspended, Running, etc
+                        return co.State;
+                }
+            }
+        }
+
+
+        /// <summary>
+        /// Returns a dynvalue result every call. Does not support <see cref="LunarBind"/>'s extended coroutine functionality, except for auto reset<para/>
+        /// Sets returnValue to null if coroutine is Dead 
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="returnValue"></param>
+        /// <param name="args"></param>
+        /// <returns></returns>
+        public CoroutineState QueryAsCoroutine(out DynValue returnValue, object[] args)
+        {
+            Coroutine co = Coroutine.Coroutine;
+            if (co.State == CoroutineState.Dead)
+            {
+                returnValue = default;
+                return CoroutineState.Dead;
+            }
+            else
+            {
+                //Do coroutine
+                DynValue ret = co.Resume(args);
+                switch (co.State)
+                {
+                    case CoroutineState.Suspended:
+                        returnValue = ret;
+                        return CoroutineState.Suspended;
+                    case CoroutineState.Dead:
+                        if (AutoResetCoroutine)
+                        {
+                            ResetCoroutine();
+                        }
+                        returnValue = ret;
+                        return CoroutineState.Dead;
+                    default:
+                        returnValue = default;
+                        return co.State;
+                }
+            }
+        }
+
+        /// <summary>
+        /// Returns a result cast to type T every call. Does not support <see cref="LunarBind"/>'s extended coroutine functionality, except for auto reset<para/>
+        /// Sets returnValue to default(T) if coroutine is Dead 
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="returnValue"></param>
+        /// <param name="args"></param>
+        /// <returns></returns>
+        public CoroutineState QueryAsCoroutine<T>(out T returnValue, object[] args)
+        {
+            Coroutine co = Coroutine.Coroutine;
+            if (co.State == CoroutineState.Dead)
+            {
+                returnValue = default;
+                return CoroutineState.Dead;
+            }
+            else
+            {
+                //Do coroutine
+                DynValue ret = co.Resume(args);
+
+                switch (co.State)
+                {
+                    case CoroutineState.Suspended:
+                        if (ret.IsNotNil())
+                        {
+                            //Todo: try catch?
+                            returnValue = ret.ToObject<T>();
+                        }
+                        else
+                        {
+                            returnValue = default;
+                        }
+                        return CoroutineState.Suspended;
+                    case CoroutineState.Dead:
+                        if (AutoResetCoroutine)
+                        {
+                            ResetCoroutine();
+                        }
+
+                        if (ret.IsNotNil())
+                        {
+                            //Todo: try catch?
+                            returnValue = ret.ToObject<T>();
+                        }
+                        else
+                        {
+                            returnValue = default;
+                        }
+                        return CoroutineState.Dead;
+                    default:
+                        returnValue = default;
+                        return co.State;
+                }
+            }
+        }
+
+        /// <summary>
+        /// Returns an IEnumerator with a clone of this ScriptFunction that yield returns null every frame. 
+        /// If it is a normal function it will call once and yield break.<para/>
+        /// You cannot check the <see cref="Yielder"/> of this <see cref="ScriptFunction"/> instance if you use this function<para/>
         /// The <see cref="Yielder"/> attached to the ScriptFunction is checked every iteration
         /// </summary>
         /// <param name="args">The arguments to be passed into the first call of the coroutine</param>
         /// <returns></returns>
-        public IEnumerator AsUnityCoroutine(params object[] args)
+        public IEnumerator CloneUnityCoroutine(params object[] args)
         {
             if (!IsCoroutine)
             {
@@ -308,7 +457,70 @@
                 Coroutine co = func.Coroutine.Coroutine;
                 while (state != CoroutineState.Dead)
                 {
-                    state = RunAsUnityCoroutine(co, null, args);
+                    state = ExecuteAsCoroutineForUnity(co, null, args);
+                    yield return null;
+                }
+            }
+        }
+
+        /// <summary>
+        /// Returns an IEnumerator with a clone of this ScriptFunction that yield returns null every frame. 
+        /// If it is a normal function it will call once and yield break.<para/>
+        /// You cannot check the <see cref="Yielder"/> of this <see cref="ScriptFunction"/> instance if you use this function<para/>
+        /// The <see cref="Yielder"/> attached to the ScriptFunction is checked every iteration
+        /// </summary>
+        /// <param name="callback">The action to be called when the coroutine is completed</param>
+        /// <param name="args">The arguments to be passed into the first call of the coroutine</param>
+        /// <returns></returns>
+        public IEnumerator CloneUnityCoroutine(Action callback, params object[] args)
+        {
+            if (!IsCoroutine)
+            {
+                Execute(args);
+                callback.Invoke();
+                yield break;
+            }
+            else
+            {
+                CoroutineState state = CoroutineState.NotStarted;
+                var func = new ScriptFunction(this);
+                func._autoResetCoroutine = false;
+                func.FuncType = LuaFuncType.SingleUseCoroutine;
+                //Pull the coroutine reference first so we don't convert every time
+                Coroutine co = func.Coroutine.Coroutine;
+                while (state != CoroutineState.Dead)
+                {
+                    state = ExecuteAsCoroutineForUnity(co, callback, args);
+                    yield return null;
+                }
+            }
+        }
+
+        /// <summary>
+        /// Returns an IEnumerator of this ScriptFunction that yield returns null every frame. 
+        /// If it is a normal function it will call once and yield break.<para/>
+        /// The <see cref="Yielder"/> attached to the ScriptFunction is checked every iteration
+        /// </summary>
+        /// <param name="args">The arguments to be passed into the first call of the coroutine</param>
+        /// <returns></returns>
+        public IEnumerator AsUnityCoroutine(params object[] args)
+        {
+            if (!IsCoroutine)
+            {
+                Execute(args);
+                yield break;
+            }
+            else
+            {
+                CoroutineState state = CoroutineState.NotStarted;
+                //var func = new ScriptFunction(this);
+                //func._autoResetCoroutine = false;
+                //func.FuncType = LuaFuncType.SingleUseCoroutine;
+                this.ResetCoroutine();
+                Coroutine co = Coroutine.Coroutine;
+                while (state != CoroutineState.Dead)
+                {
+                    state = ExecuteAsCoroutineForUnity(co, null, args);
                     yield return null;
                 }
             }
@@ -340,14 +552,13 @@
                 Coroutine co = func.Coroutine.Coroutine;
                 while (state != CoroutineState.Dead)
                 {
-                    state = RunAsUnityCoroutine(co, callback, args);
+                    state = ExecuteAsCoroutineForUnity(co, callback, args);
                     yield return null;
                 }
             }
         }
 
-        //Assumes it is a coroutine
-        private CoroutineState RunAsUnityCoroutine(Coroutine co, Action callback, object[] args)
+        private CoroutineState ExecuteAsCoroutineForUnity(Coroutine co, Action callback, object[] args)
         {
             if (co.State == CoroutineState.Dead)
             {
@@ -376,9 +587,15 @@
 
                         if (ret.IsNotNil())
                         {
-                            //Todo: try catch?
-                            Yielder yielder = ret.ToObject<Yielder>();
-                            CurYielder = yielder;
+                            try
+                            {
+                                Yielder yielder = ret.ToObject<Yielder>();
+                                CurYielder = yielder;
+                            }
+                            catch
+                            {
+
+                            }
                         }
                         return CoroutineState.Suspended;
                     case CoroutineState.Dead:
