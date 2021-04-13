@@ -186,6 +186,64 @@
             Coroutine.Assign(ScriptRef.CreateCoroutine(LuaFunc));
         }
 
+        #if LBNETFW
+        public async System.Threading.Tasks.Task<DynValue> ExecuteAsync(params object[] args)
+        {
+            if (IsCoroutine)
+            {
+                var co = Coroutine.Coroutine;
+                if (co.State == CoroutineState.Dead || !CheckYieldStatus()) //Doesn't run check yield if coroutine is dead
+                {
+                    return DynValue.Nil;
+                }
+                DynValue ret;
+
+                if (co.State == CoroutineState.NotStarted)
+                {
+                    ret = await co.ResumeAsync(args);
+                }
+                else
+                {
+                    ret = await co.ResumeAsync();
+                }
+
+                switch (co.State)
+                {
+                    case CoroutineState.Suspended:
+                        if (ret.IsNotNil())
+                        {
+                            try
+                            {
+                                CurYielder = ret.ToObject<Yielder>();
+                            }
+                            catch
+                            {
+                                //TODO: throw error?
+                            }
+                        }
+                        break;
+                    case CoroutineState.Dead:
+                        CurYielder = null;
+                        if (AutoResetCoroutine)
+                        {
+                            //Create new coroutine, assign it to our dynvalue
+                            Coroutine.Assign(ScriptRef.CreateCoroutine(LuaFunc));
+                        }
+                        break;
+                    default:
+                        break;
+                }
+                return ret;
+            }
+            else
+            {
+                //Not coroutine, just call the function
+                var ret = await ScriptRef.CallAsync(LuaFunc, args);
+                return ret;
+            }
+        }
+    #endif
+
         public DynValue Execute(params object[] args)
         {
             if (IsCoroutine)

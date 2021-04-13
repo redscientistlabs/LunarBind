@@ -42,6 +42,24 @@
             GlobalScriptBindings.Initialize(Lua);
         }
 
+        /// <summary>
+        /// Creates a new HookedScriptRunner with the specified modules, ensuring that 
+        /// </summary>
+        /// <param name="modules"></param>
+        public HookedScriptRunner(CoreModules modules)
+        {
+            if (!modules.HasFlag(CoreModules.Coroutine))
+            {
+                throw new ArgumentException("Modules must contain the Coroutine Flag to be used in a HookedScriptRunner", "modules");
+            }
+            Lua = new Script(modules);
+            Lua.Globals["RegisterHook"] = (Action<DynValue, string>)RegisterHook;
+            Lua.Globals["RegisterCoroutine"] = (Action<DynValue, string, bool>)RegisterCoroutine;
+            Lua.Globals["RemoveHook"] = (Action<string>)RemoveHook;
+            //Global init
+            GlobalScriptBindings.Initialize(Lua);
+        }
+
         public HookedScriptRunner(ScriptBindings bindings, LuaScriptStandard standard = null) : this()
         {
             bindings.Initialize(Lua);
@@ -112,25 +130,37 @@
             hook.Coroutine.Assign(Lua.CreateCoroutine(hook.LuaFunc));
         }
 
-        public DynValue Execute(string hookName, params object[] args)
+        #if LBNETFW
+        /// <summary>
+        /// Execute the function asynchronously.
+        /// </summary>
+        /// <param name="functionName"></param>
+        /// <param name="args"></param>
+        /// <returns></returns>
+        public async System.Threading.Tasks.Task<DynValue> ExecuteAsync(string functionName, params object[] args) {
+           return await scriptContainer.GetHook(functionName)?.ExecuteAsync(args);
+        }
+        #endif
+
+        public DynValue Execute(string functionName, params object[] args)
         {
-            return scriptContainer.GetHook(hookName)?.Execute(args);
+            return scriptContainer.GetHook(functionName)?.Execute(args);
         }
 
-        public void ExecuteWithCallback(string hookName, Action callback, params object[] args)
+        public void ExecuteWithCallback(string functionName, Action callback, params object[] args)
         {
-            scriptContainer.GetHook(hookName)?.ExecuteWithCallback(callback, args);
+            scriptContainer.GetHook(functionName)?.ExecuteWithCallback(callback, args);
         }
 
         
 
-        public IEnumerator CreateUnityCoroutine(string hookName, params object[] args)
+        public IEnumerator CreateUnityCoroutine(string functionName, params object[] args)
         {
             CoroutineState state = CoroutineState.NotStarted;
-            var hook = scriptContainer.GetHook(hookName);
+            var hook = scriptContainer.GetHook(functionName);
             if (hook == null)
             {
-                throw new Exception($"Hook {hookName} does not exist on script");
+                throw new Exception($"Hooked function {functionName} does not exist on script");
             }
             //Create new hook with coroutine
             hook = new ScriptFunction(hook) { AutoResetCoroutine = false };
@@ -141,13 +171,13 @@
             }
         }
 
-        public IEnumerator CreateUnityCoroutine(string hookName, Action callback, params object[] args)
+        public IEnumerator CreateUnityCoroutine(string functionName, Action callback, params object[] args)
         {
             CoroutineState state = CoroutineState.NotStarted;
-            var hook = scriptContainer.GetHook(hookName);
+            var hook = scriptContainer.GetHook(functionName);
             if(hook == null)
             {
-                throw new Exception($"Hook {hookName} does not exist on script");
+                throw new Exception($"Hook {functionName} does not exist on script");
             }
             hook = new ScriptFunction(hook) { AutoResetCoroutine = false };
             while (state != CoroutineState.Dead)
@@ -157,11 +187,11 @@
             }
         }
 
-        public T Query<T>(string hookName, params object[] args)
+        public T Query<T>(string functionName, params object[] args)
         {
             try
             {
-                var ret = scriptContainer.GetHook(hookName)?.Execute(args);
+                var ret = scriptContainer.GetHook(functionName)?.Execute(args);
                     //RunLua(scriptContainer, hookName, null, args);
                 if (ret != null)
                 {
@@ -245,59 +275,11 @@
             }
         }
 
-        //private DynValue RunLua(HookedScriptContainer script, string hookName, Action callback, object[] args)
-        //{
-        //    var hook = script.GetHook(hookName);
-        //    if (hook != null)
-        //    {
-        //        if (hook.IsCoroutine)
-        //        {
-        //            if (hook.Coroutine.Coroutine.State == CoroutineState.Dead || !hook.CheckYieldStatus()) //Doesn't run check yield if coroutine is dead
-        //            {
-        //                return null;
-        //            }
-        //            DynValue ret = hook.Coroutine.Coroutine.Resume(args);
-
-        //            switch (hook.Coroutine.Coroutine.State)
-        //            {
-        //                case CoroutineState.Suspended:
-
-        //                    if (ret.IsNotNil())
-        //                    {
-        //                        Yielder yielder = ret.ToObject<Yielder>();
-        //                        hook.CurYielder = yielder;
-        //                    }
-        //                    else
-        //                    {
-        //                        hook.CurYielder = null;
-        //                    }
-        //                    break;
-        //                case CoroutineState.Dead:
-        //                    hook.CurYielder = null;
-        //                    callback?.Invoke();
-        //                    if (AutoResetCoroutines || hook.AutoResetCoroutine)
-        //                    {
-        //                        hook.Coroutine.Assign(Lua.CreateCoroutine(hook.LuaFunc));
-        //                    }
-        //                    break;
-        //                default:
-        //                    break;
-        //            }
-        //            return ret;
-        //        }
-        //        else
-        //        {
-        //            var ret = Lua.Call(hook.LuaFunc, args);
-        //            callback?.Invoke();
-        //            return ret;
-        //        }
-        //    }
-        //    else
-        //    {
-        //        return null;
-        //    }
-        //}
-
+        /// <summary>
+        /// Access the Global table of the contained script
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
         public object this[string id]
         {
             get

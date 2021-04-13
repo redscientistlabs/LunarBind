@@ -26,7 +26,7 @@
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
     <OutputPath>bin\Release\</OutputPath>
-    <DefineConstants>TRACE</DefineConstants>
+    <DefineConstants>TRACE;LBNETFW</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
@@ -46,35 +46,35 @@
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="..\LunarBind\QuickScripting.cs" />
-	<Compile Include="..\LunarBind\ScriptFunction.cs" />
-	<Compile Include="..\LunarBind\ScriptLibrary.cs" />
-	<Compile Include="..\LunarBind\Yielding\WaitForDone.cs" />
-	<Compile Include="..\LunarBind\Yielding\WaitFrames.cs" />
-	<Compile Include="..\LunarBind\Yielding\WaitUntil.cs" />
-	<Compile Include="..\LunarBind\Yielding\Yielder.cs" />
-	<Compile Include="..\LunarBind\Standards\LuaFuncType.cs" />
-	<Compile Include="..\LunarBind\Standards\LuaScriptStandard.cs" />
-	<Compile Include="..\LunarBind\Runners\AutoHookedScriptRunner.cs" />
-	<Compile Include="..\LunarBind\Runners\BasicScriptRunner.cs" />
-	<Compile Include="..\LunarBind\Runners\HookedScriptRunner.cs" />
-	<Compile Include="..\LunarBind\Runners\HookedStateScriptRunner.cs" />
-	<Compile Include="..\LunarBind\Runners\ScriptRunnerBase.cs" />
-	<Compile Include="..\LunarBind\Runners\UserScriptRunner.cs" />
-	<Compile Include="..\LunarBind\Runners\HookedScriptContainer.cs" />
-	<Compile Include="..\LunarBind\Internal\BindingHelpers.cs" />
-	<Compile Include="..\LunarBind\Internal\StandardHelpers.cs" />
-	<Compile Include="..\LunarBind\Binding\BindEnum.cs" />
-	<Compile Include="..\LunarBind\Binding\BindFunc.cs" />
-	<Compile Include="..\LunarBind\Binding\BindItem.cs" />
-	<Compile Include="..\LunarBind\Binding\BindTable.cs" />
-	<Compile Include="..\LunarBind\Binding\GlobalScriptBindings.cs" />
-	<Compile Include="..\LunarBind\Binding\ScriptBindings.cs" />
-	<Compile Include="..\LunarBind\Attributes\LunarBindDocumentationAttribute.cs" />
-	<Compile Include="..\LunarBind\Attributes\LunarBindEnumAttribute.cs" />
-	<Compile Include="..\LunarBind\Attributes\LunarBindExampleAttribute.cs" />
-	<Compile Include="..\LunarBind\Attributes\LunarBindFunctionAttribute.cs" />
-	<Compile Include="..\LunarBind\Attributes\LunarBindHideAttribute.cs" />
-	<Compile Include="..\LunarBind\Attributes\LunarBindTypeAttribute.cs" />
+    <Compile Include="..\LunarBind\ScriptFunction.cs" />
+    <Compile Include="..\LunarBind\ScriptLibrary.cs" />
+    <Compile Include="..\LunarBind\Yielding\WaitForDone.cs" />
+    <Compile Include="..\LunarBind\Yielding\WaitFrames.cs" />
+    <Compile Include="..\LunarBind\Yielding\WaitUntil.cs" />
+    <Compile Include="..\LunarBind\Yielding\Yielder.cs" />
+    <Compile Include="..\LunarBind\Standards\LuaFuncType.cs" />
+    <Compile Include="..\LunarBind\Standards\LuaScriptStandard.cs" />
+    <Compile Include="..\LunarBind\Runners\AutoHookedScriptRunner.cs" />
+    <Compile Include="..\LunarBind\Runners\BasicScriptRunner.cs" />
+    <Compile Include="..\LunarBind\Runners\HookedScriptRunner.cs" />
+    <Compile Include="..\LunarBind\Runners\HookedStateScriptRunner.cs" />
+    <Compile Include="..\LunarBind\Runners\ScriptRunnerBase.cs" />
+    <Compile Include="..\LunarBind\Runners\UserScriptRunner.cs" />
+    <Compile Include="..\LunarBind\Runners\HookedScriptContainer.cs" />
+    <Compile Include="..\LunarBind\Internal\BindingHelpers.cs" />
+    <Compile Include="..\LunarBind\Internal\StandardHelpers.cs" />
+    <Compile Include="..\LunarBind\Binding\BindEnum.cs" />
+    <Compile Include="..\LunarBind\Binding\BindFunc.cs" />
+    <Compile Include="..\LunarBind\Binding\BindItem.cs" />
+    <Compile Include="..\LunarBind\Binding\BindTable.cs" />
+    <Compile Include="..\LunarBind\Binding\GlobalScriptBindings.cs" />
+    <Compile Include="..\LunarBind\Binding\ScriptBindings.cs" />
+    <Compile Include="..\LunarBind\Attributes\LunarBindDocumentationAttribute.cs" />
+    <Compile Include="..\LunarBind\Attributes\LunarBindEnumAttribute.cs" />
+    <Compile Include="..\LunarBind\Attributes\LunarBindExampleAttribute.cs" />
+    <Compile Include="..\LunarBind\Attributes\LunarBindFunctionAttribute.cs" />
+    <Compile Include="..\LunarBind\Attributes\LunarBindHideAttribute.cs" />
+    <Compile Include="..\LunarBind\Attributes\LunarBindTypeAttribute.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
