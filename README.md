@@ -1,5 +1,6 @@
 # LunarBind
-A .NET Standard 2.0 MoonSharp wrapper library for easy binding and quickly running synchronous Lua scripts. Extended Coroutine functionality is also added
+A .NET Standard 2.0 MoonSharp wrapper library for easy binding and quickly running synchronous Lua scripts.<br/>
+Extended Coroutine functionality is also added, including custom Yielders which are similar in functionality to Unity's YieldInstructions
 
 Library is currently under development.<br/>
 Readme also under development, may have errors in examples.<br/>
