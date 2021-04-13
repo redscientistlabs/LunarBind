@@ -1,12 +1,10 @@
 ﻿namespace LunarBind
 {
+    //TODO: Implement
     using System;
 
-    /// <summary>
-    /// Assign this to a class to access both its 
-    /// </summary>
     [System.AttributeUsage(AttributeTargets.Class | AttributeTargets.Struct, Inherited = false, AllowMultiple = false)]
-    public sealed class LunarBindTypeAttribute : Attribute
+    internal sealed class LunarBindTypeAttribute : Attribute
     {
         readonly string name;
         readonly bool newable;

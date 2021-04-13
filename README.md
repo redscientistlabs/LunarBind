@@ -197,37 +197,65 @@ class Program
 {
   static void Main(string[] args)
   {
-    GlobalScriptBindings.AddNewableType(typeof(ExampleClass));
-    GlobalScriptBindings.AddStaticType(typeof(ExampleStaticClass));
+    //Allows you to use the type name as a constructor (.__new()), 
+    //but you must prefix the type with GlobalScriptBindings.TypePrefix to use static methods and fields
+    GlobalScriptBindings.AddNewableType(typeof(ExampleClass1));
+
+    //Registers type as UserData and adds it to the script's Global table
+    GlobalScriptBindings.AddGlobalType(typeof(ExampleClass2));
+    GlobalScriptBindings.AddGlobalType(typeof(ExampleStaticClass));
+
     HookedScriptRunner runner = new HookedScriptRunner();
 
     runner.LoadScript(
       "function foo(exClassIn) " +
-      "  exClassIn.PrintMyNumber()" + 
-      "  ExampleClass(6).PrintMyNumber()" +
-      "  _ExampleStaticClass.MyNumber = 3" +
-      "  _ExampleStaticClass.StaticPrintMyNumber()" +
+      "  exClassIn.PrintMyNumber()" +
+      "  ExampleClass1(6).PrintMyNumber()" +       //Newing using newable syntax
+      "  print(_ExampleClass1.StaticVariable)" +   //Accessing newable statics 
+      "  ExampleClass2.__new(7).PrintMyNumber()" + //Newing using default Lua syntax
+      "  print(ExampleClass2.StaticVariable)" +    //Accessing default Lua syntax statics
+      "  ExampleStaticClass.MyNumber = 3" +
+      "  ExampleStaticClass.StaticPrintMyNumber()" +
       "end " +
       "RegisterHook(foo,'Foo')"
       );
 
-    runner.Execute("Foo", new ExampleClass(5));
+    runner.Execute("Foo", new ExampleClass1(5));
     Console.ReadKey();
   }
 }
 
-class ExampleClass
+class ExampleClass1
 {
+  public static readonly int StaticVariable = 1;
+
   public int MyNumber { get; private set; }
 
-  public ExampleClass(int myNumber)
+  public ExampleClass1(int myNumber)
   {
     MyNumber = myNumber;
   }
 
   public void PrintMyNumber()
   {
-    Console.WriteLine($"My Number is: {MyNumber}");
+    Console.WriteLine($"[Example Class 1] My Number is: {MyNumber}");
+  }
+}
+
+class ExampleClass2
+{
+  public static readonly int StaticVariable = 2;
+
+  public int MyNumber { get; private set; }
+
+  public ExampleClass2(int myNumber)
+  {
+    MyNumber = myNumber;
+  }
+
+  public void PrintMyNumber()
+  {
+    Console.WriteLine($"[Example Class 2] My Number is: {MyNumber}");
   }
 }
 
@@ -258,7 +286,7 @@ class Program
   static void Main(string[] args)
   {
     GlobalScriptBindings.AddTypes(typeof(Program));
-  //Register custom Yielder class
+    //Register custom Yielder class. all Yielder classes must be created with YielderTypeName() in Lua
     GlobalScriptBindings.AddYieldableType<MyYielder>();
 
     HookedScriptRunner runner = new HookedScriptRunner();
@@ -269,7 +297,7 @@ class Program
       "  print('Call '..tostring(r)..', yielding 1 calls with auto yielder')" +
       "  r = AutoYieldOneCall()" +
       "  print('Call '..tostring(r)..', yielding 3 calls with MyYielder')" +
-      "  r = coroutine.yield(MyYielder())" +
+      "  r = coroutine.yield(MyYielder())" + //Must be constructed like MyYielder()
       "  print('Call '..tostring(r)..', done. Coroutine is now dead')" +
       "  " +
       "end " +

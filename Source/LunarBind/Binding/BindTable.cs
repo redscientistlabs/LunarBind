@@ -8,9 +8,10 @@
     internal class BindTable : BindItem
     {
         //internal string
-        internal Dictionary<string, BindTable> callbackTables = new Dictionary<string, BindTable>();
-        internal Dictionary<string, BindFunc> callbackFunctions = new Dictionary<string, BindFunc>();
-        //internal Dictionary<string, BindEnum> boundEnums = new Dictionary<string, BindEnum>();
+        private readonly Dictionary<string, BindTable> bindTables = new Dictionary<string, BindTable>();
+        private readonly Dictionary<string, BindFunc> bindFunctions = new Dictionary<string, BindFunc>();
+        private readonly Dictionary<string, BindEnum> bindEnums = new Dictionary<string, BindEnum>();
+        //private readonly Dictionary<string, BindField> bindFields = new Dictionary<string, BindField>();
 
         public BindTable(string name)
         {
@@ -22,118 +23,137 @@
         //{
         //}
 
-        public void GenerateYieldableString()
+        public void GenerateWrappedYieldString()
         {
             StringBuilder sb = new StringBuilder();
-            GenYieldableString(sb);
+            GenYieldableStringRecursive(sb);
             YieldableString = sb.ToString();
-
-            //if (f.IsYieldable) { sb.AppendLine(f.YieldableString); }
         }
 
-        private void GenYieldableString(StringBuilder sb)
+        private void GenYieldableStringRecursive(StringBuilder sb)
         {
-            foreach (var f in callbackFunctions.Values)
+            foreach (var f in bindFunctions.Values)
             {
                 if (f.IsYieldable)
                 {
                     sb.Append(f.YieldableString);
                 }
             }
-            foreach (var t in callbackTables.Values)
+            foreach (var t in bindTables.Values)
             {
-                t.GenYieldableString(sb);
+                t.GenYieldableStringRecursive(sb);
             }
         }
 
-        internal void AddCallbackFunc(string[] path, int index, BindFunc func)
+        internal void AddBindFunc(string[] path, int index, BindFunc func)
         {
             if (index + 1 >= path.Length)
             {
                 //At lowest level, add callback func
-                if (callbackTables.ContainsKey(path[index]))
+                if (bindTables.ContainsKey(path[index]))
                 {
-                    throw new Exception($"Cannot add {string.Join(".",path)} ({func.Name}), a Table with that key exists");
+                    throw new Exception($"Cannot add {string.Join(".",path)} ({func.Name}), a Table with that key already exists");
                 }
-                else if (callbackFunctions.ContainsKey(path[index]))
+                else if (bindFunctions.ContainsKey(path[index]))
                 {
-                    throw new Exception($"Cannot add {string.Join(".", path)} ({func.Name}), a Function with that key exists");
+                    throw new Exception($"Cannot add {string.Join(".", path)} ({func.Name}), a Function with that key already exists");
                 }
-                callbackFunctions[path[index]] = func;
+                else if (bindEnums.ContainsKey(path[index]))
+                {
+                    throw new Exception($"Cannot add {string.Join(".", path)} ({func.Name}), an Enum with that key already exists");
+                }
+                bindFunctions[path[index]] = func;
             }
             else
             {
 
-                if (callbackFunctions.ContainsKey(path[index]))
+                if (bindFunctions.ContainsKey(path[index]))
                 {
                     throw new Exception($"Cannot add {string.Join(".", path)} ({func.Name}), a Function with the key ({path[index]}) exists in the path");
                 }
+                else if (bindEnums.ContainsKey(path[index]))
+                {
+                    throw new Exception($"Cannot add {string.Join(".", path)} ({func.Name}), an Enum with the key ({path[index]}) exists in the path");
+                }
 
                 BindTable nextTable;
-                if (callbackTables.TryGetValue(path[index], out nextTable))
+                if (bindTables.TryGetValue(path[index], out nextTable))
                 {
-                    nextTable.AddCallbackFunc(path, index + 1, func);
+                    nextTable.AddBindFunc(path, index + 1, func);
                 }
                 else
                 {
                     nextTable = new BindTable(path[index]);
-                    callbackTables.Add(path[index], nextTable);
-                    nextTable.AddCallbackFunc(path, index + 1, func);
+                    bindTables.Add(path[index], nextTable);
+                    nextTable.AddBindFunc(path, index + 1, func);
                 }
             }
         }
 
-        //internal void AddBindEnum(string[] path, int index, List<KeyValuePair<string,int>> keyValuePairs)
-        //{
-        //    if (index + 1 >= path.Length)
-        //    {
-        //        //At lowest level, add enum
-        //        if (callbackTables.ContainsKey(path[index]))
-        //        {
-        //            throw new Exception($"Cannot add {string.Join(".", path)} ({func.Name}), a Table with that key exists");
-        //        }
-        //        else if (callbackFunctions.ContainsKey(path[index]))
-        //        {
-        //            throw new Exception($"Cannot add {string.Join(".", path)} ({func.Name}), a Function with that key exists");
-        //        }
-        //        callbackFunctions[path[index]] = func;
-        //    }
-        //    else
-        //    {
+        
+        internal void AddBindEnum(string[] path, int index, BindEnum bindEnum)
+        {
+            if (index + 1 >= path.Length)
+            {
+                //At lowest level, add enum
+                if (bindTables.ContainsKey(path[index]))
+                {
+                    throw new Exception($"Cannot add {string.Join(".", path)} ({bindEnum.Name}), a Table with that key already exists");
+                }
+                else if (bindFunctions.ContainsKey(path[index]))
+                {
+                    throw new Exception($"Cannot add {string.Join(".", path)} ({bindEnum.Name}), a Function with that key already exists");
+                }
+                else if (bindEnums.ContainsKey(path[index]))
+                {
+                    throw new Exception($"Cannot add {string.Join(".", path)} ({bindEnum.Name}), an Enum with that key already exists");
+                }
+                bindEnums[path[index]] = bindEnum;
+            }
+            else
+            {
+                if (bindFunctions.ContainsKey(path[index]))
+                {
+                    throw new Exception($"Cannot add {string.Join(".", path)} ({bindEnum.Name}), a Function with the key ({path[index]}) exists in the path");
+                }
+                else if (bindEnums.ContainsKey(path[index]))
+                {
+                    throw new Exception($"Cannot add {string.Join(".", path)} ({bindEnum.Name}), an Enum with the key ({path[index]}) exists in the path");
+                }
 
-        //        if (callbackFunctions.ContainsKey(path[index]))
-        //        {
-        //            throw new Exception($"Cannot add {string.Join(".", path)} ({func.Name}), a Function with the key ({path[index]}) exists in the path");
-        //        }
-
-        //        BindTable nextTable;
-        //        if (callbackTables.TryGetValue(path[index], out nextTable))
-        //        {
-        //            nextTable.AddCallbackFunc(path, index + 1, func);
-        //        }
-        //        else
-        //        {
-        //            nextTable = new BindTable(path[index]);
-        //            callbackTables.Add(path[index], nextTable);
-        //            nextTable.AddCallbackFunc(path, index + 1, func);
-        //        }
-        //    }
-        //}
-
+                BindTable nextTable;
+                if (bindTables.TryGetValue(path[index], out nextTable))
+                {
+                    nextTable.AddBindEnum(path, index + 1, bindEnum);
+                }
+                else
+                {
+                    //Create new table
+                    nextTable = new BindTable(path[index]);
+                    bindTables.Add(path[index], nextTable);
+                    nextTable.AddBindEnum(path, index + 1, bindEnum);
+                }
+            }
+        }
 
         private Table GenerateTable(Script script)
         {
             Table table = new Table(script);
 
             //Tables
-            foreach (var t in callbackTables.Values)
+            foreach (var t in bindTables.Values)
             {
                 table[t.Name] = t.GenerateTable(script);
             }
-            //Names
-            foreach (var f in callbackFunctions.Values)
+            //Functions
+            foreach (var f in bindFunctions.Values)
             {
                 table[f.Name] = DynValue.FromObject(script, f.Callback);
+            }
+            //Enums
+            foreach (var e in bindEnums.Values)
+            {
+                table[e.Name] = e.CreateEnumTable(script);
             }
 
             return table;
@@ -144,6 +164,5 @@
             script.Globals[Name] = GenerateTable(script);
             if (!string.IsNullOrWhiteSpace(YieldableString)) { script.DoString(YieldableString); }
         }
-       
     }
 }

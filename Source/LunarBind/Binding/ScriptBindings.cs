@@ -62,6 +62,31 @@
             AddDelegates(dels);
         }
 
+        /// <summary>
+        /// Allows you to access static functions and members on the type by using the Lua global with the name<para/>
+        /// Equivalent to script.Globals[t.Name] = t
+        /// </summary>
+        /// <param name="t"></param>
+        public void AddGlobalType(Type t)
+        {
+            RegisterUserDataType(t);
+            staticTypes[t.Name] = t;
+        }
+
+        /// <summary>
+        /// Allows you to access static functions and members on the type by using the Lua global with the name<para/>
+        /// <para/>
+        /// Equivalent to script.Globals[name] = t
+        /// </summary>
+        /// <param name="name"></param>
+        /// <param name="t"></param>
+        public void AddGlobalType(string name, Type t)
+        {
+            RegisterUserDataType(t);
+            staticTypes[name] = t;
+        }
+
+
         public void AddTypes(params Type[] types)
         {
             foreach (var type in types)
@@ -103,7 +128,7 @@
         /// <param name="example"></param>
         public void AddAction(string name, Action action, string documentation = "", string example = "")
         {
-            BindingHelpers.CreateCallbackItem(callbackItems, name, action, documentation ?? "", example ?? "");
+            BindingHelpers.CreateBindFunction(callbackItems, name, action, documentation ?? "", example ?? "");
             //callbackItems[name] = new CallbackFunc(name, action, documentation, example);
         }
         /// <summary>
@@ -114,7 +139,7 @@
         /// <param name="example"></param>
         public void AddAction(Action action, string documentation = "", string example = "")
         {
-            BindingHelpers.CreateCallbackItem(callbackItems, action.Method.Name, action, documentation ?? "", example ?? "");
+            BindingHelpers.CreateBindFunction(callbackItems, action.Method.Name, action, documentation ?? "", example ?? "");
             //callbackItems[action.Method.Name] = new CallbackFunc(action.Method.Name, action, documentation, example);
         }
 
@@ -126,7 +151,7 @@
         {
             foreach (var action in actions)
             {
-                BindingHelpers.CreateCallbackItem(callbackItems, action.Method.Name, action, "", "");
+                BindingHelpers.CreateBindFunction(callbackItems, action.Method.Name, action, "", "");
                 //callbackItems[action.Method.Name] = new CallbackFunc(action.Method.Name, action);
             }
         }
@@ -140,7 +165,7 @@
         /// <param name="example"></param>
         public void AddDelegate(string name, Delegate del, string documentation = "", string example = "")
         {
-            BindingHelpers.CreateCallbackItem(callbackItems, name, del, documentation ?? "", example ?? "");
+            BindingHelpers.CreateBindFunction(callbackItems, name, del, documentation ?? "", example ?? "");
             //callbackItems[name] = new CallbackFunc(name, del, documentation, example);
         }
 
@@ -153,7 +178,7 @@
         /// <param name="example"></param>
         public void AddDelegate(Delegate del, string documentation = "", string example = "")
         {
-            BindingHelpers.CreateCallbackItem(callbackItems, del.Method.Name, del, documentation ?? "", example ?? "");
+            BindingHelpers.CreateBindFunction(callbackItems, del.Method.Name, del, documentation ?? "", example ?? "");
             //callbackItems[del.Method.Name] = new CallbackFunc(del.Method.Name, del, documentation, example);
         }
 
@@ -168,7 +193,7 @@
         {
             foreach (var del in dels)
             {
-                BindingHelpers.CreateCallbackItem(callbackItems, del.Method.Name, del, "", "");
+                BindingHelpers.CreateBindFunction(callbackItems, del.Method.Name, del, "", "");
                 //callbackItems[del.Method.Name] = new CallbackFunc(del.Method.Name, del);
             }
         }
@@ -251,7 +276,7 @@
                     var example = (LunarBindExampleAttribute)Attribute.GetCustomAttribute(mi, typeof(LunarBindExampleAttribute));
                     var del = BindingHelpers.CreateDelegate(mi, target);
                     string name = attr.Name ?? mi.Name;
-                    BindingHelpers.CreateCallbackItem(callbackItems, name, del, documentation?.Data ?? "", example?.Data ?? "");
+                    BindingHelpers.CreateBindFunction(callbackItems, name, del, documentation?.Data ?? "", example?.Data ?? "");
                     //callbackItems[name] = new CallbackFunc(name, del, documentation?.Data ?? "", example?.Data ?? "");
                 }
             }
@@ -269,7 +294,7 @@
                     var example = (LunarBindExampleAttribute)Attribute.GetCustomAttribute(mi, typeof(LunarBindExampleAttribute));
                     var del = BindingHelpers.CreateDelegate(mi);
                     string name = attr.Name ?? mi.Name;
-                    BindingHelpers.CreateCallbackItem(callbackItems, name, del, documentation?.Data ?? "", example?.Data ?? "");
+                    BindingHelpers.CreateBindFunction(callbackItems, name, del, documentation?.Data ?? "", example?.Data ?? "");
                     //callbackItems[name] = new CallbackFunc(name, del, documentation?.Data ?? "", example?.Data ?? "");
                 }
             }
@@ -293,7 +318,7 @@
         {
             if (name == null) { name = typeof(T).Name; }
             RegisterUserDataType(typeof(T));
-            yieldableTypes[GlobalScriptBindings.TYPE_PREFIX + name] = typeof(T);
+            yieldableTypes[GlobalScriptBindings.TypePrefix + name] = typeof(T);
             BakeYieldables();
         }
 
@@ -305,20 +330,20 @@
         public void AddNewableType(string name, Type t)
         {
             RegisterUserDataType(t);
-            newableTypes[GlobalScriptBindings.TYPE_PREFIX + name] = t;
+            newableTypes[GlobalScriptBindings.TypePrefix + name] = t;
             BakeNewables();
         }
 
         public void AddNewableType(Type t)
         {
             RegisterUserDataType(t);
-            newableTypes[GlobalScriptBindings.TYPE_PREFIX + t.Name] = t;
+            newableTypes[GlobalScriptBindings.TypePrefix + t.Name] = t;
             BakeNewables();
         }
 
         public void RemoveNewableType(string name)
         {
-            newableTypes.Remove(GlobalScriptBindings.TYPE_PREFIX + name);
+            newableTypes.Remove(GlobalScriptBindings.TypePrefix + name);
             BakeNewables();
         }
 
@@ -329,7 +354,7 @@
         public void RegisterStaticType(Type t)
         {
             RegisterUserDataType(t);
-            staticTypes[GlobalScriptBindings.TYPE_PREFIX + t.Name] = t;
+            staticTypes[GlobalScriptBindings.TypePrefix + t.Name] = t;
         }
 
 
@@ -364,7 +389,7 @@
             foreach (var type in source)
             {
                 string typeName = type.Key;
-                string newFuncName = type.Key.Remove(0, GlobalScriptBindings.TYPE_PREFIX.Length);
+                string newFuncName = type.Key.Remove(0, GlobalScriptBindings.TypePrefix.Length);
                 HashSet<int> paramCounts = new HashSet<int>();
                 var ctors = type.Value.GetConstructors();
                 foreach (var ctor in ctors)

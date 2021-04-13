@@ -11,16 +11,19 @@
 
     //TODO: Make GlobalScriptBindings contain and reference a static ScriptBindings to reduce code duplication and improve maintainability
     //TODO: automatic and manual hooking for enums (everywhere) and newable types (in assembly)
+    //TODO: 
     public static class GlobalScriptBindings
     {
         //Todo: decide on standards for added syntax
-        public const string TYPE_PREFIX = "_";
+        public static string TypePrefix { get; set; } = "_";
 
         //private static Dictionary<string, CallbackFunc> callbackFunctions = new Dictionary<string,CallbackFunc>();
         private static readonly Dictionary<string, BindItem> callbackItems = new Dictionary<string, BindItem>();
         private static readonly Dictionary<string, Type> yieldableTypes = new Dictionary<string, Type>();
         private static readonly Dictionary<string, Type> newableTypes = new Dictionary<string, Type>();
         private static readonly Dictionary<string, Type> staticTypes = new Dictionary<string, Type>();
+        //private static readonly Dictionary<string, Type> staticTypes = new Dictionary<string, Type>();
+        //private static readonly Dictionary<string, object> globals = new Dictionary<string, object>();
 
         private static string bakedTypeString = null;
         private static string bakedYieldableTypeString = null;
@@ -50,49 +53,63 @@
         {
             if (name == null) { name = typeof(T).Name; }
             RegisterUserDataType(typeof(T));
-            yieldableTypes[TYPE_PREFIX + name] = typeof(T);
+            yieldableTypes[TypePrefix + name] = typeof(T);
             BakeYieldables();
         }
 
         /// <summary>
-        /// Also allows you to access static functions on the type by using _TypeName
+        /// Allows you to use the type's name as the constructor, however to access static members and functions you must add <see cref="TypePrefix"/> before the name in scripts
         /// </summary>
         /// <param name="name"></param>
         /// <param name="t"></param>
         public static void AddNewableType(string name, Type t)
         {
             RegisterUserDataType(t);
-            newableTypes[TYPE_PREFIX + name] = t;
+            newableTypes[TypePrefix + name] = t;
             BakeNewables();
         }
 
         public static void AddNewableType(Type t)
         {
             RegisterUserDataType(t);
-            newableTypes[TYPE_PREFIX + t.Name] = t;
+            newableTypes[TypePrefix + t.Name] = t;
             BakeNewables();
         }
 
-        public static void RemoveNewableType(string name)
+        public static void RemoveNewableType(string name, bool withPrefix = true)
         {
-            newableTypes.Remove(TYPE_PREFIX + name);
+            newableTypes.Remove((withPrefix ? TypePrefix : "") + name);
             BakeNewables();
         }
 
         /// <summary>
-        /// Allows you to access static functions on the type by using _TypeName
+        /// Allows you to access static functions and members on the type by using the Lua global with the name<para/>
+        /// Equivalent to script.Globals[t.Name] = t
         /// </summary>
         /// <param name="t"></param>
-        public static void AddStaticType(Type t)
+        public static void AddGlobalType(Type t)
         {
             RegisterUserDataType(t);
-            staticTypes[TYPE_PREFIX + t.Name] = t;
+            staticTypes[t.Name] = t;
+        }
+
+        /// <summary>
+        /// Allows you to access static functions and members on the type by using the Lua global with the name<para/>
+        /// <para/>
+        /// Equivalent to script.Globals[name] = t
+        /// </summary>
+        /// <param name="name"></param>
+        /// <param name="t"></param>
+        public static void AddGlobalType(string name, Type t)
+        {
+            RegisterUserDataType(t);
+            staticTypes[name] = t;
         }
 
         /// <summary>
         /// Call this to register all the callback functions in all assemblies in the current app domain. Not recommended.
         /// </summary>
-        public static void HookAllAssemblies()
+        public static void AddAllAssemblies()
         {
             var assemblies = AppDomain.CurrentDomain.GetAssemblies();
             foreach (var assembly in assemblies)
@@ -114,6 +131,8 @@
             }
         }
 
+
+        //TODO: rename to differentiate from the AddStaticType, etc
         /// <summary>
         /// Automatically register all the static functions with the <see cref="LunarBindFunctionAttribute"/> for specific types
         /// </summary>
@@ -179,7 +198,7 @@
                     var example = (LunarBindExampleAttribute)Attribute.GetCustomAttribute(mi, typeof(LunarBindExampleAttribute));
                     var del = BindingHelpers.CreateDelegate(mi);
                     string name = attr.Name ?? mi.Name;
-                    BindingHelpers.CreateCallbackItem(callbackItems, name, del, documentation?.Data ?? "", example?.Data ?? "");
+                    BindingHelpers.CreateBindFunction(callbackItems, name, del, documentation?.Data ?? "", example?.Data ?? "");
                     //callbackItems[name] = new CallbackFunc(name, del, documentation?.Data ?? "", example?.Data ?? "");
                 }
             }           
@@ -215,7 +234,7 @@
         /// <param name="example"></param>
         public static void AddAction(string name, Action action, string documentation = "", string example = "")
         {
-            BindingHelpers.CreateCallbackItem(callbackItems, name, action, documentation ?? "", example ?? "");
+            BindingHelpers.CreateBindFunction(callbackItems, name, action, documentation ?? "", example ?? "");
         }
         /// <summary>
         /// Add a specific <see cref="Action"/> to the bindings, using the method's Name as the name
@@ -225,7 +244,7 @@
         /// <param name="example"></param>
         public static void AddAction(Action action, string documentation = "", string example = "")
         {
-            BindingHelpers.CreateCallbackItem(callbackItems, action.Method.Name, action, documentation ?? "", example ?? "");
+            BindingHelpers.CreateBindFunction(callbackItems, action.Method.Name, action, documentation ?? "", example ?? "");
             //callbackItems[action.Method.Name] = new CallbackFunc(action.Method.Name, action, documentation, example);
         }
 
@@ -237,7 +256,7 @@
         {
             foreach (var action in actions)
             {
-                BindingHelpers.CreateCallbackItem(callbackItems, action.Method.Name, action, "", "");
+                BindingHelpers.CreateBindFunction(callbackItems, action.Method.Name, action, "", "");
                 //callbackItems[action.Method.Name] = new CallbackFunc(action.Method.Name, action);
             }
         }
@@ -251,7 +270,7 @@
         /// <param name="example"></param>
         public static void AddDelegate(string name, Delegate del, string documentation = "", string example = "")
         {
-            BindingHelpers.CreateCallbackItem(callbackItems, name, del, documentation ?? "", example ?? "");
+            BindingHelpers.CreateBindFunction(callbackItems, name, del, documentation ?? "", example ?? "");
             //callbackItems[name] = new CallbackFunc(name, del, documentation, example);
         }
 
@@ -264,7 +283,7 @@
         /// <param name="example"></param>
         public static void AddDelegate(Delegate del, string documentation = "", string example = "")
         {
-            BindingHelpers.CreateCallbackItem(callbackItems, del.Method.Name, del, documentation ?? "", example ?? "");
+            BindingHelpers.CreateBindFunction(callbackItems, del.Method.Name, del, documentation ?? "", example ?? "");
             //callbackItems[del.Method.Name] = new CallbackFunc(del.Method.Name, del, documentation, example);
         }
 
@@ -279,7 +298,7 @@
         {
             foreach (var del in dels)
             {
-                BindingHelpers.CreateCallbackItem(callbackItems, del.Method.Name, del, "", "");
+                BindingHelpers.CreateBindFunction(callbackItems, del.Method.Name, del, "", "");
                 //callbackItems[del.Method.Name] = new CallbackFunc(del.Method.Name, del);
             }
         }
@@ -341,9 +360,9 @@
             foreach (var type in source)
             {
                 string typeName = type.Key;
-                string newFuncName = type.Key.Remove(0, TYPE_PREFIX.Length);
+                string newFuncName = type.Key.Remove(0, TypePrefix.Length);
                 HashSet<int> paramCounts = new HashSet<int>();
-                var ctors = type.Value.GetConstructors();
+                var ctors = type.Value.GetConstructors().Where(x => !x.CustomAttributes.Any(y => y.AttributeType == typeof(MoonSharp.Interpreter.MoonSharpHiddenAttribute)));
                 foreach (var ctor in ctors)
                 {
                     var pars = ctor.GetParameters();

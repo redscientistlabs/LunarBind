@@ -40,7 +40,7 @@
         /// </summary>
         /// <param name="dict"></param>
         /// <param name="pathString"></param>
-        public static void CreateCallbackItem(Dictionary<string, BindItem> dict, string pathString, Delegate callback, string documentation, string example)
+        internal static void CreateBindFunction(Dictionary<string, BindItem> dict, string pathString, Delegate callback, string documentation, string example)
         {
             if (string.IsNullOrWhiteSpace(pathString))
             {
@@ -56,7 +56,7 @@
                 //Simple global function
                 if (dict.ContainsKey(root))
                 {
-                    throw new Exception($"Cannot add {pathString} ({callback.Method.Name}), a {(dict[root].GetType() == typeof(BindFunc) ? "Function" : "Table" )} with that key already exists");
+                    throw new Exception($"Cannot add {pathString} ({callback.Method.Name}), a {(dict[root] is BindFunc ? "Function" : (dict[root] is BindEnum ? "Enum" : "Table"))} with that key already exists");
                 }
                 dict[root] = func;
             }
@@ -67,8 +67,8 @@
                 {
                     if(item is BindTable t)
                     {
-                        t.AddCallbackFunc(path, 1, func);
-                        t.GenerateYieldableString(); //Bake the yieldable string
+                        t.AddBindFunc(path, 1, func);
+                        t.GenerateWrappedYieldString(); //Bake the yieldable string
                     }
                     else
                     {
@@ -77,11 +77,60 @@
                 }
                 else
                 {
-                    //Create new
+                    //Create new table
                     BindTable t = new BindTable(root);
                     dict[root] = t;
-                    t.AddCallbackFunc(path, 1, func);
-                    t.GenerateYieldableString(); //Bake the yieldable string
+                    t.AddBindFunc(path, 1, func);
+                    t.GenerateWrappedYieldString(); //Bake the yieldable string
+                }
+            }
+        }
+
+        /// <summary>
+        /// Automatically create tables, etc for bind enums
+        /// </summary>
+        /// <param name="dict"></param>
+        /// <param name="pathString"></param>
+        internal static void CreateBindEnum(Dictionary<string, BindItem> dict, string pathString, Type enumType)
+        {
+            if (string.IsNullOrWhiteSpace(pathString))
+            {
+                throw new Exception($"Path cannot be null, empty, or whitespace for path [{pathString}] Enum Type: ({enumType.Name})");
+            }
+            var path = pathString.Split('.');
+
+            string root = path[0];
+            BindEnum bindEnum = new BindEnum(path[path.Length - 1], enumType);
+
+            if (path.Length == 1)
+            {
+                //Simple global function
+                if (dict.ContainsKey(root))
+                {
+                    throw new Exception($"Cannot add {pathString} ({enumType.Name}), a {(dict[root] is BindFunc ? "Function" : (dict[root] is BindEnum ? "Enum" : "Table"))} with that key already exists");
+                }
+                dict[root] = bindEnum;
+            }
+            else
+            {
+                //Recursion time
+                if (dict.TryGetValue(root, out BindItem item))
+                {
+                    if (item is BindTable t)
+                    {
+                        t.AddBindEnum(path, 1, bindEnum);
+                    }
+                    else
+                    {
+                        throw new Exception($"Cannot add {pathString} ({enumType.Name}), The root key is a {(dict[root] is BindFunc ? "Function" : (dict[root] is BindEnum ? "Enum" : "Table"))}");
+                    }
+                }
+                else
+                {
+                    //Create new table
+                    BindTable t = new BindTable(root);
+                    dict[root] = t;
+                    t.AddBindEnum(path, 1, bindEnum);
                 }
             }
         }
