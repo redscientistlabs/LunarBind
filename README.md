@@ -4,9 +4,6 @@ Extended Coroutine functionality is also added, including custom Yielders which 
 
 Library is currently under development.<br/>
 Readme also under development, may have errors in examples.<br/>
-All ScriptRunners currently have MoonSharp sandboxed (CoreModules.Preset_HardSandbox | CoreModules.Coroutine | CoreModules.OS_Time)
-<br/>
-Sandboxing options will be added at a later date
 <h2>Quick Start</h2>
 
 <h3>The Basics</h3>
