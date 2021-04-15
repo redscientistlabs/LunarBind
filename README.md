@@ -181,9 +181,9 @@ class ExampleClass
 }
 ```
 <h3>Registering and Using Types</h3>
-Creating new instances of registered types has been simplified (an option to use original "._new()" syntax will be added)
+Creating new instances of registered types has been made more friendly to programmers (you can still use original "._new()" syntax)
 <br/>
-Accessing a type's static functions and variables currently requires appending "_" to the type name
+Accessing a type's static functions and variables requires indexing the "new" table with the name you registered
 <br/>
 Use MoonSharp's [UserData](https://www.moonsharp.org/objects.html) attributes to hide functions and members 
 
@@ -195,10 +195,10 @@ class Program
 {
   static void Main(string[] args)
   {
-    //Allows you to use the type name as a constructor (.__new()), 
-    //but you must prefix the type with GlobalScriptBindings.TypePrefix to use static methods and fields
+    //Registers type as UserData and adds it to the script's Global table and "new" table
+    //Allows you to use new.TypeName() as a constructor (TypeName.__new()), with all available public constructors on the type
     GlobalScriptBindings.AddNewableType(typeof(ExampleClass1));
-
+    
     //Registers type as UserData and adds it to the script's Global table
     GlobalScriptBindings.AddGlobalType(typeof(ExampleClass2));
     GlobalScriptBindings.AddGlobalType(typeof(ExampleStaticClass));
@@ -208,8 +208,8 @@ class Program
     runner.LoadScript(
       "function foo(exClassIn) " +
       "  exClassIn.PrintMyNumber()" +
-      "  ExampleClass1(6).PrintMyNumber()" +       //Newing using newable syntax
-      "  print(_ExampleClass1.StaticVariable)" +   //Accessing newable statics 
+      "  new.ExampleClass1(6).PrintMyNumber()" +       //Newing using newable syntax
+      "  print(ExampleClass1.StaticVariable)" +   //Accessing newable statics 
       "  ExampleClass2.__new(7).PrintMyNumber()" + //Newing using default Lua syntax
       "  print(ExampleClass2.StaticVariable)" +    //Accessing default Lua syntax statics
       "  ExampleStaticClass.MyNumber = 3" +
@@ -263,7 +263,7 @@ static class ExampleStaticClass
 
   public static void StaticPrintMyNumber()
   {
-    Console.WriteLine($"My Static Number is: {MyNumber}");
+    Console.WriteLine($"My Static Class Number is: {MyNumber}");
   }
 }
 ```
@@ -284,30 +284,29 @@ class Program
   static void Main(string[] args)
   {
     GlobalScriptBindings.AddTypes(typeof(Program));
-    //Register custom Yielder class. all Yielder classes must be created with YielderTypeName() in Lua
+    //Register custom Yielder class. all Yielder classes are also registered as newables
     GlobalScriptBindings.AddYieldableType<MyYielder>();
 
     HookedScriptRunner runner = new HookedScriptRunner();
     string script =
-      "function foo(callNumber) " +
-      "  print('Call '..tostring(callNumber)..', yielding 0 calls with WaitFrames')" +
-      "  local r = coroutine.yield(WaitFrames(0))" +
-      "  print('Call '..tostring(r)..', yielding 1 calls with auto yielder')" +
-      "  r = AutoYieldOneCall()" +
-      "  print('Call '..tostring(r)..', yielding 3 calls with MyYielder')" +
-      "  r = coroutine.yield(MyYielder())" + //Must be constructed like MyYielder()
-      "  print('Call '..tostring(r)..', done. Coroutine is now dead')" +
+      "function foo() " +
+      "  print('yielding 0 calls with WaitFrames')" +
+      "  coroutine.yield(new.WaitFrames(0))" +
+      "  print('yielding 1 calls with auto yielder')" +
+      "  AutoYieldOneCall()" +
+      "  print('yielding 3 calls with MyYielder')" +
+      "  r = coroutine.yield(new.MyYielder())" + //Can be constructed as new.MyYielder() or MyYielder.__new()
+      "  print('done. Coroutine is now dead')" +
       "  " +
       "end " +
       "RegisterCoroutine(foo,'FooCoroutine')"; //RegisterCoroutine instead of RegisterHook
 
     Console.WriteLine("====================== Coroutine ======================");
-    runner.LoadScript(script);    
+    runner.LoadScript(script);
     for (int i = 0; i < 10; i++)
     {
-      Console.WriteLine();
       Console.WriteLine($"[C#: Call {i + 1}]");
-      runner.Execute("FooCoroutine", (i+1));
+      runner.Execute("FooCoroutine");
     }
 
     Console.WriteLine();
@@ -316,9 +315,22 @@ class Program
     runner.LoadScript(script);
     for (int i = 0; i < 10; i++)
     {
-      Console.WriteLine();
       Console.WriteLine($"[C#: Call {i + 1}]");
-      runner.ExecuteWithCallback("FooCoroutine", () => { i = 10; Console.WriteLine("Callback On Done, exiting loop"); },  (i + 1));
+      runner.ExecuteWithCallback("FooCoroutine", () => { i = 10; Console.WriteLine("Callback On Done, exiting loop"); });
+    }
+    Console.WriteLine();
+    Console.WriteLine("====================== Coroutine State Check ======================");
+    //Useful if you want to run the coroutine once
+    //Reload the script
+    //runner.LoadScript(script);
+    var func = runner.GetFunction("FooCoroutine");
+    func.ResetCoroutine();
+    var state = func.CoroutineState;
+    int call = 1;
+    while(state != MoonSharp.Interpreter.CoroutineState.Dead)
+    {
+      Console.WriteLine($"[C#: Call {call++}]");
+      state = func.ExecuteAsCoroutine();
     }
 
     Console.ReadKey();
@@ -394,22 +406,22 @@ class MyMonoBehaviour : MonoBehaviour
     
     HookedScriptRunner runner = new HookedScriptRunner();
     string script =
-      "function foo(callNumber) " +
-      "  print('Call '..tostring(callNumber)..', yielding 0 calls with WaitFrames')" +
-      "  local r = coroutine.yield(WaitFrames(0))" +
-      "  print('Call '..tostring(r)..', yielding 1 calls with auto yielder')" +
-      "  r = AutoYieldOneCall()" +
-      "  print('Call '..tostring(r)..', yielding 3 calls with MyYielder')" +
-      "  r = coroutine.yield(MyYielder())" +
-      "  print('Call '..tostring(r)..', done. Coroutine is now dead')" +
+      "function foo() " +
+      "  print('yielding 0 calls with WaitFrames')" +
+      "  local r = coroutine.yield(new.WaitFrames(0))" +
+      "  print('yielding 1 calls with auto yielder')" +
+      "  AutoYieldOneCall()" +
+      "  print('yielding 3 calls with MyYielder')" +
+      "  coroutine.yield(MyYielder())" +
+      "  print('done. Coroutine is now dead')" +
       "  " +
       "end " +
       "RegisterCoroutine(foo,'FooCoroutine')"; //RegisterCoroutine instead of RegisterHook
     runner.LoadScript(script);
     
     var func = runner.GetFunction("FooCoroutine");
-    StartCoroutine(func.AsUnityCoroutine(3));
-    StartCoroutine(runner.CreateUnityCoroutine("FooCoroutine", 3));
+    StartCoroutine(func.AsUnityCoroutine());
+    StartCoroutine(runner.CreateUnityCoroutine("FooCoroutine"));
     }
     
     [LunarBindFunction("AutoYieldOneCall")]

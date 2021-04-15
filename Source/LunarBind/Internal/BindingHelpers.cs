@@ -56,7 +56,7 @@
                 //Simple global function
                 if (dict.ContainsKey(root))
                 {
-                    throw new Exception($"Cannot add {pathString} ({callback.Method.Name}), a {(dict[root] is BindFunc ? "Function" : (dict[root] is BindEnum ? "Enum" : "Table"))} with that key already exists");
+                    throw new Exception($"Cannot add {pathString} ({callback.Method.Name}), a {GetItemTypeStr(dict[root])} with that key already exists");
                 }
                 dict[root] = func;
             }
@@ -87,6 +87,55 @@
         }
 
         /// <summary>
+        /// Automatically create tables, etc
+        /// </summary>
+        /// <param name="dict"></param>
+        /// <param name="pathString"></param>
+        internal static void CreateBindUserObject(Dictionary<string, BindItem> dict, string pathString, object obj)
+        {
+            if (string.IsNullOrWhiteSpace(pathString))
+            {
+                throw new Exception($"Path cannot be null, empty, or whitespace for path [{pathString}]");
+            }
+            var path = pathString.Split('.');
+            string root = path[0];
+            BindUserObject bindObj = new BindUserObject(path[path.Length - 1], obj);
+
+            if (path.Length == 1)
+            {
+                //Simple global function
+                if (dict.ContainsKey(root))
+                {
+                    throw new Exception($"Cannot add {pathString} (global object), a {GetItemTypeStr(dict[root])} with that key already exists");
+                }
+                dict[root] = bindObj;
+            }
+            else
+            {
+                //Recursion time
+                if (dict.TryGetValue(root, out BindItem item))
+                {
+                    if (item is BindTable t)
+                    {
+                        t.AddBindUserObject(path, 1, bindObj);
+                        t.GenerateWrappedYieldString(); //Bake the yieldable string
+                    }
+                    else
+                    {
+                        throw new Exception($"Cannot add {pathString} (global object), One or more keys in the path is already assigned to an item");
+                    }
+                }
+                else
+                {
+                    //Create new table
+                    BindTable t = new BindTable(root);
+                    dict[root] = t;
+                    t.AddBindUserObject(path, 1, bindObj);
+                }
+            }
+        }
+
+        /// <summary>
         /// Automatically create tables, etc for bind enums
         /// </summary>
         /// <param name="dict"></param>
@@ -107,7 +156,7 @@
                 //Simple global function
                 if (dict.ContainsKey(root))
                 {
-                    throw new Exception($"Cannot add {pathString} ({enumType.Name}), a {(dict[root] is BindFunc ? "Function" : (dict[root] is BindEnum ? "Enum" : "Table"))} with that key already exists");
+                    throw new Exception($"Cannot add {pathString} ({enumType.Name}), a {GetItemTypeStr(dict[root])} with that key already exists");
                 }
                 dict[root] = bindEnum;
             }
@@ -122,7 +171,7 @@
                     }
                     else
                     {
-                        throw new Exception($"Cannot add {pathString} ({enumType.Name}), The root key is a {(dict[root] is BindFunc ? "Function" : (dict[root] is BindEnum ? "Enum" : "Table"))}");
+                        throw new Exception($"Cannot add {pathString} ({enumType.Name}), The root key is a {GetItemTypeStr(dict[root])}");
                     }
                 }
                 else
@@ -133,6 +182,12 @@
                     t.AddBindEnum(path, 1, bindEnum);
                 }
             }
+        }
+
+
+        private static string GetItemTypeStr(BindItem item)
+        {
+            return (item is BindFunc ? "Function" : (item is BindEnum ? "Enum" : (item is BindUserObject ? "Global Object" : "Table")));
         }
 
 

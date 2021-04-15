@@ -31,7 +31,7 @@
             YieldableString = "";
         }
 
-        public void GenerateYieldableString(string path = null)
+        public void GenerateYieldableString(string path)
         {
             string argString = "";
 

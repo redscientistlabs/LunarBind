@@ -17,9 +17,9 @@ namespace LuaGUI
     public partial class Form1 : Form
     {
         //Console show stuff
-        [DllImport("kernel32.dll", SetLastError = true)]
-        [return: MarshalAs(UnmanagedType.Bool)]
-        static extern bool AllocConsole();
+        //[DllImport("kernel32.dll", SetLastError = true)]
+        //[return: MarshalAs(UnmanagedType.Bool)]
+        //static extern bool AllocConsole();
 
         HookedScriptRunner testScriptRunner = null;
 
@@ -46,7 +46,7 @@ namespace LuaGUI
 
         private void Form1_Load(object sender, EventArgs e)
         {
-            AllocConsole();
+            //AllocConsole();
             Console.WriteLine("Is 64 bit process: " + Environment.Is64BitProcess.ToString());
             //Basic runner test
             basicRunner = new BasicScriptRunner((Action<string>)PrintPlusA);
@@ -163,42 +163,49 @@ namespace LuaGUI
         private void bTest0_Click(object sender, EventArgs e)
         {
 
-            string s = "function A() Test.MyTables.PrintPlusA('one', 'two') end " +
-                            "function B(l,m)" +
-                            "print(l) " +
-                            "print(m) " +
-                            "coroutine.yield() " +
-                            "print(l+1) " +
-                            "coroutine.yield() " +
-                            "print(m+1) " +
-                            "end " +
-                            "RegisterCoroutine(A, 'A', true) " +
-                            "RegisterCoroutine(B, 'B', true) " +
-                            "";
+            //string s = "function A() Test.MyTables.PrintPlusA('one', 'two') end " +
+            //                "function B(l,m)" +
+            //                "print(l) " +
+            //                "print(m) " +
+            //                "coroutine.yield() " +
+            //                "print(l+1) " +
+            //                "coroutine.yield() " +
+            //                "print(m+1) " +
+            //                "end " +
+            //                "RegisterCoroutine(A, 'A', true) " +
+            //                "RegisterCoroutine(B, 'B', true) " +
+            //                "";
 
-            string s2 =     " function() " +
-                            "print(4)" +
-                            "coroutine.yield()" +
-                            "print(5)" +
-                            "coroutine.yield()" +
-                            "print(6)" +
-                            "end ";
-            
+            string s2 =     
+                "function() " +
+                " print(new.TestClass().Inst) " +
+                " print(TestClass.Stat)" +
+                " return MyEnums.Greetings.Hello " +
+                "end";
 
 
-            bool isCoroutine = true;
-            bool autoResetCoroutine = true;
-            LuaScriptStandard standard = new LuaScriptStandard(
-                new LuaFuncStandard("A", LuaFuncType.AutoCoroutine | LuaFuncType.AllowAny),
-                new LuaFuncStandard("B", LuaFuncType.AutoCoroutine | LuaFuncType.AllowAnyCoroutine)
-                );
+            string mystr = "my string";
+            //bool isCoroutine = true;
+            //bool autoResetCoroutine = true;
+            //LuaScriptStandard standard = new LuaScriptStandard(
+            //    new LuaFuncStandard("A", LuaFuncType.AutoCoroutine | LuaFuncType.AllowAny),
+            //    new LuaFuncStandard("B", LuaFuncType.AutoCoroutine | LuaFuncType.AllowAnyCoroutine)
+            //    );
+            GlobalScriptBindings.AddNewableType(typeof(TestClass));
 
-            HookedScriptRunner hsr = new HookedScriptRunner(standard);
-            ScriptBindings b = new ScriptBindings(this);
-            b.AddDelegate("Test.YieldPls", (Func<int, string, WaitUntil>)AutoCoroutineTest, "", "");
-            hsr.AddBindings(b);
-            hsr["text"] = "test";
-            hsr.LoadScript(s);
+            ScriptBindings b = new ScriptBindings();
+            b.AddEnum<TestEnum>("MyEnums.Greetings");
+            b.AddGlobalObject("MyGlobs.MyString", mystr);
+
+            HookedScriptRunner hsr = new HookedScriptRunner(b);
+            var func = new ScriptFunction(hsr.Lua, s2);
+            var r = func.Execute().ToObject<TestEnum>();
+            new object();
+            //ScriptBindings b = new ScriptBindings(this);
+            //b.AddDelegate("Test.YieldPls", (Func<int, string, WaitUntil>)AutoCoroutineTest, "", "");
+            //hsr.AddBindings(b);
+            //hsr["text"] = "test";
+            //hsr.LoadScript(s);
 
 
             //ScriptHook hook = new ScriptHook(hsr.Lua, s2, true, true);
@@ -218,17 +225,17 @@ namespace LuaGUI
             //    shb2.Execute();
             //}
 
-            hsr.LoadScript(s);
+            //hsr.LoadScript(s);
 
             //hsr.RefreshLua();
 
-            hsr.Execute("A");
+            //hsr.Execute("A");
 
-            for (int j = 0; j < 30; j++)
-            {
-                Console.WriteLine($"==========C# {j + 1}");
-                hsr.Execute("B", j+1, j+2);
-            }
+            //for (int j = 0; j < 30; j++)
+            //{
+            //    Console.WriteLine($"==========C# {j + 1}");
+            //    hsr.Execute("B", j+1, j+2);
+            //}
 
             new object();
 
@@ -252,6 +259,17 @@ namespace LuaGUI
             GC.Collect();
             //Task.Run(async () => { await Task.Delay(1000); GC.Collect(); });
         }
+    }
+    enum TestEnum
+    {
+        Hello = 0,
+        Goodbye = 1
+    }
+
+    public class TestClass
+    {
+        public string Inst = "HI";
+        public static string Stat = "BYE";
     }
 
     public class MyYielder : Yielder

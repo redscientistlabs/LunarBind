@@ -125,10 +125,10 @@ end
 
 function executeMain()
   print('(lua MAIN SCR) exec0, yield 0 frames')
-  coroutine.yield(WaitFrames(0))
+  coroutine.yield(new.WaitFrames(0))
   
   print('(lua MAIN SCR) exec1, yield 1 frame')
-  coroutine.yield(WaitFrames(1))
+  coroutine.yield(new.WaitFrames(1))
   
   print('(lua MAIN SCR) exec2, final')
   print('REMOVED PRE EXECUTE HOOK')
@@ -141,7 +141,7 @@ testNumber = 0
 
 function loadStashKeyA(a, b)
   print(a)
-  coroutine.yield(WaitFrames(0))
+  coroutine.yield(new.WaitFrames(0))
   print(b)
 end
 

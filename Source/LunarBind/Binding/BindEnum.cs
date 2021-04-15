@@ -12,13 +12,14 @@
         private List<KeyValuePair<string, int>> enumVals = new List<KeyValuePair<string, int>>();
         public BindEnum(string name, Type e)
         {
-            var fields = e.GetType().GetFields(System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Static);
+            Name = name;
+            var fields = e.GetFields(System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Static);
             foreach (var field in fields)
             {
                 var attr = (LunarBindHideAttribute)Attribute.GetCustomAttribute(field, typeof(LunarBindHideAttribute));
                 if(attr == null)
                 {
-
+                    enumVals.Add(new KeyValuePair<string, int>(field.Name, (int)field.GetValue(null)));
                 }
             }
         }

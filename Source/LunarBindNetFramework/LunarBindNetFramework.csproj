@@ -67,6 +67,7 @@
     <Compile Include="..\LunarBind\Binding\BindFunc.cs" />
     <Compile Include="..\LunarBind\Binding\BindItem.cs" />
     <Compile Include="..\LunarBind\Binding\BindTable.cs" />
+	<Compile Include="..\LunarBind\Binding\BindUserObject.cs" />
     <Compile Include="..\LunarBind\Binding\GlobalScriptBindings.cs" />
     <Compile Include="..\LunarBind\Binding\ScriptBindings.cs" />
     <Compile Include="..\LunarBind\Attributes\LunarBindDocumentationAttribute.cs" />

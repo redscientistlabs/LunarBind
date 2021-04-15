@@ -11,6 +11,7 @@
         private readonly Dictionary<string, BindTable> bindTables = new Dictionary<string, BindTable>();
         private readonly Dictionary<string, BindFunc> bindFunctions = new Dictionary<string, BindFunc>();
         private readonly Dictionary<string, BindEnum> bindEnums = new Dictionary<string, BindEnum>();
+        private readonly Dictionary<string, BindUserObject> bindObjects = new Dictionary<string, BindUserObject>();
         //private readonly Dictionary<string, BindField> bindFields = new Dictionary<string, BindField>();
 
         public BindTable(string name)
@@ -62,11 +63,14 @@
                 {
                     throw new Exception($"Cannot add {string.Join(".", path)} ({func.Name}), an Enum with that key already exists");
                 }
+                else if (bindObjects.ContainsKey(path[index]))
+                {
+                    throw new Exception($"Cannot add {string.Join(".", path)} ({func.Name}), a Global Object with the key ({path[index]}) exists in the path");
+                }
                 bindFunctions[path[index]] = func;
             }
             else
             {
-
                 if (bindFunctions.ContainsKey(path[index]))
                 {
                     throw new Exception($"Cannot add {string.Join(".", path)} ({func.Name}), a Function with the key ({path[index]}) exists in the path");
@@ -74,6 +78,10 @@
                 else if (bindEnums.ContainsKey(path[index]))
                 {
                     throw new Exception($"Cannot add {string.Join(".", path)} ({func.Name}), an Enum with the key ({path[index]}) exists in the path");
+                }
+                else if (bindObjects.ContainsKey(path[index]))
+                {
+                    throw new Exception($"Cannot add {string.Join(".", path)} ({func.Name}), a Global Object with the key ({path[index]}) exists in the path");
                 }
 
                 BindTable nextTable;
@@ -108,6 +116,10 @@
                 {
                     throw new Exception($"Cannot add {string.Join(".", path)} ({bindEnum.Name}), an Enum with that key already exists");
                 }
+                else if (bindObjects.ContainsKey(path[index]))
+                {
+                    throw new Exception($"Cannot add {string.Join(".", path)} ({bindEnum.Name}), a Global Object with the key ({path[index]}) exists in the path");
+                }
                 bindEnums[path[index]] = bindEnum;
             }
             else
@@ -120,7 +132,10 @@
                 {
                     throw new Exception($"Cannot add {string.Join(".", path)} ({bindEnum.Name}), an Enum with the key ({path[index]}) exists in the path");
                 }
-
+                else if (bindObjects.ContainsKey(path[index]))
+                {
+                    throw new Exception($"Cannot add {string.Join(".", path)} ({bindEnum.Name}), a Global Object with the key ({path[index]}) exists in the path");
+                }
                 BindTable nextTable;
                 if (bindTables.TryGetValue(path[index], out nextTable))
                 {
@@ -132,6 +147,60 @@
                     nextTable = new BindTable(path[index]);
                     bindTables.Add(path[index], nextTable);
                     nextTable.AddBindEnum(path, index + 1, bindEnum);
+                }
+            }
+        }
+
+        internal void AddBindUserObject(string[] path, int index, BindUserObject bindObj)
+        {
+            if (index + 1 >= path.Length)
+            {
+                //At lowest level, add enum
+                if (bindTables.ContainsKey(path[index]))
+                {
+                    throw new Exception($"Cannot add {string.Join(".", path)} ({bindObj.Name}), a Table with that key already exists");
+                }
+                else if (bindFunctions.ContainsKey(path[index]))
+                {
+                    throw new Exception($"Cannot add {string.Join(".", path)} ({bindObj.Name}), a Function with that key already exists");
+                }
+                else if (bindEnums.ContainsKey(path[index]))
+                {
+                    throw new Exception($"Cannot add {string.Join(".", path)} ({bindObj.Name}), an Enum with that key already exists");
+                }
+                else if (bindObjects.ContainsKey(path[index]))
+                {
+                    throw new Exception($"Cannot add {string.Join(".", path)} ({bindObj.Name}), a Global Object with the key ({path[index]}) exists in the path");
+                }
+
+                bindObjects[path[index]] = bindObj;
+            }
+            else
+            {
+                if (bindFunctions.ContainsKey(path[index]))
+                {
+                    throw new Exception($"Cannot add {string.Join(".", path)} ({bindObj.Name}), a Function with the key ({path[index]}) exists in the path");
+                }
+                else if (bindEnums.ContainsKey(path[index]))
+                {
+                    throw new Exception($"Cannot add {string.Join(".", path)} ({bindObj.Name}), an Enum with the key ({path[index]}) exists in the path");
+                }
+                else if (bindObjects.ContainsKey(path[index]))
+                {
+                    throw new Exception($"Cannot add {string.Join(".", path)} ({bindObj.Name}), a Global Object with the key ({path[index]}) exists in the path");
+                }
+
+                BindTable nextTable;
+                if (bindTables.TryGetValue(path[index], out nextTable))
+                {
+                    nextTable.AddBindUserObject(path, index + 1, bindObj);
+                }
+                else
+                {
+                    //Create new table
+                    nextTable = new BindTable(path[index]);
+                    bindTables.Add(path[index], nextTable);
+                    nextTable.AddBindUserObject(path, index + 1, bindObj);
                 }
             }
         }
@@ -154,6 +223,12 @@
             foreach (var e in bindEnums.Values)
             {
                 table[e.Name] = e.CreateEnumTable(script);
+            }
+
+            //Global Objects
+            foreach (var o in bindObjects.Values)
+            {
+                table[o.Name] = o.UserObject;
             }
 
             return table;

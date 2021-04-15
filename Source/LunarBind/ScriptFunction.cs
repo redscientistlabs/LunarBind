@@ -182,8 +182,11 @@
 
         public void ResetCoroutine()
         {
-            CurYielder = null;
-            Coroutine.Assign(ScriptRef.CreateCoroutine(LuaFunc));
+            if (IsCoroutine)
+            {
+                CurYielder = null;
+                Coroutine.Assign(ScriptRef.CreateCoroutine(LuaFunc));
+            }
         }
 
         #if LBNETFW
@@ -348,7 +351,7 @@
         /// </summary>
         /// <param name="args"></param>
         /// <returns></returns>
-        public CoroutineState ExecuteAsCoroutine(object[] args)
+        public CoroutineState ExecuteAsCoroutine(params object[] args)
         {
             Coroutine co = Coroutine.Coroutine;
             if (co.State == CoroutineState.Dead)
@@ -403,7 +406,7 @@
         /// <param name="returnValue"></param>
         /// <param name="args"></param>
         /// <returns></returns>
-        public CoroutineState QueryAsCoroutine(out DynValue returnValue, object[] args)
+        public CoroutineState QueryAsCoroutine(out DynValue returnValue, params object[] args)
         {
             Coroutine co = Coroutine.Coroutine;
             if (co.State == CoroutineState.Dead)
@@ -442,7 +445,7 @@
         /// <param name="returnValue"></param>
         /// <param name="args"></param>
         /// <returns></returns>
-        public CoroutineState QueryAsCoroutine<T>(out T returnValue, object[] args)
+        public CoroutineState QueryAsCoroutine<T>(out T returnValue, params object[] args)
         {
             Coroutine co = Coroutine.Coroutine;
             if (co.State == CoroutineState.Dead)
