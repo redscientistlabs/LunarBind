@@ -58,7 +58,7 @@
         //Do not call from BindTable
         internal override void AddToScript(Script script)
         {
-            script.Globals[Name] = Callback;
+            script.Globals[Name] = Callback;// DynValue.FromObject(script, Callback);
             if (IsYieldable && GlobalScriptBindings.AutoYield)
             {
                 script.DoString(YieldableString);

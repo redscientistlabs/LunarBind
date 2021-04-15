@@ -246,6 +246,16 @@
             }
         }
     #endif
+        public T Query<T>(params object[] args)
+        {
+            return Execute(args).ToObject<T>();
+        }
+    #if LBNETFW
+        public dynamic DynamicQuery(params object[] args)
+        {
+            return Execute(args).ToDynamic();
+        }
+    #endif
 
         public DynValue Execute(params object[] args)
         {
@@ -396,6 +406,8 @@
                 }
             }
         }
+
+
 
 
         /// <summary>

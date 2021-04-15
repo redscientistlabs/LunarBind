@@ -18,7 +18,7 @@
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
     <OutputPath>bin\Debug\</OutputPath>
-    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <DefineConstants>TRACE;DEBUG;LBNETFW</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
@@ -67,7 +67,7 @@
     <Compile Include="..\LunarBind\Binding\BindFunc.cs" />
     <Compile Include="..\LunarBind\Binding\BindItem.cs" />
     <Compile Include="..\LunarBind\Binding\BindTable.cs" />
-	<Compile Include="..\LunarBind\Binding\BindUserObject.cs" />
+    <Compile Include="..\LunarBind\Binding\BindUserObject.cs" />
     <Compile Include="..\LunarBind\Binding\GlobalScriptBindings.cs" />
     <Compile Include="..\LunarBind\Binding\ScriptBindings.cs" />
     <Compile Include="..\LunarBind\Attributes\LunarBindDocumentationAttribute.cs" />
