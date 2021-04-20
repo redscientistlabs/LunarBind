@@ -10,7 +10,7 @@
     using System.Threading;
     using System.Threading.Tasks;
     using LunarBind.Standards;
-    public sealed class HookedScriptRunner : ScriptRunnerBase
+    public class HookedScriptRunner : ScriptRunnerBase
     {
         public string Name { get; set; } = nameof(HookedScriptRunner);
 
@@ -20,7 +20,7 @@
         /// A standard all loaded scripts must follow
         /// </summary>
         public LuaScriptStandard ScriptStandard { get; private set; } = null;
-        public bool AutoResetCoroutines { get; set; } = false;
+        public bool AutoResetAllCoroutines { get; set; } = false;
 
         /// <summary>
         /// Get a reference to the 
@@ -257,7 +257,7 @@
                     case CoroutineState.Dead:
                         hook.CurYielder = null;
                         callback?.Invoke();
-                        if (AutoResetCoroutines || hook.AutoResetCoroutine)
+                        if (AutoResetAllCoroutines || hook.AutoResetCoroutine)
                         {
                             hook.Coroutine.Assign(Lua.CreateCoroutine(hook.LuaFunc));
                         }

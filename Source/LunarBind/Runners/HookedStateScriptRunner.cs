@@ -9,10 +9,8 @@
     
     //TODO: Refactor this class
 
-    /// <summary>
-    /// Can run multiple scripts at once
-    /// </summary>
-    public sealed class HookedStateScriptRunner : ScriptRunnerBase
+    [Obsolete]
+    public class HookedStateScriptRunner : ScriptRunnerBase
     {
         //public Script Lua { get; private set; }
         private readonly Dictionary<string,HookedScriptContainer> GlobalScripts = new Dictionary<string, HookedScriptContainer>();

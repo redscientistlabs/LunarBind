@@ -4,7 +4,7 @@
     using System;
 
     [System.AttributeUsage(AttributeTargets.Class | AttributeTargets.Struct, Inherited = false, AllowMultiple = false)]
-    internal sealed class LunarBindTypeAttribute : Attribute
+    internal class LunarBindTypeAttribute : Attribute
     {
         readonly string name;
         readonly bool newable;

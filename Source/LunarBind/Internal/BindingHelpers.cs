@@ -40,7 +40,7 @@
         /// </summary>
         /// <param name="dict"></param>
         /// <param name="pathString"></param>
-        internal static void CreateBindFunction(Dictionary<string, BindItem> dict, string pathString, Delegate callback, string documentation, string example)
+        internal static void CreateBindFunction(Dictionary<string, BindItem> dict, string pathString, Delegate callback, bool autoYield = true, string documentation = "", string example = "")
         {
             if (string.IsNullOrWhiteSpace(pathString))
             {
@@ -48,8 +48,8 @@
             }
             var path = pathString.Split('.');
             string root = path[0];
-            BindFunc func = new BindFunc(path[path.Length-1], callback, documentation, example);
-            if (func.IsYieldable && GlobalScriptBindings.AutoYield) { func.GenerateYieldableString(pathString); }
+            BindFunc func = new BindFunc(path[path.Length-1],  callback, autoYield, documentation, example);
+            if (autoYield && func.IsYieldable && GlobalScriptBindings.AutoYield) { func.GenerateYieldableString(pathString); }
 
             if (path.Length == 1)
             {

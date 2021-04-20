@@ -98,16 +98,28 @@
             //globalObjects[name]
         }
 
+        /// <summary>
+        /// Adds an enum to a lua table named typeof(T).Name
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
         public void AddEnum<T>() where T : Enum
         {
             BindingHelpers.CreateBindEnum(bindItems, typeof(T).Name, typeof(T));
         }
-
+        /// <summary>
+        /// Adds all fields of an enum not marked with <see cref="MoonSharpHiddenAttribute"/> or <see cref="LunarBindHideAttribute"/> to a lua table with the path
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
         public void AddEnum<T>(string path)
         {
             BindingHelpers.CreateBindEnum(bindItems, path, typeof(T));
         }
-
+        //TODO: rename to differentiate from the AddGlobalType, etc
+        /// <summary>
+        /// Use <see cref="BindTypeFuncs(Type[])"/> instead
+        /// </summary>
+        /// <param name="types"></param>
+        [Obsolete]
         public void AddTypes(params Type[] types)
         {
             foreach (var type in types)
@@ -116,6 +128,23 @@
             }
         }
 
+        /// <summary>
+        /// Bind all static functions with the [<see cref="LunarBindFunctionAttribute"/>] attribute on each type
+        /// </summary>
+        /// <param name="types"></param>
+        public void BindTypeFuncs(params Type[] types)
+        {
+            foreach (var type in types)
+            {
+                RegisterTypeFuncs(type);
+            }
+        }
+
+        /// <summary>
+        /// Use <see cref="BindInstanceFuncs(object[])"/>
+        /// </summary>
+        /// <param name="objs"></param>
+        [Obsolete]
         public void AddObjects(params object[] objs)
         {
             foreach (var obj in objs)
@@ -123,7 +152,11 @@
                 RegisterObjectFuncs(obj);
             }
         }
-
+        /// <summary>
+        /// Use <see cref="BindInstanceFuncs(object[])"/>
+        /// </summary>
+        /// <param name="objs"></param>
+        [Obsolete]
         public void AddObjects<T>(params T[] objs)
         {
             foreach (var obj in objs)
@@ -132,11 +165,24 @@
             }
         }
 
-        public void AddType(Type type)
+        /// <summary>
+        /// Bind all instance functions with the [<see cref="LunarBindFunctionAttribute"/>] attribute on each object, using that object as the instance.<para/>
+        /// Recommended to use <see cref="AddGlobalObject(string, object)"/> instead
+        /// </summary>
+        /// <param name="objs"></param>
+        public void BindInstanceFuncs(params object[] objs)
         {
-            RegisterTypeFuncs(type);
+            foreach (var obj in objs)
+            {
+                RegisterObjectFuncs(obj);
+            }
         }
 
+        /// <summary>
+        /// Bind all instance functions with the [<see cref="LunarBindFunctionAttribute"/>] attribute on the object, using that object as the instance.<para/>
+        /// Recommended to use <see cref="AddGlobalObject(string, object)"/> instead
+        /// </summary>
+        /// <param name="objs"></param>
         public void AddObject(object obj)
         {
             RegisterObjectFuncs(obj);
@@ -152,7 +198,7 @@
         /// <param name="example"></param>
         public void AddAction(string name, Action action, string documentation = "", string example = "")
         {
-            BindingHelpers.CreateBindFunction(bindItems, name, action, documentation ?? "", example ?? "");
+            BindingHelpers.CreateBindFunction(bindItems, name, action, false, documentation ?? "", example ?? "");
             //callbackItems[name] = new CallbackFunc(name, action, documentation, example);
         }
         /// <summary>
@@ -163,7 +209,7 @@
         /// <param name="example"></param>
         public void AddAction(Action action, string documentation = "", string example = "")
         {
-            BindingHelpers.CreateBindFunction(bindItems, action.Method.Name, action, documentation ?? "", example ?? "");
+            BindingHelpers.CreateBindFunction(bindItems, action.Method.Name, action, false, documentation ?? "", example ?? "");
             //callbackItems[action.Method.Name] = new CallbackFunc(action.Method.Name, action, documentation, example);
         }
 
@@ -175,7 +221,7 @@
         {
             foreach (var action in actions)
             {
-                BindingHelpers.CreateBindFunction(bindItems, action.Method.Name, action, "", "");
+                BindingHelpers.CreateBindFunction(bindItems, action.Method.Name, action, false, "", "");
                 //callbackItems[action.Method.Name] = new CallbackFunc(action.Method.Name, action);
             }
         }
@@ -189,7 +235,7 @@
         /// <param name="example"></param>
         public void AddDelegate(string name, Delegate del, string documentation = "", string example = "")
         {
-            BindingHelpers.CreateBindFunction(bindItems, name, del, documentation ?? "", example ?? "");
+            BindingHelpers.CreateBindFunction(bindItems, name, del, false, documentation ?? "", example ?? "");
             //callbackItems[name] = new CallbackFunc(name, del, documentation, example);
         }
 
@@ -202,7 +248,7 @@
         /// <param name="example"></param>
         public void AddDelegate(Delegate del, string documentation = "", string example = "")
         {
-            BindingHelpers.CreateBindFunction(bindItems, del.Method.Name, del, documentation ?? "", example ?? "");
+            BindingHelpers.CreateBindFunction(bindItems, del.Method.Name, del, false, documentation ?? "", example ?? "");
             //callbackItems[del.Method.Name] = new CallbackFunc(del.Method.Name, del, documentation, example);
         }
 
@@ -217,7 +263,7 @@
         {
             foreach (var del in dels)
             {
-                BindingHelpers.CreateBindFunction(bindItems, del.Method.Name, del, "", "");
+                BindingHelpers.CreateBindFunction(bindItems, del.Method.Name, del, false, "", "");
                 //callbackItems[del.Method.Name] = new CallbackFunc(del.Method.Name, del);
             }
         }
@@ -300,7 +346,7 @@
                     var example = (LunarBindExampleAttribute)Attribute.GetCustomAttribute(mi, typeof(LunarBindExampleAttribute));
                     var del = BindingHelpers.CreateDelegate(mi, target);
                     string name = attr.Name ?? mi.Name;
-                    BindingHelpers.CreateBindFunction(bindItems, name, del, documentation?.Data ?? "", example?.Data ?? "");
+                    BindingHelpers.CreateBindFunction(bindItems, name, del,attr.AutoYield, documentation?.Data ?? "", example?.Data ?? "");
                     //callbackItems[name] = new CallbackFunc(name, del, documentation?.Data ?? "", example?.Data ?? "");
                 }
             }
@@ -318,7 +364,7 @@
                     var example = (LunarBindExampleAttribute)Attribute.GetCustomAttribute(mi, typeof(LunarBindExampleAttribute));
                     var del = BindingHelpers.CreateDelegate(mi);
                     string name = attr.Name ?? mi.Name;
-                    BindingHelpers.CreateBindFunction(bindItems, name, del, documentation?.Data ?? "", example?.Data ?? "");
+                    BindingHelpers.CreateBindFunction(bindItems, name, del, attr.AutoYield, documentation?.Data ?? "", example?.Data ?? "");
                     //callbackItems[name] = new CallbackFunc(name, del, documentation?.Data ?? "", example?.Data ?? "");
                 }
             }

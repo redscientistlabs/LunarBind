@@ -8,11 +8,7 @@
     /// </summary>
     public class HookedScriptContainer
     {
-        public Dictionary<string, ScriptFunction> ScriptFunctions = new Dictionary<string, ScriptFunction>();
-        /// <summary>
-        /// Currently not in use!
-        /// </summary>
-        public Dictionary<string, object> ScriptData = new Dictionary<string, object>();
+        public Dictionary<string, ScriptFunction> ScriptFunctions { get; private set; } = new Dictionary<string, ScriptFunction>();
 
         public HookedScriptContainer()
         {

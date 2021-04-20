@@ -8,7 +8,6 @@
 
     internal class BindEnum : BindItem
     {
-        public string Name { get; private set; }
         private List<KeyValuePair<string, int>> enumVals = new List<KeyValuePair<string, int>>();
         public BindEnum(string name, Type e)
         {
@@ -16,8 +15,10 @@
             var fields = e.GetFields(System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Static);
             foreach (var field in fields)
             {
-                var attr = (LunarBindHideAttribute)Attribute.GetCustomAttribute(field, typeof(LunarBindHideAttribute));
-                if(attr == null)
+                var hidden = (LunarBindHideAttribute)Attribute.GetCustomAttribute(field, typeof(LunarBindHideAttribute)) != null ||
+                    (MoonSharpHiddenAttribute)Attribute.GetCustomAttribute(field, typeof(MoonSharpHiddenAttribute)) != null;
+                
+                if(!hidden)
                 {
                     enumVals.Add(new KeyValuePair<string, int>(field.Name, (int)field.GetValue(null)));
                 }

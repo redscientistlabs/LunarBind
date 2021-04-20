@@ -3,10 +3,10 @@
     //TODO: Implement
     using System;
     /// <summary>
-    /// Hide constructor from being added
+    /// Hide from being added
     /// </summary>
-    [System.AttributeUsage(AttributeTargets.Constructor, Inherited = false, AllowMultiple = false)]
-    internal sealed class LunarBindHideAttribute : Attribute
+    [System.AttributeUsage(AttributeTargets.Constructor | AttributeTargets.Field | AttributeTargets.Method | AttributeTargets.Struct | AttributeTargets.Class, Inherited = false, AllowMultiple = false)]
+    public class LunarBindHideAttribute : Attribute
     {
         public LunarBindHideAttribute()
         {

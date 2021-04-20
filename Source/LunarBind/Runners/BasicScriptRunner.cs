@@ -8,14 +8,14 @@ using MoonSharp.Interpreter;
 namespace LunarBind
 {
     /// <summary>
-    /// A 
+    /// A basic script runner that binds a script and can only run lua strings
     /// </summary>
     public class BasicScriptRunner : ScriptRunnerBase
     {   
         public Table Globals => Lua.Globals;
 
-        public BasicScriptRunner() {
-            Lua = new Script(CoreModules.Preset_HardSandbox | CoreModules.Coroutine | CoreModules.OS_Time);
+        public BasicScriptRunner(CoreModules modules = CoreModules.Preset_HardSandbox | CoreModules.Coroutine | CoreModules.OS_Time) {
+            Lua = new Script(modules);
             GlobalScriptBindings.Initialize(Lua);
         }
 

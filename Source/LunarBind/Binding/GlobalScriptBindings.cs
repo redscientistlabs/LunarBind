@@ -58,11 +58,36 @@
             //Other internal yielder types are not meant to be created in Lua
         }
 
+
+        /// <summary>
+        /// Initializes a script with C# callback functions, types, newable types, enums, and yieldables
+        /// </summary>
+        /// <param name="lua"></param>
+        public static void Initialize(Script lua)
+        {
+            foreach (var item in bindItems.Values)
+            {
+                item.AddToScript(lua);
+            }
+
+            foreach (var type in staticTypes)
+            {
+                lua.Globals[type.Key] = type.Value;
+            }
+
+            InitializeNewables(lua);
+            InitializeYieldables(lua);
+
+            if (CustomInitializerString != null)
+            {
+                lua.DoString(CustomInitializerString);
+            }
+        }
+
         public static void AddYieldableType<T>(string name = null) where T : Yielder
         {
             if (name == null) { name = typeof(T).Name; }
             RegisterUserDataType(typeof(T));
-            //yieldableTypes[TypePrefix + name] = typeof(T);
             yieldableTypes[name] = typeof(T);
             BakeYieldableNewables();
         }
@@ -75,7 +100,6 @@
         public static void AddNewableType(string name, Type t)
         {
             RegisterUserDataType(t);
-            //newableTypes[TypePrefix + name] = t;
             newableTypes[name] = t;
             BakeNewables();
         }
@@ -83,7 +107,6 @@
         public static void AddNewableType(Type t)
         {
             RegisterUserDataType(t);
-            //newableTypes[TypePrefix + t.Name] = t;
             newableTypes[t.Name] = t;
             BakeNewables();
         }
@@ -136,23 +159,10 @@
         }
 
         /// <summary>
-        /// Call this to register all the callback functions in all assemblies in the current app domain. Not recommended.
-        /// </summary>
-        public static void AddAllAssemblies()
-        {
-            var assemblies = AppDomain.CurrentDomain.GetAssemblies();
-            foreach (var assembly in assemblies)
-            {
-                RegisterAssemblyFuncs(assembly);
-                UserData.RegisterAssembly(assembly);
-            }
-        }
-
-        /// <summary>
-        /// Register all the callback functions for specific assemblies only.
+        ///  Bind all static functions with the [<see cref="LunarBindFunctionAttribute"/>] attribute on each type in each assembly
         /// </summary>
         /// <param name="assemblies"></param>
-        public static void AddAssemblies(params Assembly[] assemblies)
+        public static void BindAssemblyFuncs(params Assembly[] assemblies)
         {
             foreach (var assembly in assemblies)
             {
@@ -161,12 +171,25 @@
         }
 
 
-        //TODO: rename to differentiate from the AddStaticType, etc
+        //TODO: rename to differentiate from the AddGlobalType, etc
         /// <summary>
-        /// Automatically register all the static functions with the <see cref="LunarBindFunctionAttribute"/> for specific types
+        /// Use <see cref="BindTypeFuncs(Type[])"/> instead
         /// </summary>
         /// <param name="assemblies"></param>
+        [Obsolete]
         public static void AddTypes(params Type[] types)
+        {
+            foreach (var type in types)
+            {
+                RegisterTypeFuncs(type);
+            }
+        }
+
+        /// <summary>
+        /// Bind all static functions with the [<see cref="LunarBindFunctionAttribute"/>] attribute on each type
+        /// </summary>
+        /// <param name="types"></param>
+        public static void BindTypeFuncs(params Type[] types)
         {
             foreach (var type in types)
             {
@@ -227,10 +250,11 @@
                     var example = (LunarBindExampleAttribute)Attribute.GetCustomAttribute(mi, typeof(LunarBindExampleAttribute));
                     var del = BindingHelpers.CreateDelegate(mi);
                     string name = attr.Name ?? mi.Name;
-                    BindingHelpers.CreateBindFunction(bindItems, name, del, documentation?.Data ?? "", example?.Data ?? "");
+
+                    BindingHelpers.CreateBindFunction(bindItems, name, del, attr.AutoYield, documentation?.Data ?? "", example?.Data ?? "");
                     //callbackItems[name] = new CallbackFunc(name, del, documentation?.Data ?? "", example?.Data ?? "");
                 }
-            }           
+            }
         }
 
         //public static void HookActionProps<T0>(Type type)
@@ -263,7 +287,7 @@
         /// <param name="example"></param>
         public static void AddAction(string name, Action action, string documentation = "", string example = "")
         {
-            BindingHelpers.CreateBindFunction(bindItems, name, action, documentation ?? "", example ?? "");
+            BindingHelpers.CreateBindFunction(bindItems, name, action, false, documentation ?? "", example ?? "");
         }
         /// <summary>
         /// Add a specific <see cref="Action"/> to the bindings, using the method's Name as the name
@@ -273,7 +297,7 @@
         /// <param name="example"></param>
         public static void AddAction(Action action, string documentation = "", string example = "")
         {
-            BindingHelpers.CreateBindFunction(bindItems, action.Method.Name, action, documentation ?? "", example ?? "");
+            BindingHelpers.CreateBindFunction(bindItems, action.Method.Name, action, false, documentation ?? "", example ?? "");
             //callbackItems[action.Method.Name] = new CallbackFunc(action.Method.Name, action, documentation, example);
         }
 
@@ -285,7 +309,7 @@
         {
             foreach (var action in actions)
             {
-                BindingHelpers.CreateBindFunction(bindItems, action.Method.Name, action, "", "");
+                BindingHelpers.CreateBindFunction(bindItems, action.Method.Name, action, false, "", "");
                 //callbackItems[action.Method.Name] = new CallbackFunc(action.Method.Name, action);
             }
         }
@@ -299,7 +323,7 @@
         /// <param name="example"></param>
         public static void AddDelegate(string name, Delegate del, string documentation = "", string example = "")
         {
-            BindingHelpers.CreateBindFunction(bindItems, name, del, documentation ?? "", example ?? "");
+            BindingHelpers.CreateBindFunction(bindItems, name, del, false, documentation ?? "", example ?? "");
             //callbackItems[name] = new CallbackFunc(name, del, documentation, example);
         }
 
@@ -312,7 +336,7 @@
         /// <param name="example"></param>
         public static void AddDelegate(Delegate del, string documentation = "", string example = "")
         {
-            BindingHelpers.CreateBindFunction(bindItems, del.Method.Name, del, documentation ?? "", example ?? "");
+            BindingHelpers.CreateBindFunction(bindItems, del.Method.Name, del, false, documentation ?? "", example ?? "");
             //callbackItems[del.Method.Name] = new CallbackFunc(del.Method.Name, del, documentation, example);
         }
 
@@ -327,12 +351,12 @@
         {
             foreach (var del in dels)
             {
-                BindingHelpers.CreateBindFunction(bindItems, del.Method.Name, del, "", "");
+                BindingHelpers.CreateBindFunction(bindItems, del.Method.Name, del, false, "", "");
                 //callbackItems[del.Method.Name] = new CallbackFunc(del.Method.Name, del);
             }
         }
 
-        static void RegisterAssemblyFuncs(Assembly assembly)
+        private static void RegisterAssemblyFuncs(Assembly assembly)
         {
             Type[] types = assembly.GetTypes();
             foreach (var type in types)
@@ -341,35 +365,6 @@
             }
         }
 
-        /// <summary>
-        /// Initializes a script with C# callback functions, static types, newable types, and yieldables
-        /// </summary>
-        /// <param name="lua"></param>
-        public static void Initialize(Script lua)
-        {
-            //TODO: more stuff
-            foreach (var item in bindItems.Values)
-            {
-                item.AddToScript(lua);
-                //lua.Globals[func.Value.Name] = func.Value.Callback;
-                //if (func.Value.IsYieldable)
-                //{
-                //    lua.DoString(func.Value.YieldableString);
-                //}
-            }
-            foreach (var type in staticTypes)
-            {
-                lua.Globals[type.Key] = type.Value;
-            }
-
-            InitializeNewables(lua);
-            InitializeYieldables(lua);
-
-            if(CustomInitializerString != null)
-            {
-                lua.DoString(CustomInitializerString);
-            }
-        }
 
 
         private static void BakeNewables()
@@ -382,7 +377,7 @@
             bakedYieldableNewableTypeString = BakeNewableTypeString(yieldableTypes);
         }
 
-        private static string BakeNewableTypeString(Dictionary<string,Type> source)
+        private static string BakeNewableTypeString(Dictionary<string, Type> source)
         {
             StringBuilder s = new StringBuilder();
 
@@ -443,7 +438,7 @@
                 lua.DoString(bakedNewableTypeString);
             }
         }
-        
+
         /// <summary>
         /// Initializes a script with the yielder types
         /// </summary>

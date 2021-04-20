@@ -1,5 +1,6 @@
 ﻿namespace LunarBind.Runners
 {
+    using LunarBind.Standards;
     using MoonSharp.Interpreter;
     using System;
     using System.Collections;
@@ -13,8 +14,8 @@
     {
         //public Script Lua { get; private set; }
 
-        protected HookedScriptContainer scriptContainer = null;
-
+        protected HookedScriptContainer scriptContainer = new HookedScriptContainer();
+        protected LuaScriptStandard standard = null;
         public UserScriptRunner()
         {
             Lua = new Script(CoreModules.Preset_HardSandbox | CoreModules.Coroutine | CoreModules.OS_Time);
@@ -22,7 +23,18 @@
             Lua.Globals["RegisterCoroutine"] = (Action<DynValue, string, bool>)RegisterCoroutine;
             Lua.Globals["RemoveHook"] = (Action<string>)RemoveHook;
             GlobalScriptBindings.Initialize(Lua);
-            //GlobalScriptBindings.InitializeYieldables(Lua);
+        }
+        public UserScriptRunner(LuaScriptStandard standard) : this()
+        {
+            this.standard = standard;
+        }
+        public UserScriptRunner(CoreModules modules)
+        {
+            Lua = new Script(modules);
+            Lua.Globals["RegisterHook"] = (Action<DynValue, string>)RegisterHook;
+            Lua.Globals["RegisterCoroutine"] = (Action<DynValue, string, bool>)RegisterCoroutine;
+            Lua.Globals["RemoveHook"] = (Action<string>)RemoveHook;
+            GlobalScriptBindings.Initialize(Lua);
         }
 
         public UserScriptRunner(ScriptBindings bindings = null)
@@ -44,8 +56,19 @@
         public void LoadScript(string scriptString)
         {
             scriptContainer?.ResetHooks();
-            scriptContainer = new HookedScriptContainer();
             Lua.DoString(scriptString);
+            List<string> errors = new List<string>();
+            if(!standard.ApplyStandard(Lua,scriptContainer, errors))
+            {
+                StringBuilder sb = new StringBuilder();
+
+                for (int i = 0; i < errors.Count; i++)
+                {
+                    sb.AppendLine($"Error {i.ToString().PadLeft(4,' ')} | {errors[i]}");
+                }
+
+                throw new LunarBind.Exceptions.LunarBindStandardException(sb.ToString());
+            }
         }
 
         void RegisterCoroutine(DynValue del, string name, bool autoReset)

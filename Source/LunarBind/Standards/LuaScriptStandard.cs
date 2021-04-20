@@ -20,6 +20,7 @@
         public LuaScriptStandard()
         {
         }
+
         public LuaScriptStandard(params LuaFuncStandard[] standards)
         {
             if (standards != null)
@@ -71,11 +72,10 @@
                 //For .NET framework, must find workaround
                 //item.Value.LuaFunc.Assign(DynValue.NewNil());
 
-                //TODO: Sub-Table removal
+                //TODO: Sub-Table removal?
                 item.Value.ScriptRef.Globals.Remove(item.Key);
             }
         }
-
         
         /// <summary>
         /// Extracts functions from a <see cref="MoonSharp"/> <see cref="Script"/> that are contained in the standard
@@ -83,7 +83,7 @@
         /// <param name="script"></param>
         /// <param name="errors"></param>
         /// <returns></returns>
-        public Dictionary<string, ScriptFunction> ExtractFunctions(Script script, List<string> errors = null)
+        public Dictionary<string, ScriptFunction> ExtractFunctions(Script script, List<string> errors)
         {
             Dictionary<string, ScriptFunction> hooks = new Dictionary<string, ScriptFunction>();
             var g = script.Globals;
@@ -209,7 +209,6 @@
                     }
                     else
                     {
-                        //Is it already set up?
                         var funcType = Standards[i].FuncType;
                         if (funcType.HasFlag(LuaFuncType.AllowAny))
                         {
@@ -258,28 +257,7 @@
                     messages?.Add($"Script does not contain [{Standards[i].Path}]");
                 }
 
-
-                //TODO: Eventually do standard for Tables too
-                
-                //int len = Standards[i].SplitPath.Length;
-                //if(len == 1)
-                //{
-                //    //Check standard
-                //}
-                //else
-                //{
-                //    try
-                //    {
-                //        DynValue cur = script.Globals.Get(Standards[i].SplitPath[0]);
-                //        for (int j = 1; j < len; j++)
-                //        {
-                //            if(cur.)
-                //        }
-                //    }
-                //    catch
-                //    {
-                //    }
-                //}     
+                //TODO: Eventually do standard for Tables too  
 
             }
             return ok;
@@ -339,33 +317,6 @@
             {
                 throw new ArgumentException("Type must also contain FuncType.SingleUseCoroutine or FuncType.AutoCoroutine", "type");
             }
-
-            //switch (type)
-            //{
-            //    case LuaFuncType.Function:
-            //        IsCoroutine = false;
-            //        AutoResetCoroutine = false;
-            //        break;
-            //    case LuaFuncType.Coroutine:
-            //        IsCoroutine = true;
-            //        AutoResetCoroutine = false;
-            //        break;
-            //    case LuaFuncType.AutoCoroutine:
-            //        IsCoroutine = true;
-            //        AutoResetCoroutine = true;
-            //        break;
-            //    case LuaFuncType.AnyCoroutine:
-            //        IsCoroutine = true;
-            //        AutoResetCoroutine = true;
-            //        break;
-            //    case LuaFuncType.Any:
-            //        break;
-            //    default:
-            //        break;
-            //}
-
-            //SplitPath = path.Split('.');
-
         }
 
     }

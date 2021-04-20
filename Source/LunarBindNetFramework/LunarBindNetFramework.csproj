@@ -54,7 +54,6 @@
     <Compile Include="..\LunarBind\Yielding\Yielder.cs" />
     <Compile Include="..\LunarBind\Standards\LuaFuncType.cs" />
     <Compile Include="..\LunarBind\Standards\LuaScriptStandard.cs" />
-    <Compile Include="..\LunarBind\Runners\AutoHookedScriptRunner.cs" />
     <Compile Include="..\LunarBind\Runners\BasicScriptRunner.cs" />
     <Compile Include="..\LunarBind\Runners\HookedScriptRunner.cs" />
     <Compile Include="..\LunarBind\Runners\HookedStateScriptRunner.cs" />
@@ -76,6 +75,7 @@
     <Compile Include="..\LunarBind\Attributes\LunarBindFunctionAttribute.cs" />
     <Compile Include="..\LunarBind\Attributes\LunarBindHideAttribute.cs" />
     <Compile Include="..\LunarBind\Attributes\LunarBindTypeAttribute.cs" />
+	<Compile Include="..\LunarBind\Exceptions\LunarBindStandardException.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

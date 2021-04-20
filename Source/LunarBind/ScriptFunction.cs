@@ -257,62 +257,89 @@
         }
     #endif
 
+
+        /// <summary>
+        /// Executes this function whether it is a normal function or a coroutine. Dead coroutines do not run and return DynValue.Nil
+        /// </summary>
+        /// <param name="args"></param>
+        /// <returns></returns>
         public DynValue Execute(params object[] args)
         {
-            if (IsCoroutine)
+            try
             {
-                var co = Coroutine.Coroutine;
-                if (co.State == CoroutineState.Dead || !CheckYieldStatus()) //Doesn't run check yield if coroutine is dead
+                if (IsCoroutine)
                 {
-                    return DynValue.Nil;
-                }
-                DynValue ret;
+                    var co = Coroutine.Coroutine;
+                    if (co.State == CoroutineState.Dead || !CheckYieldStatus()) //Doesn't run check yield if coroutine is dead
+                    {
+                        return DynValue.Nil;
+                    }
+                    DynValue ret = co.Resume(args);
+                    //if (co.State == CoroutineState.NotStarted)
+                    //{
+                    //    ret = co.Resume(args);
+                    //}
+                    //else
+                    //{
+                    //    ret = co.Resume();
+                    //}
 
-                if (co.State == CoroutineState.NotStarted)
-                {
-                    ret = co.Resume(args);
+                    switch (co.State)
+                    {
+                        case CoroutineState.Suspended:
+                            if (ret.IsNotNil())
+                            {
+                                try
+                                {
+                                    CurYielder = ret.ToObject<Yielder>();
+                                }
+                                catch //Todo: catch specific exception
+                                {
+                                    //Moonsharp does not have a good way of checking the userdata type
+                                    //The way to check just throws an error anyways, so this is more efficient
+                                }
+                            }
+                            break;
+                        case CoroutineState.Dead:
+                            CurYielder = null;
+                            if (AutoResetCoroutine)
+                            {
+                                //Create new coroutine, assign it to our dynvalue
+                                Coroutine.Assign(ScriptRef.CreateCoroutine(LuaFunc));
+                            }
+                            break;
+                        default:
+                            break;
+                    }
+                    return ret;
                 }
                 else
                 {
-                    ret = co.Resume();
+                    //Not coroutine, just call the function
+                    var ret = ScriptRef.Call(LuaFunc, args);
+                    return ret;
                 }
-
-                switch (co.State)
-                {
-                    case CoroutineState.Suspended:
-                        if (ret.IsNotNil())
-                        {
-                            try
-                            {
-                                CurYielder = ret.ToObject<Yielder>();
-                            }
-                            catch
-                            {
-                                //TODO: throw error?
-                            }
-                        }
-                        break;
-                    case CoroutineState.Dead:
-                        CurYielder = null;
-                        if (AutoResetCoroutine)
-                        {
-                            //Create new coroutine, assign it to our dynvalue
-                            Coroutine.Assign(ScriptRef.CreateCoroutine(LuaFunc));
-                        }
-                        break;
-                    default:
-                        break;
-                }
-                return ret;
             }
-            else
+            catch (Exception ex)
             {
-                //Not coroutine, just call the function
-                var ret = ScriptRef.Call(LuaFunc, args);
-                return ret;
+                if (ex is InterpreterException ex2)
+                {
+                    //For unity 
+                    throw new Exception(ex2.DecoratedMessage, ex);
+                }
+                else
+                {
+                    throw ex;
+                }
             }
         }
 
+        /// <summary>
+        /// Executes this function with a callback. The callback will be called when the coroutine dies, or every time if it is a normal function
+        /// </summary>
+        /// <param name="callback"></param>
+        /// <param name="args"></param>
+        /// <returns></returns>
         public DynValue ExecuteWithCallback(Action callback, params object[] args)
         {
             if (IsCoroutine)
@@ -633,54 +660,69 @@
 
         private CoroutineState ExecuteAsCoroutineForUnity(Coroutine co, Action callback, object[] args)
         {
-            if (co.State == CoroutineState.Dead)
+            try
             {
-                return CoroutineState.Dead;
-            }
-            else if (!CheckYieldStatus())
-            {
-                return CoroutineState.Suspended;
-            }
-            else
-            {
-                //Do coroutine
-                DynValue ret;
-                if (co.State == CoroutineState.NotStarted)
+                if (co.State == CoroutineState.Dead)
                 {
-                    ret = co.Resume(args);
+                    return CoroutineState.Dead;
+                }
+                else if (!CheckYieldStatus())
+                {
+                    return CoroutineState.Suspended;
                 }
                 else
                 {
-                    ret = co.Resume();
+                    //Do coroutine
+                    DynValue ret;
+                    if (co.State == CoroutineState.NotStarted)
+                    {
+                        ret = co.Resume(args);
+                    }
+                    else
+                    {
+                        ret = co.Resume();
+                    }
+
+                    switch (co.State)
+                    {
+                        case CoroutineState.Suspended:
+
+                            if (ret.IsNotNil())
+                            {
+                                try
+                                {
+                                    Yielder yielder = ret.ToObject<Yielder>();
+                                    CurYielder = yielder;
+                                }
+                                catch
+                                {
+
+                                }
+                            }
+                            return CoroutineState.Suspended;
+                        case CoroutineState.Dead:
+                            callback?.Invoke();
+                            if (AutoResetCoroutine)
+                            {
+                                ResetCoroutine();
+                            }
+                            return CoroutineState.Dead;
+                        default:
+                            //ForceSuspended, Running, etc
+                            return co.State;
+                    }
                 }
-
-                switch (co.State)
+            }
+            catch (Exception ex)
+            {
+                if (ex is InterpreterException ex2)
                 {
-                    case CoroutineState.Suspended:
-
-                        if (ret.IsNotNil())
-                        {
-                            try
-                            {
-                                Yielder yielder = ret.ToObject<Yielder>();
-                                CurYielder = yielder;
-                            }
-                            catch
-                            {
-
-                            }
-                        }
-                        return CoroutineState.Suspended;
-                    case CoroutineState.Dead:
-                        callback?.Invoke();
-                        if (AutoResetCoroutine)
-                        {
-                            ResetCoroutine();
-                        }
-                        return CoroutineState.Dead;
-                    default:
-                        //ForceSuspended, Running, etc
-                        return co.State;
+                    //For unity 
+                    throw new Exception(ex2.DecoratedMessage, ex);
+                }
+                else
+                {
+                    throw ex;
                 }
             }
         }

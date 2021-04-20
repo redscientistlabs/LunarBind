@@ -20,14 +20,22 @@
         //TODO: create convention for coroutine yield
         const string COROUTINE_YIELD_ = "COROUTINE_YIELD_";
 
-        public BindFunc(string name, Delegate callback, string documentation = "", string example = "")
+        public BindFunc(string name, Delegate callback, bool autoYield = true, string documentation = "", string example = "")
         {
             this.Callback = callback;
             this.Documentation = documentation;
             this.Example = example;
-            IsYieldable = typeof(Yielder).IsAssignableFrom(callback.Method.ReturnType);
-            if (IsYieldable && GlobalScriptBindings.AutoYield) { Name = COROUTINE_YIELD_ + name; }
-            else { Name = name; }
+            if (autoYield)
+            {
+                IsYieldable = typeof(Yielder).IsAssignableFrom(callback.Method.ReturnType);
+                if (IsYieldable && GlobalScriptBindings.AutoYield) { Name = COROUTINE_YIELD_ + name; }
+                else { Name = name; }
+            }
+            else
+            {
+                IsYieldable = false;
+                Name = name;
+            }
             YieldableString = "";
         }
 
