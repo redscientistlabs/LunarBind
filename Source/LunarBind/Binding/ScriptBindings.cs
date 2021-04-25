@@ -93,7 +93,10 @@
 
         public void AddGlobalObject(string path, object o)
         {
-            RegisterUserDataType(o.GetType());
+            if (!(o.GetType() == typeof(string) || o.GetType().IsPrimitive))
+            {
+                RegisterUserDataType(o.GetType());
+            }
             BindingHelpers.CreateBindUserObject(bindItems, path, o);
             //globalObjects[name]
         }

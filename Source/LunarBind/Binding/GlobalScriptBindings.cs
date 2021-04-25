@@ -10,7 +10,6 @@
     using Yielding;
 
     //TODO: Make GlobalScriptBindings contain and reference a static ScriptBindings to reduce code duplication and improve maintainability
-    //TODO: automatic and manual hooking for enums (everywhere) and newable types (in assembly)
     //TODO: Generate documentation
     public static class GlobalScriptBindings
     {
@@ -166,10 +165,38 @@
         {
             foreach (var assembly in assemblies)
             {
-                RegisterAssemblyFuncs(assembly);
+                
             }
         }
 
+
+        public static void BindAssemblies(params Assembly[] assemblies)
+        {
+            foreach (var assembly in assemblies)
+            {
+                RegisterAssemblyFuncs(assembly);
+                //RegisterAssemblyInstantiables(assembly);
+            }
+            //.GetConstructor(Type.EmptyTypes)
+        }
+
+        //private static void RegisterAssemblyInstantiables(Assembly assembly)
+        //{
+        //    Type[] types = assembly.GetTypes();
+        //    foreach (var type in types)
+        //    {
+        //        var attr = (LunarBindInstanceAttribute)type.GetCustomAttribute(typeof(LunarBindInstanceAttribute));
+        //        if (attr != null)
+        //        {
+        //            AddInstantiableType(attr.Name, type);
+        //        }
+        //    }
+        //}
+
+        private static void AddInstantiableType(string name, Type type)
+        {
+            throw new NotImplementedException();
+        }
 
         //TODO: rename to differentiate from the AddGlobalType, etc
         /// <summary>

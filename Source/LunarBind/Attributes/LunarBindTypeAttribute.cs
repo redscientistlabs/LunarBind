@@ -11,12 +11,12 @@
         readonly bool staticAccess;
         public string Name => name;
         public bool Newable => newable;
-        public bool StaticAccess => staticAccess;
-        public LunarBindTypeAttribute(string name, bool newable = false, bool staticAccess = false)
+        public bool PrivateMemberAccess => staticAccess;
+        public LunarBindTypeAttribute(string name, bool newable = false, bool usePrivateMembers = false)
         {
             this.name = name;
             this.newable = newable;
-            this.staticAccess = staticAccess;
+            this.staticAccess = usePrivateMembers;
         }
 
         public LunarBindTypeAttribute(bool newable, bool staticAccess, string name = null)
@@ -25,6 +25,7 @@
             this.newable = newable;
             this.staticAccess = staticAccess;
         }
-
     }
+
+
 }
