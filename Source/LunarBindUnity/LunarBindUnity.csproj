@@ -4,7 +4,7 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{0AD5D929-B842-4DF4-BD29-80D9C406A2E0}</ProjectGuid>
+    <ProjectGuid>{87EA6577-ED4B-4D28-8EB7-25E503D70C48}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>LunarBind</RootNamespace>
@@ -17,7 +17,7 @@
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
-    <OutputPath>bin\Debug\</OutputPath>
+    <OutputPath>bin\Plugins\LunarBind\</OutputPath>
     <DefineConstants>TRACE;DEBUG;LBNETFW</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
@@ -25,7 +25,7 @@
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
-    <OutputPath>bin\Release\</OutputPath>
+    <OutputPath>bin\Plugins\LunarBind\</OutputPath>
     <DefineConstants>TRACE;LBNETFW</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
@@ -45,91 +45,125 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="..\LunarBind\QuickScripting.cs" />
-    <Compile Include="..\LunarBind\ScriptFunction.cs" />
-    <Compile Include="..\LunarBind\ScriptLibrary.cs" />
+    <Compile Include="..\LunarBind\QuickScripting.cs">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Compile>
+    <Compile Include="..\LunarBind\ScriptFunction.cs">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Compile>
+    <Compile Include="..\LunarBind\ScriptLibrary.cs">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Compile>
     <Compile Include="..\LunarBind\Yielding\WaitForDone.cs">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       <Link>Yielding\WaitForDone.cs</Link>
     </Compile>
     <Compile Include="..\LunarBind\Yielding\WaitFrames.cs">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       <Link>Yielding\WaitFrames.cs</Link>
     </Compile>
     <Compile Include="..\LunarBind\Yielding\WaitUntil.cs">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       <Link>Yielding\WaitUntil.cs</Link>
     </Compile>
     <Compile Include="..\LunarBind\Yielding\Yielder.cs">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       <Link>Yielding\Yielder.cs</Link>
     </Compile>
     <Compile Include="..\LunarBind\Standards\LuaFuncType.cs">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       <Link>Standards\LuaFuncType.cs</Link>
     </Compile>
     <Compile Include="..\LunarBind\Standards\LuaScriptStandard.cs">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       <Link>Standards\LuaScriptStandard.cs</Link>
     </Compile>
     <Compile Include="..\LunarBind\Runners\BasicScriptRunner.cs">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       <Link>Runners\BasicScriptRunner.cs</Link>
     </Compile>
     <Compile Include="..\LunarBind\Runners\HookedScriptRunner.cs">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       <Link>Runners\HookedScriptRunner.cs</Link>
     </Compile>
     <Compile Include="..\LunarBind\Runners\HookedStateScriptRunner.cs">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       <Link>Runners\HookedStateScriptRunner.cs</Link>
     </Compile>
     <Compile Include="..\LunarBind\Runners\ScriptRunnerBase.cs">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       <Link>Runners\ScriptRunnerBase.cs</Link>
     </Compile>
     <Compile Include="..\LunarBind\Runners\UserScriptRunner.cs">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       <Link>Runners\UserScriptRunner.cs</Link>
     </Compile>
     <Compile Include="..\LunarBind\Runners\HookedScriptContainer.cs">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       <Link>Runners\HookedScriptContainer.cs</Link>
     </Compile>
     <Compile Include="..\LunarBind\Internal\BindingHelpers.cs">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       <Link>Internal\BindingHelpers.cs</Link>
     </Compile>
     <Compile Include="..\LunarBind\Internal\StandardHelpers.cs">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       <Link>Internal\StandardHelpers.cs</Link>
     </Compile>
     <Compile Include="..\LunarBind\Binding\BindEnum.cs">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       <Link>Binding\BindEnum.cs</Link>
     </Compile>
     <Compile Include="..\LunarBind\Binding\BindFunc.cs">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       <Link>Binding\BindFunc.cs</Link>
     </Compile>
     <Compile Include="..\LunarBind\Binding\BindItem.cs">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       <Link>Binding\BindItem.cs</Link>
     </Compile>
     <Compile Include="..\LunarBind\Binding\BindTable.cs">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       <Link>Binding\BindTable.cs</Link>
     </Compile>
     <Compile Include="..\LunarBind\Binding\BindUserObject.cs">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       <Link>Binding\BindUserObject.cs</Link>
     </Compile>
     <Compile Include="..\LunarBind\Binding\GlobalScriptBindings.cs">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       <Link>Binding\GlobalScriptBindings.cs</Link>
     </Compile>
     <Compile Include="..\LunarBind\Binding\ScriptBindings.cs">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       <Link>Binding\ScriptBindings.cs</Link>
     </Compile>
     <Compile Include="..\LunarBind\Attributes\LunarBindDocumentationAttribute.cs">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       <Link>Attributes\LunarBindDocumentationAttribute.cs</Link>
     </Compile>
     <Compile Include="..\LunarBind\Attributes\LunarBindEnumAttribute.cs">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       <Link>Attributes\LunarBindEnumAttribute.cs</Link>
     </Compile>
     <Compile Include="..\LunarBind\Attributes\LunarBindExampleAttribute.cs">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       <Link>Attributes\LunarBindExampleAttribute.cs</Link>
     </Compile>
     <Compile Include="..\LunarBind\Attributes\LunarBindFunctionAttribute.cs">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       <Link>Attributes\LunarBindFunctionAttribute.cs</Link>
     </Compile>
     <Compile Include="..\LunarBind\Attributes\LunarBindHideAttribute.cs">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       <Link>Attributes\LunarBindHideAttribute.cs</Link>
     </Compile>
     <Compile Include="..\LunarBind\Attributes\LunarBindTypeAttribute.cs">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       <Link>Attributes\LunarBindTypeAttribute.cs</Link>
     </Compile>
     <Compile Include="..\LunarBind\Exceptions\LunarBindStandardException.cs">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       <Link>Attributes\LunarBindStandardException.cs</Link>
     </Compile>
   </ItemGroup>
@@ -140,4 +174,10 @@
     <Folder Include="Exceptions\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <PropertyGroup>
+    <PostBuildEvent>cd $(TargetDir)
+del *.dll
+del *.pdb
+del *.xml</PostBuildEvent>
+  </PropertyGroup>
 </Project>

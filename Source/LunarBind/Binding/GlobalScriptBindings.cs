@@ -181,7 +181,6 @@
                 RegisterAssemblyFuncs(assembly);
                 //RegisterAssemblyInstantiables(assembly);
             }
-            //.GetConstructor(Type.EmptyTypes)
         }
 
         //private static void RegisterAssemblyInstantiables(Assembly assembly)
