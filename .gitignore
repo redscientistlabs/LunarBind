@@ -350,5 +350,5 @@ MigrationBackup/
 .ionide/
 
 #Unity projects (Local)
-Source/LunarBindUnity.sln
-Source/LunarBindUnity/
+Source/LunarBindUnityPersonal.sln
+Source/LunarBindUnityPersonal/
