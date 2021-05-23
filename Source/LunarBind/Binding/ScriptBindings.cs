@@ -144,6 +144,19 @@
         }
 
         /// <summary>
+        /// Adds all functions under a path
+        /// </summary>
+        /// <param name="pathPrefix">The path</param>
+        /// <param name="types"></param>
+        public void BindTypeFuncs(string pathPrefix, params Type[] types)
+        {
+            foreach (var type in types)
+            {
+                RegisterTypeFuncs(type, pathPrefix);
+            }
+        }
+
+        /// <summary>
         /// Use <see cref="BindInstanceFuncs(object[])"/>
         /// </summary>
         /// <param name="objs"></param>
@@ -350,13 +363,13 @@
                     var del = BindingHelpers.CreateDelegate(mi, target);
                     string name = attr.Name ?? mi.Name;
                     BindingHelpers.CreateBindFunction(bindItems, name, del,attr.AutoYield, documentation?.Data ?? "", example?.Data ?? "");
-                    //callbackItems[name] = new CallbackFunc(name, del, documentation?.Data ?? "", example?.Data ?? "");
                 }
             }
         }
 
-        private void RegisterTypeFuncs(Type type)
+        private void RegisterTypeFuncs(Type type, string prefix = null)
         {
+            if(prefix != null) prefix = prefix.Trim('.', ' ');
             MethodInfo[] mis = type.GetMethods(BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic);
             foreach (var mi in mis)
             {
@@ -366,9 +379,8 @@
                     var documentation = (LunarBindDocumentationAttribute)Attribute.GetCustomAttribute(mi, typeof(LunarBindDocumentationAttribute));
                     var example = (LunarBindExampleAttribute)Attribute.GetCustomAttribute(mi, typeof(LunarBindExampleAttribute));
                     var del = BindingHelpers.CreateDelegate(mi);
-                    string name = attr.Name ?? mi.Name;
+                    string name = (prefix != null? prefix + "." : "") + (attr.Name ?? mi.Name);
                     BindingHelpers.CreateBindFunction(bindItems, name, del, attr.AutoYield, documentation?.Data ?? "", example?.Data ?? "");
-                    //callbackItems[name] = new CallbackFunc(name, del, documentation?.Data ?? "", example?.Data ?? "");
                 }
             }
         }
