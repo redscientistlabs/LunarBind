@@ -35,6 +35,7 @@
         public HookedScriptRunner()
         {
             Lua = new Script(CoreModules.Preset_HardSandbox | CoreModules.Coroutine | CoreModules.OS_Time);
+            Lua.Globals["Script"] = new ScriptReference(Lua);
             Lua.Globals["RegisterHook"] = (Action<DynValue, string>)RegisterHook;
             Lua.Globals["RegisterCoroutine"] = (Action<DynValue, string, bool>)RegisterCoroutine;
             Lua.Globals["RemoveHook"] = (Action<string>)RemoveHook;
@@ -53,6 +54,7 @@
                 throw new ArgumentException("Modules must contain the Coroutine Flag to be used in a HookedScriptRunner", "modules");
             }
             Lua = new Script(modules);
+            Lua.Globals["Script"] = new ScriptReference(Lua);
             Lua.Globals["RegisterHook"] = (Action<DynValue, string>)RegisterHook;
             Lua.Globals["RegisterCoroutine"] = (Action<DynValue, string, bool>)RegisterCoroutine;
             Lua.Globals["RemoveHook"] = (Action<string>)RemoveHook;
