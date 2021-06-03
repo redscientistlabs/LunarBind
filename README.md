@@ -17,7 +17,7 @@ class Program
   static void Main(string[] args)
   {
     //Register functions marked with the LunarBindFunction attribute
-    GlobalScriptBindings.AddTypes(typeof(Program));
+    GlobalScriptBindings.BindTypeFuncs(typeof(Program));
 
     //All runners are initialized with global script bindings on creation
     HookedScriptRunner runner = new HookedScriptRunner();
@@ -54,7 +54,7 @@ class Program
 {
   static void Main(string[] args)
   {
-    GlobalScriptBindings.AddTypes(typeof(Program));
+    GlobalScriptBindings.BindTypeFuncs(typeof(Program));
 
     //Create a standard that any script must follow
     LuaScriptStandard standard = new LuaScriptStandard(
@@ -109,7 +109,7 @@ class Program
 {
   static void Main(string[] args)
   {
-    GlobalScriptBindings.AddTypes(typeof(Program));
+    GlobalScriptBindings.BindTypeFuncs(typeof(Program));
     HookedScriptRunner runner = new HookedScriptRunner();
     runner.LoadScript(
       "function foo(a, b) " +
@@ -142,7 +142,7 @@ class Program
 {
   static void Main(string[] args)
   {
-    GlobalScriptBindings.AddTypes(typeof(Program));
+    GlobalScriptBindings.BindTypeFuncs(typeof(Program));
 
     ExampleClass instanceObject = new ExampleClass() { MyNumber = 27 };
 
@@ -283,7 +283,7 @@ class Program
 {
   static void Main(string[] args)
   {
-    GlobalScriptBindings.AddTypes(typeof(Program));
+    GlobalScriptBindings.BindTypeFuncs(typeof(Program));
     //Register custom Yielder class. all Yielder classes are also registered as newables
     GlobalScriptBindings.AddYieldableType<MyYielder>();
 
@@ -347,6 +347,7 @@ class Program
 class MyYielder : Yielder
 {
   int yieldCountDown = 3;
+  //Return true to continue
   public override bool CheckStatus()
   {
     return yieldCountDown-- <= 0;
@@ -354,7 +355,7 @@ class MyYielder : Yielder
 }
 ```
 
-For use with starting Unity coroutines from Lua and continuing only when they are completed, the following technique can be used:
+When you want to start a Unity coroutine from Lua and continue only when the Unity coroutine is completed, the following technique can be used:
 
 ```csharp
 [LunarBindFunction("TestMethod")]
@@ -373,7 +374,7 @@ IEnumerator MyUnityCoroutine(string text)
   yield return new WaitForSeconds(2);
 }
 
-//Implement in an extension class
+//Implement in an extension class. 
 public static WaitForDone RunUnityCoroutineFromLua(this MonoBehaviour behaviour, IEnumerator toRun)
 {
   //WaitForDone is an included Yielder class in LunarBind
@@ -394,13 +395,14 @@ These coroutines will yield return null on yielding or forced yields (moonsharp 
 ```csharp
 using System;
 using LunarBind;
+//Other usings here
 
 class MyMonoBehaviour : MonoBehaviour
 {
   void Start()
   {
     //Only set up GlobalScriptBindings once in a static initializer class
-    GlobalScriptBindings.AddTypes(typeof(MyMonoBehaviour));
+    GlobalScriptBindings.BindTypeFuncs(typeof(MyMonoBehaviour));
     //Register custom Yielder class
     GlobalScriptBindings.AddYieldableType<MyYielder>();
     
@@ -455,17 +457,17 @@ class Program
 {
   static void Main(string[] args)
   {
-    GlobalScriptBindings.AddTypes(typeof(Program));
+    GlobalScriptBindings.BindTypeFuncs(typeof(Program));
     GlobalScriptBindings.AddYieldableType<MyYielder>();
 
     Script script = new Script();
     string scriptString = "function foo(callNumber) " +
       "  print('Call '..tostring(callNumber)..', yielding 0 calls with WaitFrames')" +
-      "  local r = coroutine.yield(WaitFrames(0))" +
+      "  local r = coroutine.yield(new.WaitFrames(0))" +
       "  print('Call '..tostring(r)..', yielding 1 calls with auto yielder')" +
       "  r = AutoYieldOneCall()" +
       "  print('Call '..tostring(r)..', yielding 3 calls with MyYielder')" +
-      "  r = coroutine.yield(MyYielder())" +
+      "  r = coroutine.yield(new.MyYielder())" +
       "  print('Call '..tostring(r)..', done. Coroutine is now restarting')" +
       "  " +
       "end ";

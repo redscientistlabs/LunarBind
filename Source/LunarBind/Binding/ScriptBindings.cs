@@ -25,6 +25,11 @@
         /// </summary>
         public string CustomInitializerString { get; set; } = null;
 
+        /// <summary>
+        /// Use this to initialize any scripts initialized with this binder with custom Lua code. This runs before any global bindings have been set up. (useful for modules, etc)
+        /// </summary>
+        public string CustomPreInitializerString { get; set; } = null;
+
         public ScriptBindings()
         {
 
@@ -442,6 +447,11 @@
         /// <param name="lua"></param>
         public void Initialize(Script lua)
         {
+            if (CustomPreInitializerString != null)
+            {
+                lua.DoString(CustomPreInitializerString);
+            }
+
             foreach (var item in bindItems.Values)
             {
                 item.AddToScript(lua);

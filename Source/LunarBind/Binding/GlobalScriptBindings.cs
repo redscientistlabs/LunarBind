@@ -21,26 +21,26 @@
         private static string bakedNewableTypeString = null;
         private static string bakedYieldableNewableTypeString = null;
 
-        //Todo: decide if all newable base types should be put into a table or left in global space
         /// <summary>
-        /// The type prefix for all bindings to use for newable types
-        /// </summary>
-        public static string TypePrefix { get; set; } = "_";
-
-        /// <summary>
-        /// The table newable constructors are stored under
+        /// The table newable constructors are stored under. Only modify before binding anything.
         /// </summary>
         public static string NewableTable { get; set; } = "new";
 
 
         /// <summary>
-        /// Should functions that return Yield be automatically wrapped in coroutine.yield()?
+        /// Should functions that return a Yielder subclass be automatically wrapped in coroutine.yield()? Defaults to true
         /// </summary>
         public static bool AutoYield { get; set; } = true;
+
         /// <summary>
-        /// Use this to initialize all scripts with custom Lua code. This runs after all global bindings have been set up
+        /// Use this to initialize all scripts with custom Lua code. This runs after all global bindings have been set up. 
         /// </summary>
         public static string CustomInitializerString { get; set; } = null;
+
+        /// <summary>
+        /// Use this to initialize all scripts with custom Lua code. This runs before any global bindings have been set up. (useful for modules, etc)
+        /// </summary>
+        public static string CustomPreInitializerString { get; set; } = null;
 
         //This must happen before any script is initialized, static constructor assures that this will happen
         static GlobalScriptBindings()
@@ -64,6 +64,11 @@
         /// <param name="lua"></param>
         public static void Initialize(Script lua)
         {
+            if (CustomPreInitializerString != null)
+            {
+                lua.DoString(CustomPreInitializerString);
+            }
+
             foreach (var item in bindItems.Values)
             {
                 item.AddToScript(lua);
