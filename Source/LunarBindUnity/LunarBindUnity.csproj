@@ -45,6 +45,9 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs" />
+	<Compile Include="..\LunarBind\ScriptReference.cs">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Compile>
     <Compile Include="..\LunarBind\QuickScripting.cs">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Compile>

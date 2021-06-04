@@ -7,7 +7,7 @@ namespace LunarBind
 {
 
     /// <summary>
-    /// Used for transporting a script reference without adding Script to userdata
+    /// Used for holding a reference to a <see cref="MoonSharp.Interpreter.Script"/> in Lua without adding <see cref="MoonSharp.Interpreter.Script"/> type to userdata
     /// </summary>
     [MoonSharpUserData]
     public class ScriptReference

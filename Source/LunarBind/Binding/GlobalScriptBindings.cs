@@ -149,20 +149,23 @@
         /// <para/>
         /// Equivalent to script.Globals[name] = t
         /// </summary>
-        /// <param name="name"></param>
+        /// <param name="path"></param>
         /// <param name="t"></param>
-        public static void AddGlobalType(string name, Type t)
+        public static void AddGlobalType(string path, Type t)
         {
             RegisterUserDataType(t);
-            staticTypes[name] = t;
+            BindingHelpers.CreateBindType(bindItems, path, t);
+
         }
 
+        /// <summary>
+        /// Add an object at the specified path
+        /// </summary>
+        /// <param name="path"></param>
+        /// <param name="o"></param>
         public static void AddGlobalObject(string path, object o)
         {
-            if (!(o.GetType() == typeof(string) || o.GetType().IsPrimitive))
-            {
-                RegisterUserDataType(o.GetType());
-            }
+            RegisterUserDataType(o.GetType());
             BindingHelpers.CreateBindUserObject(bindItems, path, o);
         }
 
@@ -175,10 +178,8 @@
             foreach (var assembly in assemblies)
             {
                 RegisterAssemblyFuncs(assembly);
-                //RegisterAssemblyInstantiables(assembly);
             }
         }
-
 
         public static void BindAssemblies(params Assembly[] assemblies)
         {
@@ -187,24 +188,6 @@
                 RegisterAssemblyFuncs(assembly);
                 //RegisterAssemblyInstantiables(assembly);
             }
-        }
-
-        //private static void RegisterAssemblyInstantiables(Assembly assembly)
-        //{
-        //    Type[] types = assembly.GetTypes();
-        //    foreach (var type in types)
-        //    {
-        //        var attr = (LunarBindInstanceAttribute)type.GetCustomAttribute(typeof(LunarBindInstanceAttribute));
-        //        if (attr != null)
-        //        {
-        //            AddInstantiableType(attr.Name, type);
-        //        }
-        //    }
-        //}
-
-        private static void AddInstantiableType(string name, Type type)
-        {
-            throw new NotImplementedException();
         }
 
         //TODO: rename to differentiate from the AddGlobalType, etc
@@ -259,13 +242,17 @@
         }
 
         /// <summary>
-        /// Manually register a type to use in Lua. Calls MoonSharp's <see cref="UserData.RegisterType(Type, InteropAccessMode)"/> Only a static form of registration is available.
+        /// Manually register a type to use in Lua, is ignored if type is already registered. Calls MoonSharp's <see cref="UserData.RegisterType(Type, InteropAccessMode)"/> Only a static form of registration is available.
         /// </summary>
         /// <param name="t"></param>
         public static void RegisterUserDataType(Type t)
         {
-            UserData.RegisterType(t);
+            if (!(t == typeof(string) || t.IsPrimitive) && !UserData.IsTypeRegistered(t))
+            {
+                UserData.RegisterType(t);
+            }
         }
+
         /// <summary>
         /// Manually register a type to use in Lua. Calls MoonSharp's <see cref="UserData.RegisterType(Type, InteropAccessMode)"/> Only a static form of registration is available.
         /// </summary>
@@ -327,26 +314,50 @@
         //}
 
         /// <summary>
-        /// Add a specific <see cref="Action"/> to the bindings
+        /// Use <see cref="BindAction(string, Action, string, string)"/>
         /// </summary>
         /// <param name="name"></param>
         /// <param name="action"></param>
         /// <param name="documentation"></param>
         /// <param name="example"></param>
+        [Obsolete]
         public static void AddAction(string name, Action action, string documentation = "", string example = "")
         {
             BindingHelpers.CreateBindFunction(bindItems, name, action, false, documentation ?? "", example ?? "");
         }
+        /// <summary>
+        /// Use <see cref="BindAction(Action, string, string)"/> instead
+        /// </summary>
+        /// <param name="action"></param>
+        /// <param name="documentation"></param>
+        /// <param name="example"></param>
+        [Obsolete]
+        public static void AddAction(Action action, string documentation = "", string example = "")
+        {
+            BindingHelpers.CreateBindFunction(bindItems, action.Method.Name, action, false, documentation ?? "", example ?? "");
+        }
+
+        /// <summary>
+        /// Add a specific <see cref="Action"/> to the bindings.
+        /// </summary>
+        /// <param name="path">The path to bind to. Can contain "."</param>
+        /// <param name="action"></param>
+        /// <param name="documentation"></param>
+        /// <param name="example"></param>
+        public static void BindAction(string path, Action action, string documentation = "", string example = "")
+        {
+            BindingHelpers.CreateBindFunction(bindItems, path, action, false, documentation ?? "", example ?? "");
+        }
+
         /// <summary>
         /// Add a specific <see cref="Action"/> to the bindings, using the method's Name as the name
         /// </summary>
         /// <param name="action"></param>
         /// <param name="documentation"></param>
         /// <param name="example"></param>
-        public static void AddAction(Action action, string documentation = "", string example = "")
+        public static void BindAction(Action action, string documentation = "", string example = "")
         {
             BindingHelpers.CreateBindFunction(bindItems, action.Method.Name, action, false, documentation ?? "", example ?? "");
-            //callbackItems[action.Method.Name] = new CallbackFunc(action.Method.Name, action, documentation, example);
         }
 
         /// <summary>
@@ -358,7 +369,6 @@
             foreach (var action in actions)
             {
                 BindingHelpers.CreateBindFunction(bindItems, action.Method.Name, action, false, "", "");
-                //callbackItems[action.Method.Name] = new CallbackFunc(action.Method.Name, action);
             }
         }
 

@@ -40,7 +40,6 @@
             foreach (var assembly in assemblies)
             {
                 RegisterAssemblyFuncs(assembly);
-                UserData.RegisterAssembly(assembly);
             }
         }
 
@@ -62,12 +61,12 @@
 
         public ScriptBindings(params Action[] actions)
         {
-            AddActions(actions);
+            BindActions(actions);
         }
 
         public ScriptBindings(params Delegate[] dels)
         {
-            AddDelegates(dels);
+            BindDelegates(dels);
         }
 
         /// <summary>
@@ -209,147 +208,183 @@
             RegisterObjectFuncs(obj);
         }
 
-
         /// <summary>
-        /// Add a specific <see cref="Action"/> to the bindings
+        /// Use <see cref="BindAction(string, Action, string, string)"/>
         /// </summary>
         /// <param name="name"></param>
         /// <param name="action"></param>
         /// <param name="documentation"></param>
         /// <param name="example"></param>
+        [Obsolete]
         public void AddAction(string name, Action action, string documentation = "", string example = "")
         {
             BindingHelpers.CreateBindFunction(bindItems, name, action, false, documentation ?? "", example ?? "");
-            //callbackItems[name] = new CallbackFunc(name, action, documentation, example);
         }
+        /// <summary>
+        /// Use <see cref="BindAction(Action, string, string)"/> instead
+        /// </summary>
+        /// <param name="action"></param>
+        /// <param name="documentation"></param>
+        /// <param name="example"></param>
+        [Obsolete]
+        public void AddAction(Action action, string documentation = "", string example = "")
+        {
+            BindingHelpers.CreateBindFunction(bindItems, action.Method.Name, action, false, documentation ?? "", example ?? "");
+        }
+
+        /// <summary>
+        /// Add a specific <see cref="Action"/> to the bindings.
+        /// </summary>
+        /// <param name="path">The path to bind to. Can contain "."</param>
+        /// <param name="action"></param>
+        /// <param name="documentation"></param>
+        /// <param name="example"></param>
+        public void BindAction(string path, Action action, string documentation = "", string example = "")
+        {
+            BindingHelpers.CreateBindFunction(bindItems, path, action, false, documentation ?? "", example ?? "");
+        }
+
         /// <summary>
         /// Add a specific <see cref="Action"/> to the bindings, using the method's Name as the name
         /// </summary>
         /// <param name="action"></param>
         /// <param name="documentation"></param>
         /// <param name="example"></param>
-        public void AddAction(Action action, string documentation = "", string example = "")
+        public void BindAction(Action action, string documentation = "", string example = "")
         {
             BindingHelpers.CreateBindFunction(bindItems, action.Method.Name, action, false, documentation ?? "", example ?? "");
-            //callbackItems[action.Method.Name] = new CallbackFunc(action.Method.Name, action, documentation, example);
         }
 
         /// <summary>
-        /// Add specific <see cref="Action"/>s to the bindings, using the method's Name as the name for each
+        /// Use <see cref="BindActions(Action[])"/> instead
         /// </summary>
         /// <param name="actions"></param>
+        [Obsolete]
         public void AddActions(params Action[] actions)
         {
             foreach (var action in actions)
             {
                 BindingHelpers.CreateBindFunction(bindItems, action.Method.Name, action, false, "", "");
-                //callbackItems[action.Method.Name] = new CallbackFunc(action.Method.Name, action);
             }
+        }
+
+        /// <summary>
+        /// Add specific <see cref="Action"/>s to the bindings, using the method's Name as the name for each. Paths not supported
+        /// </summary>
+        /// <param name="actions"></param>
+        public void BindActions(params Action[] actions)
+        {
+            foreach (var action in actions)
+            {
+                BindingHelpers.CreateBindFunction(bindItems, action.Method.Name, action, false, "", "");
+            }
+        }
+
+        /// <summary>
+        /// Use <see cref="BindDelegate(string, Delegate, string, string)"/> instead
+        /// </summary>
+        /// <param name="name"></param>
+        /// <param name="del"></param>
+        /// <param name="documentation"></param>
+        /// <param name="example"></param>
+        [Obsolete]
+        public void AddDelegate(string name, Delegate del, string documentation = "", string example = "")
+        {
+            BindingHelpers.CreateBindFunction(bindItems, name, del, false, documentation ?? "", example ?? "");
+        }
+
+        /// <summary>
+        /// Use <see cref="BindDelegate(Delegate, string, string)"/> instead
+        /// </summary>
+        /// <param name="del"></param>
+        /// <param name="documentation"></param>
+        /// <param name="example"></param>
+        [Obsolete]
+        public void AddDelegate(Delegate del, string documentation = "", string example = "")
+        {
+            BindingHelpers.CreateBindFunction(bindItems, del.Method.Name, del, false, documentation ?? "", example ?? "");
         }
 
         /// <summary>
         /// Add a specific <see cref="Delegate"/> to the bindings
         /// </summary>
-        /// <param name="name"></param>
+        /// <param name="path"></param>
         /// <param name="del"></param>
         /// <param name="documentation"></param>
         /// <param name="example"></param>
-        public void AddDelegate(string name, Delegate del, string documentation = "", string example = "")
+        public void BindDelegate(string path, Delegate del, string documentation = "", string example = "")
         {
-            BindingHelpers.CreateBindFunction(bindItems, name, del, false, documentation ?? "", example ?? "");
-            //callbackItems[name] = new CallbackFunc(name, del, documentation, example);
+            BindingHelpers.CreateBindFunction(bindItems, path, del, false, documentation ?? "", example ?? "");
         }
 
         /// <summary>
         /// Add a specific <see cref="Delegate"/> to the bindings using its Name as the name
         /// </summary>
-        /// <param name="name"></param>
         /// <param name="del"></param>
         /// <param name="documentation"></param>
         /// <param name="example"></param>
-        public void AddDelegate(Delegate del, string documentation = "", string example = "")
+        public void BindDelegate(Delegate del, string documentation = "", string example = "")
         {
             BindingHelpers.CreateBindFunction(bindItems, del.Method.Name, del, false, documentation ?? "", example ?? "");
-            //callbackItems[del.Method.Name] = new CallbackFunc(del.Method.Name, del, documentation, example);
         }
 
+
         /// <summary>
-        /// Add specific <see cref="Delegate"/>s to the bindings using the method Name as the name
+        /// Use <see cref="BindDelegates(Delegate[])"/> instead
         /// </summary>
         /// <param name="name"></param>
         /// <param name="del"></param>
         /// <param name="documentation"></param>
         /// <param name="example"></param>
+        [Obsolete]
         public void AddDelegates(params Delegate[] dels)
         {
             foreach (var del in dels)
             {
                 BindingHelpers.CreateBindFunction(bindItems, del.Method.Name, del, false, "", "");
-                //callbackItems[del.Method.Name] = new CallbackFunc(del.Method.Name, del);
+            }
+        }
+
+        /// <summary>
+        /// Add specific <see cref="Delegate"/>s to the bindings using the method Name as the name. Paths not supported
+        /// </summary>
+        /// <param name="name"></param>
+        /// <param name="del"></param>
+        /// <param name="documentation"></param>
+        /// <param name="example"></param>
+        public void BindDelegates(params Delegate[] dels)
+        {
+            foreach (var del in dels)
+            {
+                BindingHelpers.CreateBindFunction(bindItems, del.Method.Name, del, false, "", "");
             }
         }
 
 
-        ///// <summary>
-        ///// Unstable, untested :)
-        ///// </summary>
-        ///// <typeparam name="T0"></typeparam>
-        ///// <param name="target"></param>
-        //public void HookActionProps<T0>(object target)
-        //{
-        //    Type type = target.GetType();
-        //    PropertyInfo[] props = type.GetProperties(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
-        //    foreach (var prop in props)
-        //    {
-        //        var attr = (LuaFunctionAttribute)Attribute.GetCustomAttribute(prop, typeof(LuaFunctionAttribute));
-        //        if (attr != null)
-        //        {
-        //            var val = prop.GetValue(target);
-        //            if (val.GetType().IsAssignableFrom(typeof(Action<T0>)))
-        //            {
-        //                var action = ((Action<T0>)val);
-        //                string name = attr.Name ?? prop.Name;
-        //                BindingHelpers.CreateCallbackItem(callbackItems, name, action, "", "");
-        //                //callbackItems[name] = new CallbackFunc(name, action, "", "");
-        //            }
-        //        }
-        //    }
-        //}
-
-        ///// <summary>
-        ///// Unstable, untested :)
-        ///// </summary>
-        ///// <typeparam name="T0"></typeparam>
-        ///// <param name="type"></param>
-        //public void HookActionProps<T0>(Type type)
-        //{
-        //    PropertyInfo[] props = type.GetProperties(BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic);
-        //    foreach (var prop in props)
-        //    {
-        //        var attr = (LuaFunctionAttribute)Attribute.GetCustomAttribute(prop, typeof(LuaFunctionAttribute));
-        //        if (attr != null)
-        //        {
-        //            var val = prop.GetValue(null);
-        //            if (val.GetType().IsAssignableFrom(typeof(Action<T0>)))
-        //            {
-        //                var action = ((Action<T0>)val);
-        //                string name = attr.Name ?? prop.Name;
-        //                callbackItems[name] = new CallbackFunc(name, action, "", "");
-        //            }
-        //        }
-        //    }
-        //}
-
         /// <summary>
-        /// Automatically register all the static functions with <see cref="Attributes.LuaFunctionAttribute"/> for specific assemblies
+        /// Use <see cref="BindAssemblyFuncs(Assembly[])"/> instead
         /// </summary>
         /// <param name="assemblies"></param>
+        [Obsolete]
         public void AddAssemblies(params Assembly[] assemblies)
         {
             foreach (var assembly in assemblies)
             {
                 RegisterAssemblyFuncs(assembly);
-                UserData.RegisterAssembly(assembly);
+                //UserData.RegisterAssembly(assembly);
+            }
+        }
+
+        /// <summary>
+        ///  Bind all static functions with the [<see cref="LunarBindFunctionAttribute"/>] attribute on each type in each assembly
+        /// </summary>
+        /// <param name="assemblies"></param>
+        public void BindAssemblyFuncs(params Assembly[] assemblies)
+        {
+            foreach (var assembly in assemblies)
+            {
+                RegisterAssemblyFuncs(assembly);
+                //UserData.RegisterAssembly(assembly);
             }
         }
 
@@ -401,14 +436,16 @@
        
         public static void RegisterUserDataType(Type t)
         {
-            UserData.RegisterType(t);
+            if (!UserData.IsTypeRegistered(t))
+            {
+                UserData.RegisterType(t);
+            }
         }
 
         public void AddYieldableType<T>(string name = null) where T : Yielder
         {
             if (name == null) { name = typeof(T).Name; }
             RegisterUserDataType(typeof(T));
-            //yieldableTypes[GlobalScriptBindings.TypePrefix + name] = typeof(T);
             yieldableTypes[name] = typeof(T);
             BakeYieldables();
         }
@@ -421,7 +458,6 @@
         public void AddNewableType(string name, Type t)
         {
             RegisterUserDataType(t);
-            //newableTypes[GlobalScriptBindings.TypePrefix + name] = t;
             newableTypes[name] = t;
             BakeNewables();
         }
@@ -429,14 +465,12 @@
         public void AddNewableType(Type t)
         {
             RegisterUserDataType(t);
-            //newableTypes[GlobalScriptBindings.TypePrefix + t.Name] = t;
             newableTypes[t.Name] = t;
             BakeNewables();
         }
 
         public void RemoveNewableType(string name)
         {
-            //newableTypes.Remove(GlobalScriptBindings.TypePrefix + name);
             newableTypes.Remove(name);
             BakeNewables();
         }
@@ -477,7 +511,7 @@
             foreach (var type in source)
             {
                 string typeName = type.Key;
-                string newFuncName = type.Key;//.Remove(0, GlobalScriptBindings.TypePrefix.Length);
+                string newFuncName = type.Key;
                 HashSet<int> paramCounts = new HashSet<int>();
                 var ctors = type.Value.GetConstructors();
                 foreach (var ctor in ctors)

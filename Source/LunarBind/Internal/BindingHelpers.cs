@@ -35,6 +35,7 @@
             return Delegate.CreateDelegate(getType(types.ToArray()), target, methodInfo.Name);
         }
 
+
         /// <summary>
         /// Automatically create tables, etc
         /// </summary>
@@ -136,6 +137,56 @@
         }
 
         /// <summary>
+        /// Automatically create tables, etc
+        /// </summary>
+        /// <param name="dict"></param>
+        /// <param name="pathString"></param>
+        internal static void CreateBindType(Dictionary<string, BindItem> dict, string pathString, Type type)
+        {
+            if (string.IsNullOrWhiteSpace(pathString))
+            {
+                throw new Exception($"Path cannot be null, empty, or whitespace for path [{pathString}]");
+            }
+            var path = pathString.Split('.');
+            string root = path[0];
+            BindUserType bindObj = new BindUserType(path[path.Length - 1], type);
+
+            if (path.Length == 1)
+            {
+                //Simple global function
+                if (dict.ContainsKey(root))
+                {
+                    throw new Exception($"Cannot add {pathString} (global object), a {GetItemTypeStr(dict[root])} with that key already exists");
+                }
+                dict[root] = bindObj;
+            }
+            else
+            {
+                //Recursion time
+                if (dict.TryGetValue(root, out BindItem item))
+                {
+                    if (item is BindTable t)
+                    {
+                        t.AddBindUserType(path, 1, bindObj);
+                        t.GenerateWrappedYieldString(); //Bake the yieldable string
+                    }
+                    else
+                    {
+                        throw new Exception($"Cannot add {pathString} (global object), One or more keys in the path is already assigned to an item");
+                    }
+                }
+                else
+                {
+                    //Create new table
+                    BindTable t = new BindTable(root);
+                    dict[root] = t;
+                    t.AddBindUserType(path, 1, bindObj);
+                }
+            }
+        }
+
+
+        /// <summary>
         /// Automatically create tables, etc for bind enums
         /// </summary>
         /// <param name="dict"></param>
@@ -187,8 +238,9 @@
 
         private static string GetItemTypeStr(BindItem item)
         {
-            return (item is BindFunc ? "Function" : (item is BindEnum ? "Enum" : (item is BindUserObject ? "Global Object" : "Table")));
+            return (item is BindFunc ? "Function" : (item is BindEnum ? "Enum" : (item is BindUserObject ? "Global Object" : (item is BindUserType ? "Global Type" : "Table"))));
         }
+
 
 
         ///// <summary>

@@ -12,17 +12,13 @@
         private readonly Dictionary<string, BindFunc> bindFunctions = new Dictionary<string, BindFunc>();
         private readonly Dictionary<string, BindEnum> bindEnums = new Dictionary<string, BindEnum>();
         private readonly Dictionary<string, BindUserObject> bindObjects = new Dictionary<string, BindUserObject>();
+        private readonly Dictionary<string, BindUserType> bindTypes = new Dictionary<string, BindUserType>();
         //private readonly Dictionary<string, BindField> bindFields = new Dictionary<string, BindField>();
 
         public BindTable(string name)
         {
             this.Name = name;
         }
-
-        //TODO: implement fields
-        //public void AddField(string name, FieldInfo info)
-        //{
-        //}
 
         public void GenerateWrappedYieldString()
         {
@@ -46,54 +42,36 @@
             }
         }
 
-        internal void AddBindFunc(string[] path, int index, BindFunc func)
+        internal void AddBindFunc(string[] path, int index, BindFunc bindFunc)
         {
             if (index + 1 >= path.Length)
             {
                 //At lowest level, add callback func
                 if (bindTables.ContainsKey(path[index]))
                 {
-                    throw new Exception($"Cannot add {string.Join(".",path)} ({func.Name}), a Table with that key already exists");
+                    throw new Exception($"Cannot add {string.Join(".",path)} ({bindFunc.Name}), a Table with that key already exists");
                 }
-                else if (bindFunctions.ContainsKey(path[index]))
+                else
                 {
-                    throw new Exception($"Cannot add {string.Join(".", path)} ({func.Name}), a Function with that key already exists");
+                    CheckConflictingItems(path, index, bindFunc);
                 }
-                else if (bindEnums.ContainsKey(path[index]))
-                {
-                    throw new Exception($"Cannot add {string.Join(".", path)} ({func.Name}), an Enum with that key already exists");
-                }
-                else if (bindObjects.ContainsKey(path[index]))
-                {
-                    throw new Exception($"Cannot add {string.Join(".", path)} ({func.Name}), a Global Object with the key ({path[index]}) exists in the path");
-                }
-                bindFunctions[path[index]] = func;
+
+                bindFunctions[path[index]] = bindFunc;
             }
             else
             {
-                if (bindFunctions.ContainsKey(path[index]))
-                {
-                    throw new Exception($"Cannot add {string.Join(".", path)} ({func.Name}), a Function with the key ({path[index]}) exists in the path");
-                }
-                else if (bindEnums.ContainsKey(path[index]))
-                {
-                    throw new Exception($"Cannot add {string.Join(".", path)} ({func.Name}), an Enum with the key ({path[index]}) exists in the path");
-                }
-                else if (bindObjects.ContainsKey(path[index]))
-                {
-                    throw new Exception($"Cannot add {string.Join(".", path)} ({func.Name}), a Global Object with the key ({path[index]}) exists in the path");
-                }
+                CheckConflictingItems(path, index, bindFunc);
 
                 BindTable nextTable;
                 if (bindTables.TryGetValue(path[index], out nextTable))
                 {
-                    nextTable.AddBindFunc(path, index + 1, func);
+                    nextTable.AddBindFunc(path, index + 1, bindFunc);
                 }
                 else
                 {
                     nextTable = new BindTable(path[index]);
                     bindTables.Add(path[index], nextTable);
-                    nextTable.AddBindFunc(path, index + 1, func);
+                    nextTable.AddBindFunc(path, index + 1, bindFunc);
                 }
             }
         }
@@ -108,34 +86,16 @@
                 {
                     throw new Exception($"Cannot add {string.Join(".", path)} ({bindEnum.Name}), a Table with that key already exists");
                 }
-                else if (bindFunctions.ContainsKey(path[index]))
+                else
                 {
-                    throw new Exception($"Cannot add {string.Join(".", path)} ({bindEnum.Name}), a Function with that key already exists");
-                }
-                else if (bindEnums.ContainsKey(path[index]))
-                {
-                    throw new Exception($"Cannot add {string.Join(".", path)} ({bindEnum.Name}), an Enum with that key already exists");
-                }
-                else if (bindObjects.ContainsKey(path[index]))
-                {
-                    throw new Exception($"Cannot add {string.Join(".", path)} ({bindEnum.Name}), a Global Object with the key ({path[index]}) exists in the path");
+                    CheckConflictingItems(path, index, bindEnum);
                 }
                 bindEnums[path[index]] = bindEnum;
             }
             else
             {
-                if (bindFunctions.ContainsKey(path[index]))
-                {
-                    throw new Exception($"Cannot add {string.Join(".", path)} ({bindEnum.Name}), a Function with the key ({path[index]}) exists in the path");
-                }
-                else if (bindEnums.ContainsKey(path[index]))
-                {
-                    throw new Exception($"Cannot add {string.Join(".", path)} ({bindEnum.Name}), an Enum with the key ({path[index]}) exists in the path");
-                }
-                else if (bindObjects.ContainsKey(path[index]))
-                {
-                    throw new Exception($"Cannot add {string.Join(".", path)} ({bindEnum.Name}), a Global Object with the key ({path[index]}) exists in the path");
-                }
+                CheckConflictingItems(path, index, bindEnum);
+
                 BindTable nextTable;
                 if (bindTables.TryGetValue(path[index], out nextTable))
                 {
@@ -160,35 +120,15 @@
                 {
                     throw new Exception($"Cannot add {string.Join(".", path)} ({bindObj.Name}), a Table with that key already exists");
                 }
-                else if (bindFunctions.ContainsKey(path[index]))
+                else
                 {
-                    throw new Exception($"Cannot add {string.Join(".", path)} ({bindObj.Name}), a Function with that key already exists");
+                    CheckConflictingItems(path, index, bindObj);
                 }
-                else if (bindEnums.ContainsKey(path[index]))
-                {
-                    throw new Exception($"Cannot add {string.Join(".", path)} ({bindObj.Name}), an Enum with that key already exists");
-                }
-                else if (bindObjects.ContainsKey(path[index]))
-                {
-                    throw new Exception($"Cannot add {string.Join(".", path)} ({bindObj.Name}), a Global Object with the key ({path[index]}) exists in the path");
-                }
-
                 bindObjects[path[index]] = bindObj;
             }
             else
             {
-                if (bindFunctions.ContainsKey(path[index]))
-                {
-                    throw new Exception($"Cannot add {string.Join(".", path)} ({bindObj.Name}), a Function with the key ({path[index]}) exists in the path");
-                }
-                else if (bindEnums.ContainsKey(path[index]))
-                {
-                    throw new Exception($"Cannot add {string.Join(".", path)} ({bindObj.Name}), an Enum with the key ({path[index]}) exists in the path");
-                }
-                else if (bindObjects.ContainsKey(path[index]))
-                {
-                    throw new Exception($"Cannot add {string.Join(".", path)} ({bindObj.Name}), a Global Object with the key ({path[index]}) exists in the path");
-                }
+                CheckConflictingItems(path, index, bindObj);
 
                 BindTable nextTable;
                 if (bindTables.TryGetValue(path[index], out nextTable))
@@ -202,6 +142,71 @@
                     bindTables.Add(path[index], nextTable);
                     nextTable.AddBindUserObject(path, index + 1, bindObj);
                 }
+            }
+        }
+
+        internal void AddBindUserType(string[] path, int index, BindUserType bindType)
+        {
+            if (index + 1 >= path.Length)
+            {
+                //At lowest level, add enum
+                if (bindTables.ContainsKey(path[index]))
+                {
+                    throw new Exception($"Cannot add {string.Join(".", path)} ({bindType.Name}), a Table with that key already exists");
+                }
+                else
+                {
+                    CheckConflictingItems(path, index, bindType);
+                }
+
+                bindTypes[path[index]] = bindType;
+            }
+            else
+            {
+                CheckConflictingItems(path, index, bindType);
+
+                BindTable nextTable;
+                if (bindTables.TryGetValue(path[index], out nextTable))
+                {
+                    nextTable.AddBindUserType(path, index + 1, bindType);
+                }
+                else
+                {
+                    //Create new table
+                    nextTable = new BindTable(path[index]);
+                    bindTables.Add(path[index], nextTable);
+                    nextTable.AddBindUserType(path, index + 1, bindType);
+                }
+            }
+        }
+
+        private void CheckConflictingItems(string[] path, int index, BindItem bindType)
+        {
+            string GetConflictingPath()
+            {
+                List<string> retL = new List<string>();
+                for (int i = 0; i <= index; i++)
+                {
+                    retL.Add(path[index]);
+                }
+                return string.Join(".", retL);
+            }
+
+            if (bindFunctions.ContainsKey(path[index]))
+            {
+                throw new Exception($"Cannot add {string.Join(".", path)} ({bindType.Name}), a Function  with the key ({GetConflictingPath()}) exists in the path");
+            }
+            else if (bindEnums.ContainsKey(path[index]))
+            {
+                throw new Exception($"Cannot add {string.Join(".", path)} ({bindType.Name}), an Enum  with the key ({GetConflictingPath()}) exists in the path");
+            }
+            else if (bindObjects.ContainsKey(path[index]))
+            {
+                throw new Exception($"Cannot add {string.Join(".", path)} ({bindType.Name}), a Global Object with the key ({GetConflictingPath()}) exists in the path");
+            }
+            else if (bindTypes.ContainsKey(path[index]))
+            {
+                throw new Exception($"Cannot add {string.Join(".", path)} ({bindType.Name}), a Global Type with the key ({GetConflictingPath()}) exists in the path");
             }
         }
 
@@ -229,6 +234,12 @@
             foreach (var o in bindObjects.Values)
             {
                 table[o.Name] = o.UserObject;
+            }
+
+            //Global Types
+            foreach (var o in bindTypes.Values)
+            {
+                table[o.Name] = o.UserType;
             }
 
             return table;

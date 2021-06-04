@@ -20,4 +20,21 @@
             script.Globals[Name] = UserObject;
         }
     }
+
+    internal class BindUserType : BindItem
+    {
+        public Type UserType { get; private set; }
+
+        public BindUserType(string name, Type type)
+        {
+            Name = name;
+            UserType = type;
+        }
+
+        internal override void AddToScript(Script script)
+        {
+            script.Globals[Name] = UserType;
+        }
+    }
+
 }
