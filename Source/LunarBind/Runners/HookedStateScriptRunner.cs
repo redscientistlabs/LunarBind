@@ -190,11 +190,7 @@
                             }
                             break;
                         case CoroutineState.Dead:
-                            hook.CurYielder = null;
-                            if (hook.AutoResetCoroutine)
-                            {
-                                hook.Coroutine.Assign(Lua.CreateCoroutine(hook.LuaFunc));
-                            }
+                            hook.ResetCoroutine();
                             break;
                         default:
                             break;

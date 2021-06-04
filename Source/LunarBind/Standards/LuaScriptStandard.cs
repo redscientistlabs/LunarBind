@@ -69,10 +69,6 @@
         {
             foreach (var item in container.ScriptFunctions)
             {
-                //For .NET framework, must find workaround
-                //item.Value.LuaFunc.Assign(DynValue.NewNil());
-
-                //TODO: Sub-Table removal?
                 item.Value.ScriptRef.Globals.Remove(item.Key);
             }
         }

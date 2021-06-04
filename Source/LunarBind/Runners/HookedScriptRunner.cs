@@ -86,7 +86,7 @@
 
         public void LoadScript(string scriptString, string scriptName = "User Code")
         {
-
+            //Remove old hooks so they aren't counted
             if(ScriptStandard != null)
             {
                 ScriptStandard.Scrub(scriptContainer);
@@ -129,7 +129,7 @@
         public void ResetCoroutine(string name)
         {
             var hook = scriptContainer.GetHook(name);
-            hook.Coroutine.Assign(Lua.CreateCoroutine(hook.LuaFunc));
+            hook.ResetCoroutine();
         }
 
         #if LBNETFW
@@ -261,7 +261,7 @@
                         callback?.Invoke();
                         if (AutoResetAllCoroutines || hook.AutoResetCoroutine)
                         {
-                            hook.Coroutine.Assign(Lua.CreateCoroutine(hook.LuaFunc));
+                            hook.ResetCoroutine();
                         }
                         return CoroutineState.Dead;
                     default:

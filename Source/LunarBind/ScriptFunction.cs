@@ -185,7 +185,11 @@
             if (IsCoroutine)
             {
                 CurYielder = null;
-                Coroutine.Assign(ScriptRef.CreateCoroutine(LuaFunc));
+                //It is expensive to create coroutines, also DynVal.Assign() function is more expensive than just assigning in C#
+                if (CoroutineState != CoroutineState.NotStarted)
+                {
+                    Coroutine = ScriptRef.CreateCoroutine(LuaFunc);
+                }
             }
         }
 
@@ -230,7 +234,7 @@
                         if (AutoResetCoroutine)
                         {
                             //Create new coroutine, assign it to our dynvalue
-                            Coroutine.Assign(ScriptRef.CreateCoroutine(LuaFunc));
+                            Coroutine = ScriptRef.CreateCoroutine(LuaFunc);
                         }
                         break;
                     default:
@@ -305,7 +309,7 @@
                             if (AutoResetCoroutine)
                             {
                                 //Create new coroutine, assign it to our dynvalue
-                                Coroutine.Assign(ScriptRef.CreateCoroutine(LuaFunc));
+                                Coroutine = ScriptRef.CreateCoroutine(LuaFunc);
                             }
                             break;
                         default:
@@ -367,7 +371,7 @@
                         callback?.Invoke();
                         if (AutoResetCoroutine)
                         {
-                            Coroutine.Assign(ScriptRef.CreateCoroutine(LuaFunc));
+                            Coroutine = ScriptRef.CreateCoroutine(LuaFunc);
                         }
                         break;
                     default:
