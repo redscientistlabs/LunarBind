@@ -72,7 +72,15 @@
                 item.Value.ScriptRef.Globals.Remove(item.Key);
             }
         }
-        
+
+        public void Scrub(Script script, HookedScriptContainer container)
+        {
+            foreach (var item in container.ScriptFunctions)
+            {
+                script.Globals.Remove(item.Key);
+            }
+        }
+
         /// <summary>
         /// Extracts functions from a <see cref="MoonSharp"/> <see cref="Script"/> that are contained in the standard
         /// </summary>

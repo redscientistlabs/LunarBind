@@ -124,6 +124,15 @@
     <Compile Include="..\LunarBind\Attributes\LunarBindFunctionAttribute.cs">
       <Link>Attributes\LunarBindFunctionAttribute.cs</Link>
     </Compile>
+	<Compile Include="..\LunarBind\Attributes\LunarBindInstanceAttribute.cs">
+      <Link>Attributes\LunarBindInstanceAttribute.cs</Link>
+    </Compile>
+	<Compile Include="..\LunarBind\Attributes\LunarBindStaticAttribute.cs">
+      <Link>Attributes\LunarBindStaticAttribute.cs</Link>
+    </Compile>
+	<Compile Include="..\LunarBind\Attributes\LunarBindPrefixAttribute.cs">
+      <Link>Attributes\LunarBindPrefixAttribute.cs</Link>
+    </Compile>
     <Compile Include="..\LunarBind\Attributes\LunarBindHideAttribute.cs">
       <Link>Attributes\LunarBindHideAttribute.cs</Link>
     </Compile>

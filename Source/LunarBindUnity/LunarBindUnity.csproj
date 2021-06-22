@@ -157,6 +157,18 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       <Link>Attributes\LunarBindFunctionAttribute.cs</Link>
     </Compile>
+	<Compile Include="..\LunarBind\Attributes\LunarBindInstanceAttribute.cs">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <Link>Attributes\LunarBindInstanceAttribute.cs</Link>
+    </Compile>
+	<Compile Include="..\LunarBind\Attributes\LunarBindStaticAttribute.cs">
+	  <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <Link>Attributes\LunarBindStaticAttribute.cs</Link>
+    </Compile>
+	<Compile Include="..\LunarBind\Attributes\LunarBindPrefixAttribute.cs">
+	  <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <Link>Attributes\LunarBindPrefixAttribute.cs</Link>
+    </Compile>
     <Compile Include="..\LunarBind\Attributes\LunarBindHideAttribute.cs">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       <Link>Attributes\LunarBindHideAttribute.cs</Link>

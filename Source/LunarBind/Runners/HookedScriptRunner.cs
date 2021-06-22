@@ -44,7 +44,7 @@
         }
 
         /// <summary>
-        /// Creates a new HookedScriptRunner with the specified modules, ensuring that 
+        /// Creates a new HookedScriptRunner with the specified modules, throws exception if Coroutines flag is not included
         /// </summary>
         /// <param name="modules"></param>
         public HookedScriptRunner(CoreModules modules)
@@ -89,7 +89,7 @@
             //Remove old hooks so they aren't counted
             if(ScriptStandard != null)
             {
-                ScriptStandard.Scrub(scriptContainer);
+                ScriptStandard.Scrub(Lua, scriptContainer);
             }
 
             scriptContainer.ResetHooks();
@@ -107,6 +107,29 @@
                 }
             }
         }
+
+        public void LoadScriptFile(string scriptFile, string scriptName = null)
+        {
+            if (ScriptStandard != null)
+            {
+                ScriptStandard.Scrub(Lua, scriptContainer);
+            }
+
+            scriptContainer.ResetHooks();
+            Lua.DoFile(scriptFile, null, scriptName);
+            
+            if (ScriptStandard != null)
+            {
+                List<string> errors = new List<string>();
+                bool res = ScriptStandard.ApplyStandard(Lua, scriptContainer, errors);
+                if (!res)
+                {
+                    //Todo: new type of exception with info
+                    throw new Exception($"Script Standard was not met! Standards Not Met: [{string.Join(", ", errors)}]");
+                }
+            }
+        }
+
 
         #region callbacks
         void RegisterCoroutine(DynValue del, string name, bool autoReset = false)

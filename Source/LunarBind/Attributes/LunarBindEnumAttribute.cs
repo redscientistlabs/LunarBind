@@ -1,10 +1,10 @@
 ﻿namespace LunarBind
 {
-
+    //For use in bind assembly functions
     //TODO: Implement
     using System;
     [System.AttributeUsage(AttributeTargets.Enum, Inherited = false, AllowMultiple = false)]
-    internal sealed class LunarBindEnumAttribute : Attribute
+    public sealed class LunarBindEnumAttribute : Attribute
     {
         readonly string name;
         public string Name => name;

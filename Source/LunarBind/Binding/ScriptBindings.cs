@@ -15,7 +15,7 @@
         private readonly Dictionary<string, BindItem> bindItems = new Dictionary<string, BindItem>();
         private readonly Dictionary<string, Type> yieldableTypes = new Dictionary<string, Type>();
         private readonly Dictionary<string, Type> newableTypes = new Dictionary<string, Type>();
-        private readonly Dictionary<string, Type> staticTypes = new Dictionary<string, Type>();
+        //private readonly Dictionary<string, Type> staticTypes = new Dictionary<string, Type>();
 
         private string bakedNewableTypeString = null;
         private string bakedYieldableTypeString = null;
@@ -39,7 +39,7 @@
         {
             foreach (var assembly in assemblies)
             {
-                RegisterAssemblyFuncs(assembly);
+                RegisterAssemblyTypes(assembly);
             }
         }
 
@@ -77,8 +77,7 @@
         public void AddGlobalType(Type t)
         {
             RegisterUserDataType(t);
-            //TODO: check path
-            staticTypes[t.Name] = t;
+            BindingHelpers.CreateBindType(bindItems, t.Name, t);
         }
 
         /// <summary>
@@ -91,8 +90,7 @@
         public void AddGlobalType(string name, Type t)
         {
             RegisterUserDataType(t);
-            //TODO: check path
-            staticTypes[name] = t;
+            BindingHelpers.CreateBindType(bindItems, name, t);
         }
 
         public void AddGlobalObject(string path, object o)
@@ -370,7 +368,7 @@
         {
             foreach (var assembly in assemblies)
             {
-                RegisterAssemblyFuncs(assembly);
+                RegisterAssemblyTypes(assembly);
                 //UserData.RegisterAssembly(assembly);
             }
         }
@@ -383,7 +381,7 @@
         {
             foreach (var assembly in assemblies)
             {
-                RegisterAssemblyFuncs(assembly);
+                RegisterAssemblyTypes(assembly);
                 //UserData.RegisterAssembly(assembly);
             }
         }
@@ -409,28 +407,66 @@
 
         private void RegisterTypeFuncs(Type type, string prefix = null)
         {
-            if(prefix != null) prefix = prefix.Trim('.', ' ');
+            if (prefix != null) prefix = prefix.Trim('.', ' ');
             MethodInfo[] mis = type.GetMethods(BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic);
             foreach (var mi in mis)
             {
                 var attr = (LunarBindFunctionAttribute)Attribute.GetCustomAttribute(mi, typeof(LunarBindFunctionAttribute));
                 if (attr != null)
                 {
+                    var prefixAttrib = (LunarBindPrefixAttribute)type.GetCustomAttribute(typeof(LunarBindPrefixAttribute));
                     var documentation = (LunarBindDocumentationAttribute)Attribute.GetCustomAttribute(mi, typeof(LunarBindDocumentationAttribute));
                     var example = (LunarBindExampleAttribute)Attribute.GetCustomAttribute(mi, typeof(LunarBindExampleAttribute));
                     var del = BindingHelpers.CreateDelegate(mi);
-                    string name = (prefix != null? prefix + "." : "") + (attr.Name ?? mi.Name);
+                    //string name = (prefix != null ? prefix + "." : "") + (attr.Name ?? mi.Name);
+                    string name = $"{(prefixAttrib?.Prefix != null ? prefixAttrib.Prefix + "." : "")}{(prefix != null ? prefix + "." : "")}{(attr.Name ?? mi.Name)}";
+
                     BindingHelpers.CreateBindFunction(bindItems, name, del, attr.AutoYield, documentation?.Data ?? "", example?.Data ?? "");
                 }
             }
         }
 
-        private void RegisterAssemblyFuncs(Assembly assembly)
+        private void RegisterAssemblyTypes(Assembly assembly)
         {
             Type[] types = assembly.GetTypes();
             foreach (var type in types)
             {
-                RegisterTypeFuncs(type);
+                if (type.IsEnum)
+                {
+                    
+                    var enumAttr = (LunarBindEnumAttribute)type.GetCustomAttribute(typeof(LunarBindEnumAttribute));
+                    if (enumAttr != null)
+                    {
+                        BindingHelpers.CreateBindEnum(bindItems, enumAttr.Name ?? type.Name, type);
+                    }
+                }
+                else
+                {
+                    var instantiable = (LunarBindInstanceAttribute)type.GetCustomAttribute(typeof(LunarBindInstanceAttribute));
+                    if (instantiable != null)
+                    {
+                        var constructor = type.GetConstructor(new Type[] { });
+                        if (constructor != null)
+                        {
+                            object instance = constructor.Invoke(new object[] { });
+                            AddGlobalObject(instantiable.Path, instance);
+                        }
+                        else
+                        {
+                            //TODO: custom exception
+                            throw new Exception($"LunarBind: No public empty constructor found on Type [{type.Name}] with LunarBindInstantiableAttribute");
+                        }
+                    }
+
+                    var staticAttribute = (LunarBindStaticAttribute)type.GetCustomAttribute(typeof(LunarBindStaticAttribute));
+                    if (staticAttribute != null)
+                    {
+                        RegisterUserDataType(type);
+                        BindingHelpers.CreateBindType(bindItems, staticAttribute.Path ?? type.Name, type);
+                    }
+
+                    RegisterTypeFuncs(type);
+                }
             }
         }
        
@@ -490,10 +526,10 @@
             {
                 item.AddToScript(lua);
             }
-            foreach (var type in staticTypes)
-            {
-                lua.Globals[type.Key] = type.Value;
-            }
+            //foreach (var type in staticTypes)
+            //{
+            //    lua.Globals[type.Key] = type.Value;
+            //}
 
             InitializeNewables(lua);
             InitializeYieldables(lua);
@@ -594,7 +630,7 @@
         /// Removes all callback functions from a script
         /// </summary>
         /// <param name="lua"></param>
-        internal void Clean(Script lua)
+        internal void CleanFunctions(Script lua)
         {
             foreach (var func in bindItems)
             {

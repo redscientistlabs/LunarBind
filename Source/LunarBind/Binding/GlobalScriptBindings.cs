@@ -16,7 +16,7 @@
         private static readonly Dictionary<string, BindItem> bindItems = new Dictionary<string, BindItem>();
         private static readonly Dictionary<string, Type> yieldableTypes = new Dictionary<string, Type>();
         private static readonly Dictionary<string, Type> newableTypes = new Dictionary<string, Type>();
-        private static readonly Dictionary<string, Type> staticTypes = new Dictionary<string, Type>();
+        //private static readonly Dictionary<string, Type> staticTypes = new Dictionary<string, Type>();
 
         private static string bakedNewableTypeString = null;
         private static string bakedYieldableNewableTypeString = null;
@@ -46,7 +46,7 @@
         static GlobalScriptBindings()
         {
             Script.WarmUp();
-            RegisterAssemblyFuncs(typeof(GlobalScriptBindings).Assembly);
+            RegisterAssemblyTypes(typeof(GlobalScriptBindings).Assembly);
             UserData.RegisterAssembly(typeof(GlobalScriptBindings).Assembly);
             InitializeYielders();
         }
@@ -74,10 +74,10 @@
                 item.AddToScript(lua);
             }
 
-            foreach (var type in staticTypes)
-            {
-                lua.Globals[type.Key] = type.Value;
-            }
+            //foreach (var type in staticTypes)
+            //{
+            //    lua.Globals[type.Key] = type.Value;
+            //}
 
             InitializeNewables(lua);
             InitializeYieldables(lua);
@@ -131,7 +131,6 @@
         {
             BindingHelpers.CreateBindEnum(bindItems, path, typeof(T));
         }
-        //TODO: allow paths for global types
 
         /// <summary>
         /// Allows you to access static functions and members on the type by using the Lua global with the name<para/>
@@ -141,7 +140,7 @@
         public static void AddGlobalType(Type t)
         {
             RegisterUserDataType(t);
-            staticTypes[t.Name] = t;
+            BindingHelpers.CreateBindType(bindItems, t.Name, t);
         }
 
         /// <summary>
@@ -155,7 +154,6 @@
         {
             RegisterUserDataType(t);
             BindingHelpers.CreateBindType(bindItems, path, t);
-
         }
 
         /// <summary>
@@ -177,16 +175,18 @@
         {
             foreach (var assembly in assemblies)
             {
-                RegisterAssemblyFuncs(assembly);
+                RegisterAssemblyTypes(assembly);
             }
         }
-
+        /// <summary>
+        ///  Bind all static functions with the [<see cref="LunarBindFunctionAttribute"/>] attribute on each type in each assembly
+        /// </summary>
+        /// <param name="assemblies"></param>
         public static void BindAssemblies(params Assembly[] assemblies)
         {
             foreach (var assembly in assemblies)
             {
-                RegisterAssemblyFuncs(assembly);
-                //RegisterAssemblyInstantiables(assembly);
+                RegisterAssemblyTypes(assembly);
             }
         }
 
@@ -195,7 +195,7 @@
         /// Use <see cref="BindTypeFuncs(Type[])"/> instead
         /// </summary>
         /// <param name="assemblies"></param>
-        [Obsolete]
+        [Obsolete("Use BindTypeFuncs instead")]
         public static void AddTypes(params Type[] types)
         {
             foreach (var type in types)
@@ -283,10 +283,13 @@
                 var attr = (LunarBindFunctionAttribute)Attribute.GetCustomAttribute(mi, typeof(LunarBindFunctionAttribute));
                 if (attr != null)
                 {
+                    var prefixAttrib = (LunarBindPrefixAttribute)type.GetCustomAttribute(typeof(LunarBindPrefixAttribute));
                     var documentation = (LunarBindDocumentationAttribute)Attribute.GetCustomAttribute(mi, typeof(LunarBindDocumentationAttribute));
                     var example = (LunarBindExampleAttribute)Attribute.GetCustomAttribute(mi, typeof(LunarBindExampleAttribute));
                     var del = BindingHelpers.CreateDelegate(mi);
-                    string name = (prefix != null ? prefix + "." : "") + (attr.Name ?? mi.Name);
+                    //string name = (prefix != null ? prefix + "." : "") + (attr.Name ?? mi.Name);
+                    string name = $"{(prefixAttrib?.Prefix != null ? prefixAttrib.Prefix + "." : "")}{(prefix != null ? prefix + "." : "")}{(attr.Name ?? mi.Name)}";
+
                     BindingHelpers.CreateBindFunction(bindItems, name, del, attr.AutoYield, documentation?.Data ?? "", example?.Data ?? "");
                 }
             }
@@ -320,7 +323,7 @@
         /// <param name="action"></param>
         /// <param name="documentation"></param>
         /// <param name="example"></param>
-        [Obsolete]
+        [Obsolete("use BindAction instead")]
         public static void AddAction(string name, Action action, string documentation = "", string example = "")
         {
             BindingHelpers.CreateBindFunction(bindItems, name, action, false, documentation ?? "", example ?? "");
@@ -331,10 +334,23 @@
         /// <param name="action"></param>
         /// <param name="documentation"></param>
         /// <param name="example"></param>
-        [Obsolete]
+        [Obsolete("use BindAction instead")]
         public static void AddAction(Action action, string documentation = "", string example = "")
         {
             BindingHelpers.CreateBindFunction(bindItems, action.Method.Name, action, false, documentation ?? "", example ?? "");
+        }
+
+        /// <summary>
+        /// Add specific <see cref="Action"/>s to the bindings, using the method's Name as the name for each
+        /// </summary>
+        /// <param name="actions"></param>
+        [Obsolete("use BindActions instead")]
+        public static void AddActions(params Action[] actions)
+        {
+            foreach (var action in actions)
+            {
+                BindingHelpers.CreateBindFunction(bindItems, action.Method.Name, action, false, "", "");
+            }
         }
 
         /// <summary>
@@ -364,7 +380,7 @@
         /// Add specific <see cref="Action"/>s to the bindings, using the method's Name as the name for each
         /// </summary>
         /// <param name="actions"></param>
-        public static void AddActions(params Action[] actions)
+        public static void BindActions(params Action[] actions)
         {
             foreach (var action in actions)
             {
@@ -379,10 +395,10 @@
         /// <param name="del"></param>
         /// <param name="documentation"></param>
         /// <param name="example"></param>
+        [Obsolete("Use BindDelegate instead")]
         public static void AddDelegate(string name, Delegate del, string documentation = "", string example = "")
         {
             BindingHelpers.CreateBindFunction(bindItems, name, del, false, documentation ?? "", example ?? "");
-            //callbackItems[name] = new CallbackFunc(name, del, documentation, example);
         }
 
         /// <summary>
@@ -392,10 +408,10 @@
         /// <param name="del"></param>
         /// <param name="documentation"></param>
         /// <param name="example"></param>
+        [Obsolete("Use BindDelegate instead")]
         public static void AddDelegate(Delegate del, string documentation = "", string example = "")
         {
             BindingHelpers.CreateBindFunction(bindItems, del.Method.Name, del, false, documentation ?? "", example ?? "");
-            //callbackItems[del.Method.Name] = new CallbackFunc(del.Method.Name, del, documentation, example);
         }
 
         /// <summary>
@@ -405,25 +421,96 @@
         /// <param name="del"></param>
         /// <param name="documentation"></param>
         /// <param name="example"></param>
+        [Obsolete("Use BindDelegates instead")]
         public static void AddDelegates(params Delegate[] dels)
         {
             foreach (var del in dels)
             {
                 BindingHelpers.CreateBindFunction(bindItems, del.Method.Name, del, false, "", "");
-                //callbackItems[del.Method.Name] = new CallbackFunc(del.Method.Name, del);
             }
         }
 
-        private static void RegisterAssemblyFuncs(Assembly assembly)
+        /// <summary>
+        /// Add a specific <see cref="Delegate"/> to the bindings
+        /// </summary>
+        /// <param name="name"></param>
+        /// <param name="del"></param>
+        /// <param name="documentation"></param>
+        /// <param name="example"></param>
+        public static void BindDelegate(string name, Delegate del, string documentation = "", string example = "")
+        {
+            BindingHelpers.CreateBindFunction(bindItems, name, del, false, documentation ?? "", example ?? "");
+        }
+
+        /// <summary>
+        /// Add a specific <see cref="Delegate"/> to the bindings using the method Name as the name
+        /// </summary>
+        /// <param name="name"></param>
+        /// <param name="del"></param>
+        /// <param name="documentation"></param>
+        /// <param name="example"></param>
+        public static void BindDelegate(Delegate del, string documentation = "", string example = "")
+        {
+            BindingHelpers.CreateBindFunction(bindItems, del.Method.Name, del, false, documentation ?? "", example ?? "");
+        }
+
+        /// <summary>
+        /// Add a specific <see cref="Delegate"/>s to the bindings using the method Names as the name
+        /// </summary>
+        /// <param name="name"></param>
+        /// <param name="del"></param>
+        /// <param name="documentation"></param>
+        /// <param name="example"></param>
+        public static void BindDelegates(params Delegate[] dels)
+        {
+            foreach (var del in dels)
+            {
+                BindingHelpers.CreateBindFunction(bindItems, del.Method.Name, del, false, "", "");
+            }
+        }
+
+        private static void RegisterAssemblyTypes(Assembly assembly)
         {
             Type[] types = assembly.GetTypes();
             foreach (var type in types)
             {
-                RegisterTypeFuncs(type);
+                if (type.IsEnum)
+                {
+                    var enumAttr = (LunarBindEnumAttribute)type.GetCustomAttribute(typeof(LunarBindEnumAttribute));
+                    if (enumAttr != null)
+                    {
+                        BindingHelpers.CreateBindEnum(bindItems, enumAttr.Name ?? type.Name, type);
+                    }
+                }
+                else 
+                {
+                    var instantiable = (LunarBindInstanceAttribute)type.GetCustomAttribute(typeof(LunarBindInstanceAttribute));
+                    if (instantiable != null)
+                    {
+                        var constructor = type.GetConstructor(new Type[] { });
+                        if (constructor != null)
+                        {
+                            object instance = constructor.Invoke(new object[] { });
+                            AddGlobalObject(instantiable.Path, instance);
+                        }
+                        else
+                        {
+                            //TODO: custom exception
+                            throw new Exception($"LunarBind: No public empty constructor found on Type [{type.Name}] with LunarBindInstantiableAttribute");
+                        }
+                    }
+
+                    var staticAttribute = (LunarBindStaticAttribute)type.GetCustomAttribute(typeof(LunarBindStaticAttribute));
+                    if (staticAttribute != null)
+                    {
+                        RegisterUserDataType(type);
+                        BindingHelpers.CreateBindType(bindItems, staticAttribute.Path ?? type.Name, type);
+                    }
+
+                    RegisterTypeFuncs(type);
+                }
             }
         }
-
-
 
         private static void BakeNewables()
         {
@@ -466,8 +553,6 @@
                             else { parString += $",t{j}"; }
                         }
 
-                        //REVERT
-                        //s.AppendLine($"function {newFuncName}({parString}) return {typeName}.__new({parString}) end");
                         s.AppendLine($"{NewableTable}.{newFuncName} = function({parString}) return {typeName}.__new({parString}) end");
                     }
                 }
@@ -513,31 +598,6 @@
                 lua.DoString(bakedYieldableNewableTypeString);
             }
         }
-
-        //static StringBuilder paramsSB = new StringBuilder();
-        //private static string ConstructFunction(CallbackFunc func)
-        //{
-        //    paramsSB.Clear();
-        //    int numPars = func.NumParams;
-        //    for (int j = 0; j < numPars; j++)
-        //    {
-        //        if (j == 0) { paramsSB.Append("n0"); }
-        //        else
-        //        {
-        //            paramsSB.Append(",n");
-        //            paramsSB.Append(j);
-        //        }
-        //    }
-        //    string pars = numPars > 0 ? paramsSB.ToString() : "";
-        //    if (func.IsYieldable)
-        //    {
-        //        return $"function {func.Path}({pars}) coroutine.yield() end";
-        //    }
-        //    else
-        //    {
-        //        return $"function {func.Path}({pars})  end";
-        //    }
-        //}
 
     }
 

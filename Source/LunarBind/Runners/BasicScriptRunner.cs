@@ -16,6 +16,7 @@ namespace LunarBind
 
         public BasicScriptRunner(CoreModules modules = CoreModules.Preset_HardSandbox | CoreModules.Coroutine | CoreModules.OS_Time) {
             Lua = new Script(modules);
+            Lua.Globals["Script"] = new ScriptReference(Lua);
             GlobalScriptBindings.Initialize(Lua);
         }
 
@@ -44,7 +45,7 @@ namespace LunarBind
 
         public void RemoveBindings(ScriptBindings bindings)
         {
-            bindings.Clean(Lua);
+            bindings.CleanFunctions(Lua);
         }
         
         public void Run(string script, string scriptName = "User Code")

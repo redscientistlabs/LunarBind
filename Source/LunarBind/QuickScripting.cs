@@ -8,6 +8,7 @@
     public static class QuickScripting
     {
         public static BasicScriptRunner Basic { get; private set; } = new BasicScriptRunner();
+        public static HookedScriptRunner Hooked { get; private set; } = new HookedScriptRunner();
 
         public static void Run(string script)
         {
