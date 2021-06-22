@@ -67,17 +67,23 @@
 
         public void Scrub(HookedScriptContainer container)
         {
-            foreach (var item in container.ScriptFunctions)
+            if (container != null)
             {
-                item.Value.ScriptRef.Globals.Remove(item.Key);
+                foreach (var item in container.ScriptFunctions)
+                {
+                    item.Value.ScriptRef.Globals.Remove(item.Key);
+                }
             }
         }
 
         public void Scrub(Script script, HookedScriptContainer container)
         {
-            foreach (var item in container.ScriptFunctions)
+            if (script != null && container != null)
             {
-                script.Globals.Remove(item.Key);
+                foreach (var item in container.ScriptFunctions)
+                {
+                    script.Globals.Remove(item.Key);
+                }
             }
         }
 

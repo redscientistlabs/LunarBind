@@ -211,6 +211,11 @@
             Initialize();
         }
 
+        public void ResetCurrent()
+        {
+            CurrentTempScript = null;
+        }
+
         //private void RunLua(HookedScriptContainer script, string hookName, params object[] args)
         //{
         //    var hook = script.GetHook(hookName);
