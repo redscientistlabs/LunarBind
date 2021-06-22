@@ -4,12 +4,12 @@
     using System.Collections.Generic;
     using MoonSharp.Interpreter;
     using LunarBind.Yielding;
+    using LunarBind.Standards;
 
     //TODO: make this a collection of HookedScriptRunners instead of one runner?
-    
+
     //TODO: Refactor this class
 
-    [Obsolete]
     public class HookedStateScriptRunner : ScriptRunnerBase
     {
         //public Script Lua { get; private set; }
@@ -18,8 +18,13 @@
 
 
         private HookedScriptContainer runningScript = null;
-
+        public LuaScriptStandard ScriptStandard { get; private set; } = null;
         public HookedStateScriptRunner()
+        {
+            Initialize();
+        }
+
+        private void Initialize()
         {
             Lua = new Script(CoreModules.Preset_HardSandbox | CoreModules.Coroutine | CoreModules.OS_Time);
             Lua.Globals["Script"] = new ScriptReference(Lua);
@@ -30,19 +35,33 @@
             Lua.Globals["RemoveGlobal"] = (Action<string>)RemoveGlobal;
             Lua.Globals["ResetGlobals"] = (Action)ResetGlobals;
 
-            //Global init
             GlobalScriptBindings.Initialize(Lua);
-            //GlobalScriptBindings.InitializeYieldables(Lua);
         }
 
-        public HookedStateScriptRunner(ScriptBindings bindings) : this()
+        public HookedStateScriptRunner(ScriptBindings bindings, LuaScriptStandard standard = null) : this()
         {
             bindings.Initialize(Lua);
+            ScriptStandard = standard;
+        }
+
+        public HookedStateScriptRunner(LuaScriptStandard standard, ScriptBindings bindings = null) : this()
+        {
+            bindings.Initialize(Lua);
+            ScriptStandard = standard;
         }
 
         public void LoadScript(string scriptString)
         {
+
+            //Remove old hooks so they aren't counted
+            if (ScriptStandard != null)
+            {
+                ScriptStandard.Scrub(Lua, CurrentTempScript);
+            }
+
             CurrentTempScript?.ResetHooks();
+
+
             if (string.IsNullOrWhiteSpace(scriptString))
             {
                 //No script
@@ -56,6 +75,16 @@
             try
             {
                 Lua.DoString(scriptString);
+
+                if (ScriptStandard != null)
+                {
+                    List<string> errors = new List<string>();
+                    bool res = ScriptStandard.ApplyStandard(Lua, CurrentTempScript, errors);
+                    if (!res)
+                    {
+                        throw new Exception($"Script Standard was not met! Standards Not Met: [{string.Join(", ", errors)}]");
+                    }
+                }
             }
             catch (Exception ex)
             {
@@ -136,14 +165,16 @@
                 foreach (var script in GlobalScripts.Values)
                 {
                     runningScript = script;
-                    RunLua(script, hookName, args);
+                    script.GetHook(hookName)?.Execute(args);
+                    //RunLua(script, hookName, args);
                     runningScript = null;
                 }
 
                 if (CurrentTempScript != null)
                 {
                     runningScript = CurrentTempScript;
-                    RunLua(CurrentTempScript, hookName, args);
+                    CurrentTempScript.GetHook(hookName)?.Execute(args);
+                    //RunLua(CurrentTempScript, hookName, args);
                     runningScript = null;
                 }
             }
@@ -162,46 +193,57 @@
             }
         }
 
-        private void RunLua(HookedScriptContainer script, string hookName, params object[] args)
+        public void Reset()
         {
-            var hook = script.GetHook(hookName);
-            if (hook != null)
+            foreach (var scr in GlobalScripts)
             {
-                if (hook.IsCoroutine) 
-                {
-                    if (hook.Coroutine.Coroutine.State == CoroutineState.Dead || !hook.CheckYieldStatus()) //Doesn't run check yield if coroutine is dead
-                    {
-                        return;
-                    }
-
-                    DynValue ret = hook.Coroutine.Coroutine.Resume(args);
-
-                    switch (hook.Coroutine.Coroutine.State)
-                    {
-                        case CoroutineState.Suspended:
-                            if (ret.IsNotNil())
-                            {
-                                Yielder yielder = ret.ToObject<Yielder>();
-                                hook.CurYielder = yielder;
-                            }
-                            else
-                            {
-                                hook.CurYielder = null;
-                            }
-                            break;
-                        case CoroutineState.Dead:
-                            hook.ResetCoroutine();
-                            break;
-                        default:
-                            break;
-                    }
-                }
-                else
-                {
-                     Lua.Call(hook.LuaFunc, args);
-                }
+                scr.Value.ResetHooks();
             }
+            GlobalScripts.Clear();
+            CurrentTempScript = null;
+            Initialize();
         }
+
+        //private void RunLua(HookedScriptContainer script, string hookName, params object[] args)
+        //{
+        //    var hook = script.GetHook(hookName);
+        //    if (hook != null)
+        //    {
+        //        if (hook.IsCoroutine) 
+        //        {
+        //            if (hook.Coroutine.Coroutine.State == CoroutineState.Dead || !hook.CheckYieldStatus()) //Doesn't run check yield if coroutine is dead
+        //            {
+        //                return;
+        //            }
+
+        //            DynValue ret = hook.Coroutine.Coroutine.Resume(args);
+
+        //            switch (hook.Coroutine.Coroutine.State)
+        //            {
+        //                case CoroutineState.Suspended:
+        //                    if (ret.IsNotNil())
+        //                    {
+        //                        Yielder yielder = ret.ToObject<Yielder>();
+        //                        hook.CurYielder = yielder;
+        //                    }
+        //                    else
+        //                    {
+        //                        hook.CurYielder = null;
+        //                    }
+        //                    break;
+        //                case CoroutineState.Dead:
+        //                    hook.ResetCoroutine();
+        //                    break;
+        //                default:
+        //                    break;
+        //            }
+        //        }
+        //        else
+        //        {
+        //             Lua.Call(hook.LuaFunc, args);
+        //        }
+        //    }
+        //}
 
         public object this[string id]
         {
