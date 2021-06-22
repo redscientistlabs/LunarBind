@@ -96,6 +96,13 @@
             }
         }
 
+        public void LoadGlobalScript(string scriptName, string scriptString)
+        {
+            scriptString += $"\r\nMakeGlobal(\"{scriptName}\")";
+            LoadScript(scriptString);
+        }
+
+
         #region callbacks
 
         void RegisterCoroutine(DynValue del, string name, bool autoResetCoroutine = false)
