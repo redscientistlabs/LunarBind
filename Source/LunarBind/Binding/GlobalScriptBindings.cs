@@ -599,6 +599,38 @@
             }
         }
 
+
+        public static List<string> GetAllRegisteredPaths()
+        {
+            List<string> ret = new List<string>();
+            foreach (var item in newableTypes)
+            {
+                ret.Add("new." + item.Key);
+            }
+            foreach (var item in yieldableTypes)
+            {
+                ret.Add("new." + item.Key);
+            }
+
+            foreach (var item in bindItems)
+            {
+                if (item.Value is BindTable bTable)
+                {
+                    ret.AddRange(bTable.GetAllItemPaths());
+                }
+                else if (item.Value is BindEnum bEnum)
+                {
+                    ret.AddRange(bEnum.GetAllEnumPaths());
+                }
+                else
+                {
+                    ret.Add(item.Key);
+                }
+            }
+
+            return ret;
+        }
+
     }
 
 }

@@ -7,6 +7,7 @@
     using System.Reflection;
     internal class BindTable : BindItem
     {
+        //Todo: use more polymorphism??
         //internal string
         private readonly Dictionary<string, BindTable> bindTables = new Dictionary<string, BindTable>();
         private readonly Dictionary<string, BindFunc> bindFunctions = new Dictionary<string, BindFunc>();
@@ -18,6 +19,33 @@
         public BindTable(string name)
         {
             this.Name = name;
+        }
+
+        public List<string> GetAllItemPaths(string prefix = "")
+        {
+            prefix += Name + ".";
+            List<string> ret = new List<string>();
+            foreach (var table in bindTables.Values)
+            {
+                ret.AddRange(table.GetAllItemPaths(prefix));
+            }
+            foreach (var enu in bindEnums)
+            {
+                ret.AddRange(enu.Value.GetAllEnumPaths(prefix));
+            }
+            foreach (var func in bindFunctions)
+            {
+                ret.Add(prefix + func.Value.Name);
+            }
+            foreach (var obj in bindObjects)
+            {
+                ret.Add(prefix + obj.Value.Name);
+            }
+            foreach (var type in bindTypes)
+            {
+                ret.Add(prefix + type.Value.Name);
+            }
+            return ret;
         }
 
         public void GenerateWrappedYieldString()

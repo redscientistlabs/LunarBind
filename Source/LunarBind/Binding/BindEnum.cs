@@ -25,6 +25,17 @@
             }
         }
 
+        public string[] GetAllEnumPaths(string prefix = "")
+        {
+            string[] ret = new string[enumVals.Count];
+            prefix += Name + ".";
+            for (int i = 0; i < enumVals.Count; i++)
+            {
+                ret[i] = prefix + enumVals[i].Key;
+            }
+            return ret;
+        }
+
         internal Table CreateEnumTable(Script script)
         {
             Table t = new Table(script);
