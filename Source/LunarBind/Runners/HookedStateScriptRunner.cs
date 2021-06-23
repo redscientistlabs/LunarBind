@@ -79,7 +79,7 @@
                 if (ScriptStandard != null)
                 {
                     List<string> errors = new List<string>();
-                    bool res = ScriptStandard.ApplyStandard(Lua, CurrentTempScript, errors);
+                    bool res = ScriptStandard.ApplyStandard(Lua, scr, errors);
                     if (!res)
                     {
                         throw new Exception($"Script Standard was not met! Standards Not Met: [{string.Join(", ", errors)}]");
