@@ -9,19 +9,23 @@
     {
         //Todo: use more polymorphism??
         //internal string
-        private readonly Dictionary<string, BindTable> bindTables = new Dictionary<string, BindTable>();
-        private readonly Dictionary<string, BindFunc> bindFunctions = new Dictionary<string, BindFunc>();
-        private readonly Dictionary<string, BindEnum> bindEnums = new Dictionary<string, BindEnum>();
-        private readonly Dictionary<string, BindUserObject> bindObjects = new Dictionary<string, BindUserObject>();
-        private readonly Dictionary<string, BindUserType> bindTypes = new Dictionary<string, BindUserType>();
+        internal readonly Dictionary<string, BindTable> bindTables = new Dictionary<string, BindTable>();
+        internal readonly Dictionary<string, BindFunc> bindFunctions = new Dictionary<string, BindFunc>();
+        internal readonly Dictionary<string, BindEnum> bindEnums = new Dictionary<string, BindEnum>();
+        internal readonly Dictionary<string, BindUserObject> bindObjects = new Dictionary<string, BindUserObject>();
+        internal readonly Dictionary<string, BindUserType> bindTypes = new Dictionary<string, BindUserType>();
         //private readonly Dictionary<string, BindField> bindFields = new Dictionary<string, BindField>();
 
         public BindTable(string name)
         {
             this.Name = name;
         }
-
-        public List<string> GetAllItemPaths(string prefix = "")
+        /// <summary>
+        /// For autocomplete purposes
+        /// </summary>
+        /// <param name="prefix"></param>
+        /// <returns></returns>
+        internal List<string> GetAllItemPaths(string prefix = "")
         {
             prefix += Name + ".";
             List<string> ret = new List<string>();
@@ -46,6 +50,37 @@
                 ret.Add(prefix + type.Value.Name);
             }
             return ret;
+        }
+
+        /// <summary>
+        /// For documentation purposes
+        /// </summary>
+        /// <returns></returns>
+        internal List<BindItem> GetAllItems()
+        {
+            List<BindItem> bindItems = new List<BindItem>();
+
+            foreach (var item in bindFunctions.Values)
+            {
+                bindItems.Add(item);
+            }
+            foreach (var item in bindEnums.Values)
+            {
+                bindItems.Add(item);
+            }
+            foreach (var item in bindObjects.Values)
+            {
+                bindItems.Add(item);
+            }
+            foreach (var item in bindTypes.Values)
+            {
+                bindItems.Add(item);
+            }
+            foreach (var item in bindTables.Values)
+            {
+                bindItems.Add(item);
+            }
+            return bindItems;
         }
 
         public void GenerateWrappedYieldString()

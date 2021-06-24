@@ -8,9 +8,11 @@
 
     internal class BindEnum : BindItem
     {
+        internal Type EnumType { get; private set; }
         private List<KeyValuePair<string, int>> enumVals = new List<KeyValuePair<string, int>>();
         public BindEnum(string name, Type e)
         {
+            EnumType = e;
             Name = name;
             var fields = e.GetFields(System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Static);
             foreach (var field in fields)

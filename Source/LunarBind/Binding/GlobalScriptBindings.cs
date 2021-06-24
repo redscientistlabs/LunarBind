@@ -13,9 +13,9 @@
     //TODO: Generate documentation
     public static class GlobalScriptBindings
     {
-        private static readonly Dictionary<string, BindItem> bindItems = new Dictionary<string, BindItem>();
-        private static readonly Dictionary<string, Type> yieldableTypes = new Dictionary<string, Type>();
-        private static readonly Dictionary<string, Type> newableTypes = new Dictionary<string, Type>();
+        internal static readonly Dictionary<string, BindItem> bindItems = new Dictionary<string, BindItem>();
+        internal static readonly Dictionary<string, Type> yieldableTypes = new Dictionary<string, Type>();
+        internal static readonly Dictionary<string, Type> newableTypes = new Dictionary<string, Type>();
         //private static readonly Dictionary<string, Type> staticTypes = new Dictionary<string, Type>();
 
         private static string bakedNewableTypeString = null;

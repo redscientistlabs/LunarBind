@@ -141,6 +141,9 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       <Link>Binding\ScriptBindings.cs</Link>
     </Compile>
+		<Compile Include="..\LunarBind\Documentation\BindingDocumentation.cs">
+      <Link>Documentation\BindingDocumentation.cs</Link>
+    </Compile>
     <Compile Include="..\LunarBind\Attributes\LunarBindDocumentationAttribute.cs">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       <Link>Attributes\LunarBindDocumentationAttribute.cs</Link>
@@ -186,6 +189,7 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
+    <Folder Include="Documentation\" />
     <Folder Include="Exceptions\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

@@ -12,9 +12,9 @@
     //TODO: Generate documentation
     public class ScriptBindings
     {
-        private readonly Dictionary<string, BindItem> bindItems = new Dictionary<string, BindItem>();
-        private readonly Dictionary<string, Type> yieldableTypes = new Dictionary<string, Type>();
-        private readonly Dictionary<string, Type> newableTypes = new Dictionary<string, Type>();
+        internal readonly Dictionary<string, BindItem> bindItems = new Dictionary<string, BindItem>();
+        internal readonly Dictionary<string, Type> yieldableTypes = new Dictionary<string, Type>();
+        internal readonly Dictionary<string, Type> newableTypes = new Dictionary<string, Type>();
         //private readonly Dictionary<string, Type> staticTypes = new Dictionary<string, Type>();
 
         private string bakedNewableTypeString = null;

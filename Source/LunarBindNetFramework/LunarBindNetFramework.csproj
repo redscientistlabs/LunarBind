@@ -45,7 +45,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs" />
-	<Compile Include="..\LunarBind\ScriptReference.cs" />
+    <Compile Include="..\LunarBind\ScriptReference.cs" />
     <Compile Include="..\LunarBind\QuickScripting.cs" />
     <Compile Include="..\LunarBind\ScriptFunction.cs" />
     <Compile Include="..\LunarBind\ScriptLibrary.cs" />
@@ -112,6 +112,9 @@
     <Compile Include="..\LunarBind\Binding\ScriptBindings.cs">
       <Link>Binding\ScriptBindings.cs</Link>
     </Compile>
+	<Compile Include="..\LunarBind\Documentation\BindingDocumentation.cs">
+      <Link>Documentation\BindingDocumentation.cs</Link>
+    </Compile>
     <Compile Include="..\LunarBind\Attributes\LunarBindDocumentationAttribute.cs">
       <Link>Attributes\LunarBindDocumentationAttribute.cs</Link>
     </Compile>
@@ -124,13 +127,13 @@
     <Compile Include="..\LunarBind\Attributes\LunarBindFunctionAttribute.cs">
       <Link>Attributes\LunarBindFunctionAttribute.cs</Link>
     </Compile>
-	<Compile Include="..\LunarBind\Attributes\LunarBindInstanceAttribute.cs">
+    <Compile Include="..\LunarBind\Attributes\LunarBindInstanceAttribute.cs">
       <Link>Attributes\LunarBindInstanceAttribute.cs</Link>
     </Compile>
-	<Compile Include="..\LunarBind\Attributes\LunarBindStaticAttribute.cs">
+    <Compile Include="..\LunarBind\Attributes\LunarBindStaticAttribute.cs">
       <Link>Attributes\LunarBindStaticAttribute.cs</Link>
     </Compile>
-	<Compile Include="..\LunarBind\Attributes\LunarBindPrefixAttribute.cs">
+    <Compile Include="..\LunarBind\Attributes\LunarBindPrefixAttribute.cs">
       <Link>Attributes\LunarBindPrefixAttribute.cs</Link>
     </Compile>
     <Compile Include="..\LunarBind\Attributes\LunarBindHideAttribute.cs">
@@ -140,13 +143,14 @@
       <Link>Attributes\LunarBindTypeAttribute.cs</Link>
     </Compile>
     <Compile Include="..\LunarBind\Exceptions\LunarBindStandardException.cs">
-      <Link>Attributes\LunarBindStandardException.cs</Link>
+      <Link>Exceptions\LunarBindStandardException.cs</Link>
     </Compile>
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
+    <Folder Include="Documentation\" />
     <Folder Include="Exceptions\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
