@@ -157,11 +157,9 @@ namespace LunarBind.Documentation
             var mi = func.Callback.Method;
             var parameterInfo = mi.GetParameters();
             string parameterTypes = "";
-            string parameterFullNames = null;
             if (parameterInfo.Length > 0)
             {
                 parameterTypes = GetParamString(parameterInfo);
-                parameterFullNames = string.Join("\n", parameterInfo.Select(m => $"- {(m.ParameterType.IsGenericType ? GetGenericString(m.ParameterType, true) : m.ParameterType.FullName)}"));
             }
 
             var returnType = mi.ReturnType;
@@ -183,11 +181,9 @@ namespace LunarBind.Documentation
             
             var parameterInfo = mi.GetParameters();
             string parameterTypes = "";
-            string parameterFullNames = null;
             if (parameterInfo.Length > 0)
             {
                 parameterTypes = GetParamString(parameterInfo);
-                parameterFullNames = string.Join("\n", parameterInfo.Select(m => $"- {(m.ParameterType.IsGenericType ? GetGenericString(m.ParameterType, true) : m.ParameterType.FullName)}"));
             }
 
             var returnType = mi.ReturnType;
@@ -325,7 +321,6 @@ namespace LunarBind.Documentation
 
                 if (!hidden)
                 {
-                    //new KeyValuePair<string, int>(field.Name, (int)field.GetValue(null))
                     doc.SubDocs.Add(DocumentInstanceObject(typeof(int), field.Name, nextPrefix, enu.EnumType));
                 }
             }
@@ -335,11 +330,6 @@ namespace LunarBind.Documentation
         private static DocItem DocumentObject(BindUserObject obj, string prefix)
         {
             return DocumentInstanceObject(obj.UserObject.GetType(), obj.Name, prefix, obj.UserObject.GetType());
-            //string name = obj.Name;
-            //string fullName = prefix + name;
-            //string definition = fullName;
-            //string copy = definition;
-            //return new DocItem(DocItemType.InstanceObject, obj.GetType(), name, fullName, definition, copy);
         }
 
 

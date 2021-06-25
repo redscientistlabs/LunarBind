@@ -141,7 +141,8 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       <Link>Binding\ScriptBindings.cs</Link>
     </Compile>
-		<Compile Include="..\LunarBind\Documentation\BindingDocumentation.cs">
+	<Compile Include="..\LunarBind\Documentation\BindingDocumentation.cs">
+	  <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       <Link>Documentation\BindingDocumentation.cs</Link>
     </Compile>
     <Compile Include="..\LunarBind\Attributes\LunarBindDocumentationAttribute.cs">
@@ -182,7 +183,7 @@
     </Compile>
     <Compile Include="..\LunarBind\Exceptions\LunarBindStandardException.cs">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-      <Link>Attributes\LunarBindStandardException.cs</Link>
+      <Link>Exceptions\LunarBindStandardException.cs</Link>
     </Compile>
   </ItemGroup>
   <ItemGroup>
