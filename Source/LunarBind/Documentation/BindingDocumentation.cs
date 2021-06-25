@@ -370,11 +370,21 @@ namespace LunarBind.Documentation
                 var paramType = parameterInfo[l].ParameterType;
                 if (paramType.IsGenericType)
                 {
-                    paramSubList.Add(GetGenericString(paramType, full) + " " + parameterInfo[l].Name);
+                    string str = GetGenericString(paramType, full) + " " + parameterInfo[l].Name;
+                    if (parameterInfo[l].HasDefaultValue)
+                    {
+                        str += " = " + (parameterInfo[l].DefaultValue?.ToString() ?? "null");
+                    }
+                    paramSubList.Add(str);
                 }
                 else
                 {
-                    paramSubList.Add((full ? paramType.FullName : paramType.Name) + " " + parameterInfo[l].Name);
+                    string str = (full ? paramType.FullName : paramType.Name) + " " + parameterInfo[l].Name;
+                    if (parameterInfo[l].HasDefaultValue)
+                    {
+                        str += " = " + (parameterInfo[l].DefaultValue?.ToString() ?? "null");
+                    }
+                    paramSubList.Add(str);
                 }
             }
             return string.Join(", ", paramSubList);
