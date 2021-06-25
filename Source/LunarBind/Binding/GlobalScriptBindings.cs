@@ -471,7 +471,7 @@
 
         private static void RegisterAssemblyTypes(Assembly assembly)
         {
-            Type[] types = assembly.GetTypes();
+            var types = assembly.GetTypes().Where(x => x.GetCustomAttribute<LunarBindHideAttribute>() == null && x.GetCustomAttribute<LunarBindIgnoreAssemblyAddAttribute>() == null);
             foreach (var type in types)
             {
                 if (type.IsEnum)

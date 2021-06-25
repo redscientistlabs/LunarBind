@@ -360,7 +360,7 @@
 
 
         /// <summary>
-        /// Use <see cref="BindAssemblyFuncs(Assembly[])"/> instead
+        /// Use <see cref="BindAssembly(Assembly[])"/> instead
         /// </summary>
         /// <param name="assemblies"></param>
         [Obsolete]
@@ -370,6 +370,18 @@
             {
                 RegisterAssemblyTypes(assembly);
                 //UserData.RegisterAssembly(assembly);
+            }
+        }
+
+        /// <summary>
+        ///  Bind all static functions with the [<see cref="LunarBindFunctionAttribute"/>] attribute on each type in each assembly
+        /// </summary>
+        /// <param name="assemblies"></param>
+        public void BindAssembly(params Assembly[] assemblies)
+        {
+            foreach (var assembly in assemblies)
+            {
+                RegisterAssemblyTypes(assembly);
             }
         }
 
@@ -428,7 +440,7 @@
 
         private void RegisterAssemblyTypes(Assembly assembly)
         {
-            Type[] types = assembly.GetTypes();
+            var types = assembly.GetTypes().Where(x => x.GetCustomAttribute<LunarBindHideAttribute>() == null && x.GetCustomAttribute<LunarBindIgnoreAssemblyAddAttribute>() == null);
             foreach (var type in types)
             {
                 if (type.IsEnum)
@@ -512,7 +524,7 @@
         }
 
 
-        public void Initialize(ScriptRunnerBase scriptRunner)
+        public void InitializeRunner(ScriptRunnerBase scriptRunner)
         {
             Initialize(scriptRunner.Lua);
         }
