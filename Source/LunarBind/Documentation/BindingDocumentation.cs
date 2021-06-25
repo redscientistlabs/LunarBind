@@ -157,9 +157,11 @@ namespace LunarBind.Documentation
             var mi = func.Callback.Method;
             var parameterInfo = mi.GetParameters();
             string parameterTypes = "";
+            string parameterNames = "";
             if (parameterInfo.Length > 0)
             {
                 parameterTypes = GetParamString(parameterInfo);
+                parameterNames = GetParamNamesOnlyString(parameterInfo);
             }
 
             var returnType = mi.ReturnType;
@@ -167,7 +169,7 @@ namespace LunarBind.Documentation
             //string tooltip = $"Return Type:\n- {(returnType.IsGenericType ? GetGenericString(returnType, true) : returnType.FullName)}{(parameterFullNames != null ? $"\nParameter Types:\n{parameterFullNames}" : " ")}";
 
             string definition = $"{returnTypeName} {fullName}({parameterTypes})";
-            string copy = $"{fullName}({parameterTypes})";
+            string copy = $"{fullName}()";
 
             return new DocItem(DocItemType.Function, func.Callback.Method.DeclaringType, name, fullName, definition, copy, documentation, example);
 
@@ -181,9 +183,12 @@ namespace LunarBind.Documentation
             
             var parameterInfo = mi.GetParameters();
             string parameterTypes = "";
+            string parameterNames = "";
+
             if (parameterInfo.Length > 0)
             {
                 parameterTypes = GetParamString(parameterInfo);
+                parameterNames = GetParamNamesOnlyString(parameterInfo);
             }
 
             var returnType = mi.ReturnType;
@@ -191,7 +196,7 @@ namespace LunarBind.Documentation
             //string tooltip = $"Return Type:\n- {(returnType.IsGenericType ? GetGenericString(returnType, true) : returnType.FullName)}{(parameterFullNames != null ? $"\nParameter Types:\n{parameterFullNames}" : " ")}";
 
             string definition = $"{returnTypeName} {fullName}({parameterTypes})";
-            string copy = $"{fullName}({parameterTypes})";
+            string copy = $"{fullName}()";
 
             return new DocItem(DocItemType.Function, mi.DeclaringType, name, fullName, definition, copy);
         }
@@ -212,7 +217,6 @@ namespace LunarBind.Documentation
             //TODO: events
             //var events = type.GetEvents(BindingFlags.Static | BindingFlags.Public)
             //    .Where(x => !x.CustomAttributes.Any(y => y.AttributeType == typeof(MoonSharpHiddenAttribute) || y.AttributeType == typeof(MoonSharpHideMemberAttribute) || y.AttributeType == typeof(LunarBindHideAttribute)));
-
 
             foreach (var field in fields)
             {
@@ -376,6 +380,15 @@ namespace LunarBind.Documentation
             return string.Join(", ", paramSubList);
         }
 
+        private static string GetParamNamesOnlyString(ParameterInfo[] parameterInfo)
+        {
+            List<string> paramSubList = new List<string>();
+            for (int l = 0; l < parameterInfo.Length; l++)
+            {
+                paramSubList.Add(parameterInfo[l].Name);
+            }
+            return string.Join(", ", paramSubList);
+        }
 
     }
 
