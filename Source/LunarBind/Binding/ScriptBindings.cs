@@ -511,6 +511,12 @@
             BakeNewables();
         }
 
+
+        public void Initialize(ScriptRunnerBase scriptRunner)
+        {
+            Initialize(scriptRunner.Lua);
+        }
+
         /// <summary>
         /// Exposed initialize function to initialize non-scriptcore moonsharp scripts
         /// </summary>
