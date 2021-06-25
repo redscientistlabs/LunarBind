@@ -11,6 +11,7 @@ namespace LunarBind.Documentation
     /// </summary>
     public static class BindingDocumentation
     {
+        public static int MaxRecursion { get; set; } = 32;
 
         /// <summary>
         /// Create global script bindings documentation
@@ -26,7 +27,7 @@ namespace LunarBind.Documentation
             {
                 if (item is BindTable bTable)
                 {
-                    doc.SubDocs.Add(DocumentTable(bTable, ""));
+                    doc.SubDocs.Add(DocumentTable(bTable, "", 0));
                 }
                 else if(item is BindFunc func)
                 {
@@ -34,11 +35,11 @@ namespace LunarBind.Documentation
                 }
                 else if (item is BindUserType bUserType)
                 {
-                    doc.SubDocs.Add(DocumentType(bUserType, ""));
+                    doc.SubDocs.Add(DocumentType(bUserType, "", 0));
                 }
                 else if (item is BindUserObject bUserObj)
                 {
-                    doc.SubDocs.Add(DocumentObject(bUserObj, ""));
+                    doc.SubDocs.Add(DocumentObject(bUserObj, "", 0));
                 }
                 else if (item is BindEnum bEnum)
                 {
@@ -61,7 +62,7 @@ namespace LunarBind.Documentation
             {
                 if (item is BindTable bTable)
                 {
-                    doc.SubDocs.Add(DocumentTable(bTable, ""));
+                    doc.SubDocs.Add(DocumentTable(bTable, "", 0));
                 }
                 else if (item is BindFunc func)
                 {
@@ -69,11 +70,11 @@ namespace LunarBind.Documentation
                 }
                 else if (item is BindUserType bUserType)
                 {
-                    doc.SubDocs.Add(DocumentType(bUserType, ""));
+                    doc.SubDocs.Add(DocumentType(bUserType, "", 0));
                 }
                 else if (item is BindUserObject bUserObj)
                 {
-                    doc.SubDocs.Add(DocumentObject(bUserObj, ""));
+                    doc.SubDocs.Add(DocumentObject(bUserObj, "", 0));
                 }
                 else if (item is BindEnum bEnum)
                 {
@@ -86,9 +87,14 @@ namespace LunarBind.Documentation
             return doc;
         }
 
-        private static DocItem DocumentTable(BindTable table, string prefix)
+        private static DocItem DocumentTable(BindTable table, string prefix, int curLevel)
         {
             DocItem doc = new DocItem(DocItemType.Table, typeof(Table), table.Name, prefix + table.Name, prefix + table.Name, prefix + table.Name);
+            if(curLevel > MaxRecursion)
+            {
+                doc.SubDocs.Add(new DocItem(DocItemType.None, typeof(void), "Max Recursion Reached", "Max Recursion Reached", "Max Recursion Reached", "", "", ""));
+                return doc;
+            }
             var nextPrefix = prefix + table.Name + ".";
             //var items = table.GetAllItems();
 
@@ -105,7 +111,7 @@ namespace LunarBind.Documentation
             //Types
             foreach (var item in table.bindTypes.Values)
             {
-                var docItem = DocumentType(item, nextPrefix);
+                var docItem = DocumentType(item, nextPrefix, curLevel + 1);
                 if (docItem != null)
                 {
                     doc.SubDocs.Add(docItem);
@@ -125,7 +131,7 @@ namespace LunarBind.Documentation
             //User Objects
             foreach (var item in table.bindObjects.Values)
             {
-                var docItem = DocumentObject(item, nextPrefix);
+                var docItem = DocumentObject(item, nextPrefix, curLevel + 1);
                 if (docItem != null)
                 {
                     doc.SubDocs.Add(docItem);
@@ -136,7 +142,7 @@ namespace LunarBind.Documentation
             foreach (var item in table.bindTables.Values)
             {
                 //Add to prefix
-                var documentTable = DocumentTable(item, nextPrefix);
+                var documentTable = DocumentTable(item, nextPrefix, curLevel + 1);
                 if (documentTable != null) 
                 {
                     doc.SubDocs.Add(documentTable);
@@ -190,6 +196,19 @@ namespace LunarBind.Documentation
                 parameterTypes = GetParamString(parameterInfo);
                 parameterNames = GetParamNamesOnlyString(parameterInfo);
             }
+            string documentation = "";
+            string example = "";
+
+            var docAttrib = mi.GetCustomAttribute<LunarBindDocumentationAttribute>();
+            if (docAttrib != null)
+            {
+                documentation = docAttrib.Data;
+            }
+            var exampleAttrib = mi.GetCustomAttribute<LunarBindExampleAttribute>();
+            if (exampleAttrib != null)
+            {
+                example = exampleAttrib.Data;
+            }
 
             var returnType = mi.ReturnType;
             string returnTypeName = returnType.IsGenericType ? GetGenericString(returnType) : returnType.Name;
@@ -198,13 +217,29 @@ namespace LunarBind.Documentation
             string definition = $"{returnTypeName} {fullName}({parameterTypes})";
             string copy = $"{fullName}()";
 
-            return new DocItem(DocItemType.Function, mi.DeclaringType, name, fullName, definition, copy);
+            return new DocItem(DocItemType.Function, mi.DeclaringType, name, fullName, definition, copy, documentation, example);
         }
 
 
-        private static DocItem DocumentType(BindUserType userType, string prefix)
+        private static DocItem DocumentType(BindUserType userType, string prefix, int curLevel)
         {
-            DocItem doc = new DocItem(DocItemType.StaticType, userType.UserType, userType.Name, prefix + userType.Name, "");
+
+            //Get attributes
+            string documentation = "";
+            string example = "";
+
+            var docAttrib = userType.UserType.GetCustomAttribute<LunarBindDocumentationAttribute>();
+            if (docAttrib != null)
+            {
+                documentation = docAttrib.Data;
+            }
+            var exampleAttrib = userType.UserType.GetCustomAttribute<LunarBindExampleAttribute>();
+            if (exampleAttrib != null)
+            {
+                example = exampleAttrib.Data;
+            }
+
+            DocItem doc = new DocItem(DocItemType.StaticType, userType.UserType, userType.Name, prefix + userType.Name, "", documentation, example);
             var type = userType.UserType;
             var nextPrefix = prefix + userType.Name + ".";
             //STATIC
@@ -220,7 +255,21 @@ namespace LunarBind.Documentation
 
             foreach (var field in fields)
             {
-                var fdoc = DocumentInstanceObject(field.FieldType, field.Name, nextPrefix, type);
+                string docu = "";
+                string ex = "";
+
+                var docAttrib2 = field.GetCustomAttribute<LunarBindDocumentationAttribute>();
+                if (docAttrib2 != null)
+                {
+                    docu = docAttrib2.Data;
+                }
+                var exampleAttrib2 = field.GetCustomAttribute<LunarBindExampleAttribute>();
+                if (exampleAttrib2 != null)
+                {
+                    ex = exampleAttrib2.Data;
+                }
+
+                var fdoc = DocumentInstanceObject(field.FieldType, field.Name, nextPrefix, curLevel + 1, type, docu, ex);
                 if(fdoc != null)
                 {
                     doc.SubDocs.Add(fdoc);
@@ -229,7 +278,21 @@ namespace LunarBind.Documentation
 
             foreach (var property in properties)
             {
-                var pdoc = DocumentInstanceObject(property.PropertyType, property.Name, nextPrefix, type);
+                string docu = "";
+                string ex = "";
+
+                var docAttrib2 = property.GetCustomAttribute<LunarBindDocumentationAttribute>();
+                if (docAttrib2 != null)
+                {
+                    docu = docAttrib2.Data;
+                }
+                var exampleAttrib2 = property.GetCustomAttribute<LunarBindExampleAttribute>();
+                if (exampleAttrib2 != null)
+                {
+                    ex = exampleAttrib2.Data;
+                }
+
+                var pdoc = DocumentInstanceObject(property.PropertyType, property.Name, nextPrefix, curLevel + 1, type, docu, ex);
                 if (pdoc != null)
                 {
                     doc.SubDocs.Add(pdoc);
@@ -251,7 +314,7 @@ namespace LunarBind.Documentation
         /// <summary>
         /// CAN RETURN NULL
         /// </summary>
-        private static DocItem DocumentInstanceObject(Type type, string name, string prefix, Type declType = null)
+        private static DocItem DocumentInstanceObject(Type type, string name, string prefix, int curLevel, Type declType = null, string documentation = "", string example = "")
         {
             string fullName = prefix + name;
             var nextPrefix = prefix + name + ".";
@@ -268,6 +331,13 @@ namespace LunarBind.Documentation
 
             DocItem doc = new DocItem(DocItemType.InstanceObject, type, name, fullName, "");
 
+            if (curLevel > MaxRecursion)
+            {
+                doc.SubDocs.Add(new DocItem(DocItemType.None, typeof(void), "Max Recursion Reached", "Max Recursion Reached", "Max Recursion Reached", "", "", ""));
+                return doc;
+            }
+
+
             var fields = type.GetFields(BindingFlags.Instance | BindingFlags.Public).Where(a => !a.IsSpecialName && a.Name != "ToString" && a.Name != "GetHashCode" && a.Name != "GetType" && a.Name != "Equals" && a.Name != "GetTypeCode")
                 .Where(x => !x.CustomAttributes.Any(y => y.AttributeType == typeof(MoonSharpHiddenAttribute) || y.AttributeType == typeof(MoonSharpHideMemberAttribute) || y.AttributeType == typeof(LunarBindHideAttribute)));
             var properties = type.GetProperties(BindingFlags.Instance | BindingFlags.Public).Where(a => !a.IsSpecialName && a.Name != "ToString" && a.Name != "GetHashCode" && a.Name != "GetType" && a.Name != "Equals" && a.Name != "GetTypeCode")
@@ -280,7 +350,21 @@ namespace LunarBind.Documentation
 
             foreach (var field in fields)
             {
-                var fdoc = DocumentInstanceObject(field.FieldType, field.Name, nextPrefix, type);
+                string docu = "";
+                string ex = "";
+
+                var docAttrib = field.GetCustomAttribute<LunarBindDocumentationAttribute>();
+                if (docAttrib != null)
+                {
+                    docu = docAttrib.Data;
+                }
+                var exampleAttrib = field.GetCustomAttribute<LunarBindExampleAttribute>();
+                if (exampleAttrib != null)
+                {
+                    ex = exampleAttrib.Data;
+                }
+
+                var fdoc = DocumentInstanceObject(field.FieldType, field.Name, nextPrefix, curLevel + 1, type, docu, ex);
                 if (fdoc != null)
                 {
                     doc.SubDocs.Add(fdoc);
@@ -289,7 +373,22 @@ namespace LunarBind.Documentation
 
             foreach (var property in properties)
             {
-                var pdoc = DocumentInstanceObject(property.PropertyType, property.Name, nextPrefix, type);
+
+                string docu = "";
+                string ex = "";
+
+                var docAttrib = property.GetCustomAttribute<LunarBindDocumentationAttribute>();
+                if (docAttrib != null)
+                {
+                    docu = docAttrib.Data;
+                }
+                var exampleAttrib = property.GetCustomAttribute<LunarBindExampleAttribute>();
+                if (exampleAttrib != null)
+                {
+                    ex = exampleAttrib.Data;
+                }
+
+                var pdoc = DocumentInstanceObject(property.PropertyType, property.Name, nextPrefix, curLevel + 1, type, docu, ex);
                 if (pdoc != null)
                 {
                     doc.SubDocs.Add(pdoc);
@@ -325,15 +424,15 @@ namespace LunarBind.Documentation
 
                 if (!hidden)
                 {
-                    doc.SubDocs.Add(DocumentInstanceObject(typeof(int), field.Name, nextPrefix, enu.EnumType));
+                    doc.SubDocs.Add(DocumentInstanceObject(typeof(int), field.Name, nextPrefix, 0, enu.EnumType));
                 }
             }
             return doc;
         }
 
-        private static DocItem DocumentObject(BindUserObject obj, string prefix)
+        private static DocItem DocumentObject(BindUserObject obj, string prefix, int curLevel)
         {
-            return DocumentInstanceObject(obj.UserObject.GetType(), obj.Name, prefix, obj.UserObject.GetType());
+            return DocumentInstanceObject(obj.UserObject.GetType(), obj.Name, prefix, curLevel, obj.UserObject.GetType());
         }
 
 

@@ -45,7 +45,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs" />
-	<Compile Include="..\LunarBind\ScriptReference.cs">
+    <Compile Include="..\LunarBind\ScriptReference.cs">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Compile>
     <Compile Include="..\LunarBind\QuickScripting.cs">
@@ -141,8 +141,8 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       <Link>Binding\ScriptBindings.cs</Link>
     </Compile>
-	<Compile Include="..\LunarBind\Documentation\BindingDocumentation.cs">
-	  <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    <Compile Include="..\LunarBind\Documentation\BindingDocumentation.cs">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       <Link>Documentation\BindingDocumentation.cs</Link>
     </Compile>
     <Compile Include="..\LunarBind\Attributes\LunarBindDocumentationAttribute.cs">
@@ -161,16 +161,16 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       <Link>Attributes\LunarBindFunctionAttribute.cs</Link>
     </Compile>
-	<Compile Include="..\LunarBind\Attributes\LunarBindInstanceAttribute.cs">
+    <Compile Include="..\LunarBind\Attributes\LunarBindInstanceAttribute.cs">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       <Link>Attributes\LunarBindInstanceAttribute.cs</Link>
     </Compile>
-	<Compile Include="..\LunarBind\Attributes\LunarBindStaticAttribute.cs">
-	  <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    <Compile Include="..\LunarBind\Attributes\LunarBindStaticAttribute.cs">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       <Link>Attributes\LunarBindStaticAttribute.cs</Link>
     </Compile>
-	<Compile Include="..\LunarBind\Attributes\LunarBindPrefixAttribute.cs">
-	  <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    <Compile Include="..\LunarBind\Attributes\LunarBindPrefixAttribute.cs">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       <Link>Attributes\LunarBindPrefixAttribute.cs</Link>
     </Compile>
     <Compile Include="..\LunarBind\Attributes\LunarBindHideAttribute.cs">
@@ -189,10 +189,11 @@
   <ItemGroup>
     <None Include="packages.config" />
   </ItemGroup>
-  <ItemGroup>
+    <ItemGroup>
     <Folder Include="Documentation\" />
     <Folder Include="Exceptions\" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
     <PostBuildEvent>cd $(TargetDir)
