@@ -5,15 +5,23 @@
     using System.Text;
     using System.Linq;
     using MoonSharp.Interpreter;
+    using System.Reflection;
 
     internal class BindEnum : BindItem
     {
         internal Type EnumType { get; private set; }
-        private List<KeyValuePair<string, int>> enumVals = new List<KeyValuePair<string, int>>();
+        internal List<KeyValuePair<string, int>> EnumVals = new List<KeyValuePair<string, int>>();
+        internal List<string> FieldDocumentations { get; private set; } = new List<string>();
+        internal List<string> FieldExamples { get; private set; } = new List<string>();
+
         public BindEnum(string name, Type e)
         {
             EnumType = e;
             Name = name;
+
+            Documentation = e.GetCustomAttribute<LunarBindDocumentationAttribute>()?.Data ?? "";
+            Example = e.GetCustomAttribute<LunarBindExampleAttribute>()?.Data ?? "";
+
             var fields = e.GetFields(System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Static);
             foreach (var field in fields)
             {
@@ -22,18 +30,23 @@
                 
                 if(!hidden)
                 {
-                    enumVals.Add(new KeyValuePair<string, int>(field.Name, (int)field.GetValue(null)));
+                    EnumVals.Add(new KeyValuePair<string, int>(field.Name, (int)field.GetValue(null)));
+                    //Add any documentation attributes
+                    var doc = field.GetCustomAttribute<LunarBindDocumentationAttribute>()?.Data ?? "";
+                    var ex = field.GetCustomAttribute<LunarBindExampleAttribute>()?.Data ?? "";
+                    FieldDocumentations.Add(doc);
+                    FieldExamples.Add(ex);
                 }
             }
         }
 
         public string[] GetAllEnumPaths(string prefix = "")
         {
-            string[] ret = new string[enumVals.Count];
+            string[] ret = new string[EnumVals.Count];
             prefix += Name + ".";
-            for (int i = 0; i < enumVals.Count; i++)
+            for (int i = 0; i < EnumVals.Count; i++)
             {
-                ret[i] = prefix + enumVals[i].Key;
+                ret[i] = prefix + EnumVals[i].Key;
             }
             return ret;
         }
@@ -41,7 +54,7 @@
         internal Table CreateEnumTable(Script script)
         {
             Table t = new Table(script);
-            foreach (var item in enumVals)
+            foreach (var item in EnumVals)
             {
                 t[item.Key] = item.Value;
             }
@@ -52,7 +65,7 @@
         {
             Table t = new Table(script);
 
-            foreach (var item in enumVals)
+            foreach (var item in EnumVals)
             {
                 t[item.Key] = item.Value;
             }

@@ -491,7 +491,13 @@
                         if (constructor != null)
                         {
                             object instance = constructor.Invoke(new object[] { });
-                            AddGlobalObject(instantiable.Path, instance);
+
+                            var bindObj = BindingHelpers.CreateBindUserObject(bindItems, instantiable.Path, instance);
+                            var doc = type.GetCustomAttribute<LunarBindDocumentationAttribute>()?.Data ?? "";
+                            var ex = type.GetCustomAttribute<LunarBindExampleAttribute>()?.Data ?? "";
+                            bindObj.Documentation = doc;
+                            bindObj.Example = ex;
+                            //AddGlobalObject(instantiable.Path, instance);
                         }
                         else
                         {

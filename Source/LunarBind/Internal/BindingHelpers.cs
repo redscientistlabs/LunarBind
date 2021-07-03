@@ -35,13 +35,13 @@
             return Delegate.CreateDelegate(getType(types.ToArray()), target, methodInfo.Name);
         }
 
-
+        //TODO: get the attributes here
         /// <summary>
         /// Automatically create tables, etc
         /// </summary>
         /// <param name="dict"></param>
         /// <param name="pathString"></param>
-        internal static void CreateBindFunction(Dictionary<string, BindItem> dict, string pathString, Delegate callback, bool autoYield = true, string documentation = "", string example = "")
+        internal static BindFunc CreateBindFunction(Dictionary<string, BindItem> dict, string pathString, Delegate callback, bool autoYield = true, string documentation = "", string example = "")
         {
             if (string.IsNullOrWhiteSpace(pathString))
             {
@@ -85,6 +85,8 @@
                     t.GenerateWrappedYieldString(); //Bake the yieldable string
                 }
             }
+
+            return func;
         }
 
         /// <summary>
@@ -92,7 +94,7 @@
         /// </summary>
         /// <param name="dict"></param>
         /// <param name="pathString"></param>
-        internal static void CreateBindUserObject(Dictionary<string, BindItem> dict, string pathString, object obj)
+        internal static BindUserObject CreateBindUserObject(Dictionary<string, BindItem> dict, string pathString, object obj)
         {
             if (string.IsNullOrWhiteSpace(pathString))
             {
@@ -101,6 +103,12 @@
             var path = pathString.Split('.');
             string root = path[0];
             BindUserObject bindObj = new BindUserObject(path[path.Length - 1], obj);
+
+            var doc = obj.GetType().GetCustomAttribute<LunarBindDocumentationAttribute>()?.Data ?? "";
+            var ex = obj.GetType().GetCustomAttribute<LunarBindExampleAttribute>()?.Data ?? "";
+            bindObj.Documentation = doc;
+            bindObj.Example = ex;
+
 
             if (path.Length == 1)
             {
@@ -134,6 +142,8 @@
                     t.AddBindUserObject(path, 1, bindObj);
                 }
             }
+
+            return bindObj;
         }
 
         /// <summary>
@@ -141,7 +151,7 @@
         /// </summary>
         /// <param name="dict"></param>
         /// <param name="pathString"></param>
-        internal static void CreateBindType(Dictionary<string, BindItem> dict, string pathString, Type type)
+        internal static BindUserType CreateBindType(Dictionary<string, BindItem> dict, string pathString, Type type)
         {
             if (string.IsNullOrWhiteSpace(pathString))
             {
@@ -150,6 +160,12 @@
             var path = pathString.Split('.');
             string root = path[0];
             BindUserType bindObj = new BindUserType(path[path.Length - 1], type);
+
+            var doc = type.GetCustomAttribute<LunarBindDocumentationAttribute>()?.Data ?? "";
+            var ex = type.GetCustomAttribute<LunarBindExampleAttribute>()?.Data ?? "";
+            bindObj.Documentation = doc;
+            bindObj.Example = ex;
+
 
             if (path.Length == 1)
             {
@@ -183,6 +199,7 @@
                     t.AddBindUserType(path, 1, bindObj);
                 }
             }
+            return bindObj;
         }
 
 
@@ -191,7 +208,7 @@
         /// </summary>
         /// <param name="dict"></param>
         /// <param name="pathString"></param>
-        internal static void CreateBindEnum(Dictionary<string, BindItem> dict, string pathString, Type enumType)
+        internal static BindEnum CreateBindEnum(Dictionary<string, BindItem> dict, string pathString, Type enumType)
         {
             if (string.IsNullOrWhiteSpace(pathString))
             {
@@ -201,6 +218,7 @@
 
             string root = path[0];
             BindEnum bindEnum = new BindEnum(path[path.Length - 1], enumType);
+
 
             if (path.Length == 1)
             {
@@ -233,6 +251,8 @@
                     t.AddBindEnum(path, 1, bindEnum);
                 }
             }
+
+            return bindEnum;
         }
 
 

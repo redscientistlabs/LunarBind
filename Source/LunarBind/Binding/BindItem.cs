@@ -9,8 +9,11 @@
     internal abstract class BindItem
     {
         public string Name { get; internal protected set; }
+        public string Example { get; internal set; }
+        public string Documentation { get; internal set; }
+
         //Todo: limit to table and function
-        public string YieldableString { get; internal protected set; }
+        internal string YieldableString { get; set; }
         internal abstract void AddToScript(Script script);
     }
 }

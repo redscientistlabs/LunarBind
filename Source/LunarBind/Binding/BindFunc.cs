@@ -10,8 +10,6 @@
         /// The C# callback function
         /// </summary>
         public Delegate Callback { get; private set; } 
-        public string Example { get; private set; }
-        public string Documentation { get; private set; }
 
         public bool IsYieldable { get; private set; }
 

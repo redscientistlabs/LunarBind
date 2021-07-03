@@ -12,7 +12,8 @@ namespace LunarBind.Documentation
     public static class BindingDocumentation
     {
         public static int MaxRecursion { get; set; } = 32;
-
+        public static string ReturnTypeColor = "#A5A5A5";
+        public static string ParamsTypeColor = "#A5A5A5";
         /// <summary>
         /// Create global script bindings documentation
         /// </summary>
@@ -86,6 +87,44 @@ namespace LunarBind.Documentation
 
             return doc;
         }
+
+        public static DocItem CreateDocumentation(params Assembly[] assemblies)
+        {
+            var bindings = new ScriptBindings();
+            bindings.BindAssembly(assemblies);
+
+            DocItem doc = new DocItem(DocItemType.Table, null, "Root", "Root", "");
+            var bi = bindings.bindItems.Values;
+
+            foreach (var item in bi)
+            {
+                if (item is BindTable bTable)
+                {
+                    doc.SubDocs.Add(DocumentTable(bTable, "", 0));
+                }
+                else if (item is BindFunc func)
+                {
+                    doc.SubDocs.Add(DocumentFunction(func, ""));
+                }
+                else if (item is BindUserType bUserType)
+                {
+                    doc.SubDocs.Add(DocumentType(bUserType, "", 0));
+                }
+                else if (item is BindUserObject bUserObj)
+                {
+                    doc.SubDocs.Add(DocumentObject(bUserObj, "", 0));
+                }
+                else if (item is BindEnum bEnum)
+                {
+                    doc.SubDocs.Add(DocumentEnum(bEnum, ""));
+                }
+            }
+
+            doc.Sort();
+
+            return doc;
+        }
+
 
         private static DocItem DocumentTable(BindTable table, string prefix, int curLevel)
         {
@@ -162,23 +201,33 @@ namespace LunarBind.Documentation
 
             var mi = func.Callback.Method;
             var parameterInfo = mi.GetParameters();
-            string parameterTypes = "";
-            string parameterNames = "";
+            string paramTypes = "";
+            string paramTypesRT = "";
+            string fullParams = "";
+            string fullParamsRT = "";
+            //string parameterNames = "";
             if (parameterInfo.Length > 0)
             {
-                parameterTypes = GetParamString(parameterInfo);
-                parameterNames = GetParamNamesOnlyString(parameterInfo);
+                paramTypes = GetParamTypesOnlyString(parameterInfo, false);
+                paramTypesRT = GetParamTypesOnlyString(parameterInfo, true);
+                fullParams = GetParamString(parameterInfo, false);
+                fullParamsRT = GetParamString(parameterInfo, true);
+                //parameterNames = GetParamNamesOnlyString(parameterInfo);
             }
 
             var returnType = mi.ReturnType;
             string returnTypeName = returnType.IsGenericType ? GetGenericString(returnType) : returnType.Name;
             //string tooltip = $"Return Type:\n- {(returnType.IsGenericType ? GetGenericString(returnType, true) : returnType.FullName)}{(parameterFullNames != null ? $"\nParameter Types:\n{parameterFullNames}" : " ")}";
-
-            string definition = $"{returnTypeName} {fullName}({parameterTypes})";
+            string definition = $"{returnTypeName} {fullName}({fullParams})";
             string copy = $"{fullName}()";
 
-            return new DocItem(DocItemType.Function, func.Callback.Method.DeclaringType, name, fullName, definition, copy, documentation, example);
 
+            string returnTypeRichText = $"<i><color=\"{ReturnTypeColor}\">{returnTypeName}</color></i>";
+            string richTextDefinition = $"{returnTypeRichText} {fullName}({fullParamsRT})";
+            string preview = $"{returnTypeName} {name}({paramTypes})";
+            string previewRT = $"{returnTypeRichText} {name}({paramTypesRT})";
+
+            return new DocItem(DocItemType.Function, func.Callback.Method.DeclaringType, name, fullName, definition, copy, documentation, example, richTextDefinition, preview, previewRT);
         }
 
         //For user type
@@ -188,14 +237,21 @@ namespace LunarBind.Documentation
             string fullName = prefix + name;
             
             var parameterInfo = mi.GetParameters();
-            string parameterTypes = "";
-            string parameterNames = "";
 
+            string paramTypes = "";
+            string paramTypesRT = "";
+            string fullParams = "";
+            string fullParamsRT = "";
+            //string parameterNames = "";
             if (parameterInfo.Length > 0)
             {
-                parameterTypes = GetParamString(parameterInfo);
-                parameterNames = GetParamNamesOnlyString(parameterInfo);
+                paramTypes = GetParamTypesOnlyString(parameterInfo, false);
+                paramTypesRT = GetParamTypesOnlyString(parameterInfo, true);
+                fullParams = GetParamString(parameterInfo, false);
+                fullParamsRT = GetParamString(parameterInfo, true);
+                //parameterNames = GetParamNamesOnlyString(parameterInfo);
             }
+
             string documentation = "";
             string example = "";
 
@@ -214,10 +270,17 @@ namespace LunarBind.Documentation
             string returnTypeName = returnType.IsGenericType ? GetGenericString(returnType) : returnType.Name;
             //string tooltip = $"Return Type:\n- {(returnType.IsGenericType ? GetGenericString(returnType, true) : returnType.FullName)}{(parameterFullNames != null ? $"\nParameter Types:\n{parameterFullNames}" : " ")}";
 
-            string definition = $"{returnTypeName} {fullName}({parameterTypes})";
+            string definition = $"{returnTypeName} {fullName}({fullParams})";
             string copy = $"{fullName}()";
 
-            return new DocItem(DocItemType.Function, mi.DeclaringType, name, fullName, definition, copy, documentation, example);
+            string returnTypeRichText = $"<i><color=\"{ReturnTypeColor}\">{returnTypeName}</color></i>";
+            string richTextDefinition = $"{returnTypeRichText} {fullName}({fullParamsRT})";
+            string preview = $"{returnTypeName} {name}({paramTypes})";
+            string previewRT = $"{returnTypeRichText} {name}({paramTypesRT})";
+
+
+            return new DocItem(DocItemType.Function, mi.DeclaringType, name, fullName, definition, copy, documentation, example, richTextDefinition, preview, previewRT);
+            //return new DocItem(DocItemType.Function, mi.DeclaringType, name, fullName, definition, copy, documentation, example);
         }
 
 
@@ -225,19 +288,8 @@ namespace LunarBind.Documentation
         {
 
             //Get attributes
-            string documentation = "";
-            string example = "";
-
-            var docAttrib = userType.UserType.GetCustomAttribute<LunarBindDocumentationAttribute>();
-            if (docAttrib != null)
-            {
-                documentation = docAttrib.Data;
-            }
-            var exampleAttrib = userType.UserType.GetCustomAttribute<LunarBindExampleAttribute>();
-            if (exampleAttrib != null)
-            {
-                example = exampleAttrib.Data;
-            }
+            string documentation = userType.Documentation ?? "";
+            string example = userType.Example ?? "";
 
             DocItem doc = new DocItem(DocItemType.StaticType, userType.UserType, userType.Name, prefix + userType.Name, "", documentation, example);
             var type = userType.UserType;
@@ -322,14 +374,14 @@ namespace LunarBind.Documentation
             if (type.IsPrimitive || type == typeof(string))
             {
                 //Stop recursing
-                return new DocItem(DocItemType.InstanceObject, declType ?? type, name, fullName, fullName, fullName);
+                return new DocItem(DocItemType.InstanceObject, declType ?? type, name, fullName, fullName, fullName, documentation, example);
             }
             else if (!UserData.IsTypeRegistered(type))
             {
                 return null;
             }
 
-            DocItem doc = new DocItem(DocItemType.InstanceObject, type, name, fullName, "");
+            DocItem doc = new DocItem(DocItemType.InstanceObject, type, name, fullName, fullName, fullName, documentation, example);
 
             if (curLevel > MaxRecursion)
             {
@@ -350,24 +402,34 @@ namespace LunarBind.Documentation
 
             foreach (var field in fields)
             {
-                string docu = "";
-                string ex = "";
-
-                var docAttrib = field.GetCustomAttribute<LunarBindDocumentationAttribute>();
-                if (docAttrib != null)
+                if (field.FieldType.IsEnum)
                 {
-                    docu = docAttrib.Data;
+                    BindEnum bindEnum = new BindEnum(field.Name, field.FieldType);
+                    doc.SubDocs.Add(DocumentEnum(bindEnum, prefix));
                 }
-                var exampleAttrib = field.GetCustomAttribute<LunarBindExampleAttribute>();
-                if (exampleAttrib != null)
+                else
                 {
-                    ex = exampleAttrib.Data;
-                }
 
-                var fdoc = DocumentInstanceObject(field.FieldType, field.Name, nextPrefix, curLevel + 1, type, docu, ex);
-                if (fdoc != null)
-                {
-                    doc.SubDocs.Add(fdoc);
+                    string docu = "";
+                    string ex = "";
+
+                    var docAttrib = field.GetCustomAttribute<LunarBindDocumentationAttribute>();
+                    if (docAttrib != null)
+                    {
+                        docu = docAttrib.Data;
+                    }
+                    var exampleAttrib = field.GetCustomAttribute<LunarBindExampleAttribute>();
+                    if (exampleAttrib != null)
+                    {
+                        ex = exampleAttrib.Data;
+                    }
+
+
+                    var fdoc = DocumentInstanceObject(field.FieldType, field.Name, nextPrefix, curLevel + 1, type, docu, ex);
+                    if (fdoc != null)
+                    {
+                        doc.SubDocs.Add(fdoc);
+                    }
                 }
             }
 
@@ -415,24 +477,25 @@ namespace LunarBind.Documentation
             string copy = definition;
             var nextPrefix = prefix + name + ".";
 
-            var doc = new DocItem(DocItemType.Enum, enu.EnumType, name, fullName, definition, copy);
-            var fields = enu.EnumType.GetFields(System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Static);
-            foreach (var field in fields)
-            {
-                var hidden = (LunarBindHideAttribute)Attribute.GetCustomAttribute(field, typeof(LunarBindHideAttribute)) != null ||
-                    (MoonSharpHiddenAttribute)Attribute.GetCustomAttribute(field, typeof(MoonSharpHiddenAttribute)) != null;
+            string documentation = enu.Documentation ?? "";
+            string example = enu.Example ?? "";
 
-                if (!hidden)
-                {
-                    doc.SubDocs.Add(DocumentInstanceObject(typeof(int), field.Name, nextPrefix, 0, enu.EnumType));
-                }
+            var doc = new DocItem(DocItemType.Enum, enu.EnumType, name, fullName, definition, copy, documentation, example);
+
+            for(int i = 0; i < enu.EnumVals.Count; i++)
+            {
+                var field = enu.EnumVals[i];
+                var iobj = DocumentInstanceObject(typeof(int), field.Key, nextPrefix, 0, enu.EnumType, enu.FieldDocumentations[i], enu.FieldExamples[i]);
+                doc.SubDocs.Add(iobj);
             }
             return doc;
         }
 
         private static DocItem DocumentObject(BindUserObject obj, string prefix, int curLevel)
         {
-            return DocumentInstanceObject(obj.UserObject.GetType(), obj.Name, prefix, curLevel, obj.UserObject.GetType());
+            string documentation = obj.Documentation ?? "";
+            string example = obj.Example ?? "";
+            return DocumentInstanceObject(obj.UserObject.GetType(), obj.Name, prefix, curLevel, obj.UserObject.GetType(), documentation, example);
         }
 
 
@@ -460,7 +523,7 @@ namespace LunarBind.Documentation
             return genericStringRes + ">";
         }
 
-        private static string GetParamString(ParameterInfo[] parameterInfo, bool full = false)
+        private static string GetParamString(ParameterInfo[] parameterInfo, bool richText = false, bool full = false)
         {
             List<string> paramSubList = new List<string>();
 
@@ -469,7 +532,16 @@ namespace LunarBind.Documentation
                 var paramType = parameterInfo[l].ParameterType;
                 if (paramType.IsGenericType)
                 {
-                    string str = GetGenericString(paramType, full) + " " + parameterInfo[l].Name;
+                    string str;
+                    if (richText)
+                    {
+                        str = $"<i><color=\"{ParamsTypeColor}\">{GetGenericString(paramType, full)}</color></i> {parameterInfo[l].Name}";
+                    }
+                    else
+                    {
+                        str = GetGenericString(paramType, full);
+                    }
+
                     if (parameterInfo[l].HasDefaultValue)
                     {
                         str += " = " + (parameterInfo[l].DefaultValue?.ToString() ?? "null");
@@ -478,11 +550,57 @@ namespace LunarBind.Documentation
                 }
                 else
                 {
-                    string str = (full ? paramType.FullName : paramType.Name) + " " + parameterInfo[l].Name;
+                    string str;
+                    if (richText)
+                    {
+                        str = $"<i><color=\"{ParamsTypeColor}\">{paramType.Name}</color></i> {parameterInfo[l].Name}";
+                    }
+                    else
+                    {
+                        str = paramType.Name;
+                    }
                     if (parameterInfo[l].HasDefaultValue)
                     {
                         str += " = " + (parameterInfo[l].DefaultValue?.ToString() ?? "null");
                     }
+                    paramSubList.Add(str);
+                }
+            }
+            return string.Join(", ", paramSubList);
+        }
+
+        private static string GetParamTypesOnlyString(ParameterInfo[] parameterInfo, bool richText = false, bool full = false)
+        {
+            List<string> paramSubList = new List<string>();
+
+            for (int l = 0; l < parameterInfo.Length; l++)
+            {
+                var paramType = parameterInfo[l].ParameterType;
+                if (paramType.IsGenericType)
+                {
+                    string str;
+                    if (richText)
+                    {
+                        str = $"<i><color=\"{ParamsTypeColor}\">{GetGenericString(paramType, full)}</color></i>";
+                    }
+                    else
+                    {
+                         str = GetGenericString(paramType, full);
+                    }
+                    paramSubList.Add(str);
+                }
+                else
+                {
+                    string str;
+                    if (richText)
+                    {
+                        str = $"<i><color=\"{ParamsTypeColor}\">{paramType.Name}</color></i>";
+                    }
+                    else
+                    {
+                        str = paramType.Name;
+                    }
+
                     paramSubList.Add(str);
                 }
             }
@@ -528,17 +646,25 @@ namespace LunarBind.Documentation
         /// The definition, complete with types
         /// </summary>
         public string DefinitionString { get; internal set; }
+        public string PreviewString { get; internal set; }
+        public string RichTextPreviewString { get; internal set; }
+
         /// <summary>
         /// The string to copy with a copy function
         /// </summary>
         public string CopyString { get; internal set; }
         public string DocumentationString { get; internal set; }
+        private string _richTextDefinition = null;
+        /// <summary>
+        /// Returns a string ready for formatting
+        /// </summary>
+        public string RichTextDefinitionString { get; internal set; }
         public string Example { get; internal set; }
         public Type DeclaringType { get; internal set; }
 
         internal DocItem(DocItemType itemType) : this(itemType, null, "", "", "") { }
 
-        internal DocItem(DocItemType itemType, Type declaringType, string name, string fullname, string definition, string copyString = "", string documentation = "", string example = "")
+        internal DocItem(DocItemType itemType, Type declaringType, string name, string fullname, string definition, string copyString = "", string documentation = "", string example = "", string richTextDefinition = null, string preview = null, string richTextPreview = null)
         {
             ItemType = itemType;
             Name = name;
@@ -548,6 +674,9 @@ namespace LunarBind.Documentation
             CopyString = copyString;
             DocumentationString = documentation;
             Example = example;
+            RichTextDefinitionString = richTextDefinition ?? definition;
+            PreviewString = preview ?? DefinitionString;
+            RichTextPreviewString = richTextPreview ?? preview ?? RichTextDefinitionString ?? DocumentationString;
         }
 
         public void Sort()
