@@ -9,7 +9,6 @@
     using System.Text;
     using System.Threading.Tasks;
 
-    //TODO: Generate documentation
     public class ScriptBindings
     {
         internal readonly Dictionary<string, BindItem> bindItems = new Dictionary<string, BindItem>();
@@ -119,7 +118,7 @@
         {
             BindingHelpers.CreateBindEnum(bindItems, path, typeof(T));
         }
-        //TODO: rename to differentiate from the AddGlobalType, etc
+
         /// <summary>
         /// Use <see cref="BindTypeFuncs(Type[])"/> instead
         /// </summary>

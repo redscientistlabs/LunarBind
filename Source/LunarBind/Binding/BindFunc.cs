@@ -3,7 +3,6 @@
     using MoonSharp.Interpreter;
     using System;
 
-    //TODO: implement a meaningful way of retrieving documentation and examples
     internal class BindFunc : BindItem
     {
         /// <summary>
@@ -15,8 +14,7 @@
 
         public int NumParams => Callback.Method.GetParameters().Length;
 
-        //TODO: create convention for coroutine yield
-        const string COROUTINE_YIELD_ = "COROUTINE_YIELD_";
+        internal const string COROUTINE_YIELD_ = "COROUTINE_YIELD_";
 
         public BindFunc(string name, Delegate callback, bool autoYield = true, string documentation = "", string example = "")
         {

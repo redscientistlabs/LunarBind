@@ -11,5 +11,7 @@
     public abstract class ScriptRunnerBase
     {
         public Script Lua { get; protected set; }
+
+        public Guid Guid { get; private set; } = Guid.NewGuid();
     }
 }

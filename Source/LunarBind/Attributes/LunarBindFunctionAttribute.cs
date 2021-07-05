@@ -4,7 +4,6 @@
     [System.AttributeUsage(AttributeTargets.Method, Inherited = false, AllowMultiple = false)]
     public sealed class LunarBindFunctionAttribute : Attribute
     {
-        //Todo: Add AutoYield functionality
 
         readonly string name;
         readonly bool autoYield;

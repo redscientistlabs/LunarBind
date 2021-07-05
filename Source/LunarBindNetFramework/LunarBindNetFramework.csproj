@@ -142,6 +142,12 @@
     <Compile Include="..\LunarBind\Attributes\LunarBindTypeAttribute.cs">
       <Link>Attributes\LunarBindTypeAttribute.cs</Link>
     </Compile>
+	<Compile Include="..\LunarBind\Attributes\LunarBindYielderAttribute.cs">
+      <Link>Attributes\LunarBindYielderAttribute.cs</Link>
+    </Compile>
+	<Compile Include="..\LunarBind\Attributes\LunarBindIgnoreAssemblyAddAttribute.cs">
+      <Link>Attributes\LunarBindIgnoreAssemblyAddAttribute.cs</Link>
+    </Compile>
     <Compile Include="..\LunarBind\Exceptions\LunarBindStandardException.cs">
       <Link>Exceptions\LunarBindStandardException.cs</Link>
     </Compile>

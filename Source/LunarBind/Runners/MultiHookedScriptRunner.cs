@@ -9,14 +9,14 @@
     /// <summary>
     /// Allows multiple script strings sharing one Script object
     /// </summary>
-    public class HookedStateScriptRunner : ScriptRunnerBase
+    public class MultiHookedScriptRunner : ScriptRunnerBase
     {
-        private readonly Dictionary<string,HookedScriptContainer> GlobalScripts = new Dictionary<string, HookedScriptContainer>();
+        private readonly Dictionary<string, HookedScriptContainer> GlobalScripts = new Dictionary<string, HookedScriptContainer>();
         private HookedScriptContainer CurrentTempScript = null;
 
         private HookedScriptContainer runningScript = null;
         public LuaScriptStandard ScriptStandard { get; private set; } = null;
-        public HookedStateScriptRunner()
+        public MultiHookedScriptRunner()
         {
             Initialize();
         }
@@ -35,13 +35,13 @@
             GlobalScriptBindings.Initialize(Lua);
         }
 
-        public HookedStateScriptRunner(ScriptBindings bindings, LuaScriptStandard standard = null) : this()
+        public MultiHookedScriptRunner(ScriptBindings bindings, LuaScriptStandard standard = null) : this()
         {
             bindings.Initialize(Lua);
             ScriptStandard = standard;
         }
 
-        public HookedStateScriptRunner(LuaScriptStandard standard, ScriptBindings bindings = null) : this()
+        public MultiHookedScriptRunner(LuaScriptStandard standard, ScriptBindings bindings = null) : this()
         {
             bindings.Initialize(Lua);
             ScriptStandard = standard;

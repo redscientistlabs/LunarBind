@@ -22,15 +22,20 @@
         private static string bakedYieldableNewableTypeString = null;
 
         /// <summary>
-        /// The table newable constructors are stored under. Only modify before binding anything.
+        /// The table newable constructors are stored under. Only modify before binding anything for consistency.
         /// </summary>
         public static string NewableTable { get; set; } = "new";
-
 
         /// <summary>
         /// Should functions that return a Yielder subclass be automatically wrapped in coroutine.yield()? Defaults to true
         /// </summary>
         public static bool AutoYield { get; set; } = true;
+
+        //TODO: Implement
+        ///// <summary>
+        ///// Should bound classes automatically be added to <see cref="MoonSharp"/>'s <see cref="UserData"/>? defaults to true
+        ///// </summary>
+        //public static bool AutoAddUserData { get; set; } = true;
 
         /// <summary>
         /// Use this to initialize all scripts with custom Lua code. This runs after all global bindings have been set up. 
@@ -46,15 +51,20 @@
         static GlobalScriptBindings()
         {
             Script.WarmUp();
-            RegisterAssemblyTypes(typeof(GlobalScriptBindings).Assembly);
-            UserData.RegisterAssembly(typeof(GlobalScriptBindings).Assembly);
-            InitializeYielders();
+            RegisterDefaultGlobalBindings();
+            InitializeDefaultYielders();
         }
 
-        private static void InitializeYielders()
+        private static void RegisterDefaultGlobalBindings()
+        {
+            RegisterAssemblyTypes(typeof(GlobalScriptBindings).Assembly);
+            UserData.RegisterAssembly(typeof(GlobalScriptBindings).Assembly);
+        }
+
+        private static void InitializeDefaultYielders()
         {
             GlobalScriptBindings.AddYieldableType<WaitFrames>();
-            //Other internal yielder types are not meant to be created in Lua
+            //Other internal yielder types are not meant to be created in Lua, and thus will not be added here
         }
 
 

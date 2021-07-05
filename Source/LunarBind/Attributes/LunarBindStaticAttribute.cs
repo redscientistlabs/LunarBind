@@ -6,7 +6,6 @@ namespace LunarBind
 {
     using System;
 
-    //TODO: Implement
     /// <summary>
     /// Use this attribute to mark classes for instantiation
     /// </summary>

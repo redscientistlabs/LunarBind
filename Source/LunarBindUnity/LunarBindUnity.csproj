@@ -181,6 +181,14 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       <Link>Attributes\LunarBindTypeAttribute.cs</Link>
     </Compile>
+	<Compile Include="..\LunarBind\Attributes\LunarBindYielderAttribute.cs">
+	  <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <Link>Attributes\LunarBindYielderAttribute.cs</Link>
+    </Compile>
+	<Compile Include="..\LunarBind\Attributes\LunarBindIgnoreAssemblyAddAttribute.cs">
+	  <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <Link>Attributes\LunarBindIgnoreAssemblyAddAttribute.cs</Link>
+    </Compile>
     <Compile Include="..\LunarBind\Exceptions\LunarBindStandardException.cs">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       <Link>Exceptions\LunarBindStandardException.cs</Link>
