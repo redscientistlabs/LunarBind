@@ -300,7 +300,7 @@ namespace LunarBind.Documentation
             string documentation = userType.Documentation ?? "";
             string example = userType.Example ?? "";
 
-            DocItem doc = new DocItem(DocItemType.StaticType, userType.UserType, userType.Name, prefix + userType.Name, "", documentation, example);
+            DocItem doc = new DocItem(DocItemType.StaticType, userType.UserType, userType.Name, prefix + userType.Name, userType.Name, userType.Name, documentation, example, userType.Name, userType.Name, userType.Name) { DataType = userType.UserType };
             var type = userType.UserType;
             var nextPrefix = prefix + userType.Name + ".";
             //STATIC
@@ -384,18 +384,18 @@ namespace LunarBind.Documentation
             if (type.IsPrimitive || type == typeof(string))
             {
                 //Stop recursing
-                return new DocItem(DocItemType.InstanceObject, declType ?? type, name, fullName, fullName, fullName, documentation, example) { DataType = type };
+                return new DocItem(DocItemType.InstanceObject, declType ?? type, name, fullName, fullName, fullName, documentation, example, name, name, name) { DataType = type };
             }
             else if (!UserData.IsTypeRegistered(type))
             {
                 return null;
             }
 
-            DocItem doc = new DocItem(DocItemType.InstanceObject, type, name, fullName, fullName, fullName, documentation, example) { DataType = type };
+            DocItem doc = new DocItem(DocItemType.InstanceObject, type, name, fullName, fullName, fullName, documentation, example, name, name, name) { DataType = type };
 
             if (curLevel > MaxRecursion)
             {
-                doc.SubDocs.Add(new DocItem(DocItemType.None, typeof(void), "Max Recursion Reached", "Max Recursion Reached", "Max Recursion Reached", "", "", ""));
+                doc.SubDocs.Add(new DocItem(DocItemType.None, typeof(void), "Max Recursion Reached", "Max Recursion Reached", "Max Recursion Reached", "", "", ""){ DataType = typeof(string) });
                 return doc;
             }
 
@@ -508,8 +508,19 @@ namespace LunarBind.Documentation
             return DocumentInstanceObject(obj.UserObject.GetType(), obj.Name, prefix, curLevel, obj.UserObject.GetType(), documentation, example);
         }
 
+        public static string GetTypeString(Type type, bool full = false)
+        {
+            if (type.IsGenericType)
+            {
+                return GetGenericString(type, full);
+            }
+            else
+            {
+                return full ? type.FullName : type.Name;
+            }
+        }
 
-        private static string GetGenericString(Type genericType, bool full = false)
+        public static string GetGenericString(Type genericType, bool full = false)
         {
             string genericStringRes = full ? $"{genericType.FullName.Split('`')[0]}<" : $"{genericType.Name.Split('`')[0]}<";
 

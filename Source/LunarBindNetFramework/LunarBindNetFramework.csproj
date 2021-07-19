@@ -48,6 +48,7 @@
     <Compile Include="..\LunarBind\ScriptReference.cs" />
     <Compile Include="..\LunarBind\QuickScripting.cs" />
     <Compile Include="..\LunarBind\ScriptFunction.cs" />
+	<Compile Include="..\LunarBind\OptimizedUnityCoroutine.cs" />
     <Compile Include="..\LunarBind\ScriptLibrary.cs" />
     <Compile Include="..\LunarBind\Yielding\WaitForDone.cs">
       <Link>Yielding\WaitForDone.cs</Link>

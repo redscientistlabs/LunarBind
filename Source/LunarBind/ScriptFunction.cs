@@ -14,20 +14,22 @@
         /// <summary>
         /// A reference to the script, is used to create coroutines and execute functions
         /// </summary>
-        public Script ScriptRef { get; private set; }
+        public Script ScriptRef { get; protected set; }
         /// <summary>
         /// A reference to the original MoonSharp function
         /// </summary>
-        public DynValue LuaFunc { get; private set; }
+        public DynValue LuaFunc { get; protected set; }
 
         /// <summary>
         /// A reference the internally created Coroutine dynval
         /// </summary>
-        public DynValue Coroutine { get; private set; }
+        public DynValue Coroutine { get; protected set; }
         /// <summary>
         /// Is it a coroutine?
         /// </summary>
-        public bool IsCoroutine { get; private set; }
+        public bool IsCoroutine { get; protected set; }
+
+        public string ID { get; protected set; } = "Func_" + Guid.NewGuid().ToString().Replace('-', '_');
 
         public CoroutineState CoroutineState 
         { 
@@ -45,7 +47,7 @@
         }
 
 
-        private bool _autoResetCoroutine;
+        protected bool _autoResetCoroutine;
         /// <summary>
         /// Automatically create a new coroutine when the current one is dead?
         /// </summary>
@@ -63,7 +65,7 @@
         /// </summary>
         public Yielder CurYielder { get; set; } = null;
 
-        public LuaFuncType FuncType { get; private set; }
+        public LuaFuncType FuncType { get; protected set; }
 
         /// <summary>
         /// Creates a script hook from a reference script and a string containing a function
@@ -81,6 +83,16 @@
             Coroutine = coroutine ? scriptRef.CreateCoroutine(LuaFunc) : null;
             FuncType = StandardHelpers.GetLuaFuncType(coroutine, autoreset);
         }
+        public ScriptFunction(Script scriptRef, string singleFunctionString)
+        {
+            this.ScriptRef = scriptRef;
+            LuaFunc = scriptRef.LoadFunction(singleFunctionString);
+            IsCoroutine = false;
+            AutoResetCoroutine = false;
+            Coroutine = null;
+            FuncType = StandardHelpers.GetLuaFuncType(false, false);
+        }
+
 
         public ScriptFunction(Script scriptRef, DynValue function, bool coroutine = false, bool autoreset = true)
         {
@@ -117,6 +129,7 @@
             if (IsCoroutine) { Coroutine.Coroutine.AutoYieldCounter = other.Coroutine.Coroutine.AutoYieldCounter; }
             FuncType = other.FuncType;
         }
+
 
         /// <summary>
         /// Creates a script hook from a function from the script's global table
@@ -180,7 +193,7 @@
             CurYielder = yielder;
         }
 
-        public void ResetCoroutine()
+        public virtual void ResetCoroutine()
         {
             if (IsCoroutine)
             {
@@ -662,7 +675,7 @@
             }
         }
 
-        private CoroutineState ExecuteAsCoroutineForUnity(Coroutine co, Action callback, object[] args)
+        protected virtual CoroutineState ExecuteAsCoroutineForUnity(Coroutine co, Action callback, object[] args)
         {
             try
             {
