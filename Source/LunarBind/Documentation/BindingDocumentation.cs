@@ -14,6 +14,12 @@ namespace LunarBind.Documentation
         public static int MaxRecursion { get; set; } = 32;
         public static string ReturnTypeColor { get; set; } = "#A5A5A5";
         public static string ParamsTypeColor { get; set; } = "#A5A5A5";
+
+        /// <summary>
+        /// Any child classes of these types will be ignored
+        /// </summary>
+        public static HashSet<Type> BreakTypes { get; private set; } = new HashSet<Type>();
+
         /// <summary>
         /// Create global script bindings documentation
         /// </summary>
@@ -30,7 +36,7 @@ namespace LunarBind.Documentation
                 {
                     doc.SubDocs.Add(DocumentTable(bTable, "", 0));
                 }
-                else if(item is BindFunc func)
+                else if (item is BindFunc func)
                 {
                     doc.SubDocs.Add(DocumentFunction(func, ""));
                 }
@@ -129,7 +135,7 @@ namespace LunarBind.Documentation
         private static DocItem DocumentTable(BindTable table, string prefix, int curLevel)
         {
             DocItem doc = new DocItem(DocItemType.Table, typeof(Table), table.Name, prefix + table.Name, prefix + table.Name, prefix + table.Name);
-            if(curLevel > MaxRecursion)
+            if (curLevel > MaxRecursion)
             {
                 doc.SubDocs.Add(new DocItem(DocItemType.None, typeof(void), "Max Recursion Reached", "Max Recursion Reached", "Max Recursion Reached", "", "", ""));
                 return doc;
@@ -182,7 +188,7 @@ namespace LunarBind.Documentation
             {
                 //Add to prefix
                 var documentTable = DocumentTable(item, nextPrefix, curLevel + 1);
-                if (documentTable != null) 
+                if (documentTable != null)
                 {
                     doc.SubDocs.Add(documentTable);
                 }
@@ -228,10 +234,10 @@ namespace LunarBind.Documentation
             string preview = $"{returnTypeName} {name}({paramTypes})";
             string previewRT = $"{returnTypeRichText} {name}({paramTypesRT})";
 
-            return new DocItem(DocItemType.Function, func.Callback.Method.DeclaringType, name, fullName, definition, copy, documentation, example, richTextDefinition, preview, previewRT) 
-            { 
-                DataType = typeof(Delegate), 
-                MethodInfoReference = mi 
+            return new DocItem(DocItemType.Function, func.Callback.Method.DeclaringType, name, fullName, definition, copy, documentation, example, richTextDefinition, preview, previewRT)
+            {
+                DataType = typeof(Delegate),
+                MethodInfoReference = mi
             };
         }
 
@@ -240,7 +246,7 @@ namespace LunarBind.Documentation
         {
             string name = mi.Name;
             string fullName = prefix + name;
-            
+
             var parameterInfo = mi.GetParameters();
 
             string paramTypes = "";
@@ -284,10 +290,10 @@ namespace LunarBind.Documentation
             string previewRT = $"{returnTypeRichText} {name}({paramTypesRT})";
 
 
-            return new DocItem(DocItemType.Function, mi.DeclaringType, name, fullName, definition, copy, documentation, example, richTextDefinition, preview, previewRT) 
-            { 
-                DataType = typeof(MethodInfo), 
-                MethodInfoReference = mi 
+            return new DocItem(DocItemType.Function, mi.DeclaringType, name, fullName, definition, copy, documentation, example, richTextDefinition, preview, previewRT)
+            {
+                DataType = typeof(MethodInfo),
+                MethodInfoReference = mi
             };
             //return new DocItem(DocItemType.Function, mi.DeclaringType, name, fullName, definition, copy, documentation, example);
         }
@@ -330,9 +336,33 @@ namespace LunarBind.Documentation
                     ex = exampleAttrib2.Data;
                 }
 
-                var fdoc = DocumentInstanceObject(field.FieldType, field.Name, nextPrefix, curLevel + 1, type, docu, ex);
+                DocItem fdoc = null;
+                bool ignore = false;
 
-                if(fdoc != null)
+                if (BreakTypes.Contains(field.FieldType))
+                {
+                    ignore = true;
+                }
+                else
+                {
+                    foreach (var t in BreakTypes)
+                    {
+                        if (t.IsAssignableFrom(field.FieldType))
+                        {
+                            ignore = true;
+                            break;
+                        }
+                    }
+                }
+
+
+                if (!ignore)
+                {
+                    fdoc = DocumentInstanceObject(field.FieldType, field.Name, nextPrefix, curLevel + 1, type, docu, ex);
+                }
+
+
+                if (fdoc != null)
                 {
                     doc.SubDocs.Add(fdoc);
                 }
@@ -354,7 +384,30 @@ namespace LunarBind.Documentation
                     ex = exampleAttrib2.Data;
                 }
 
-                var pdoc = DocumentInstanceObject(property.PropertyType, property.Name, nextPrefix, curLevel + 1, type, docu, ex);
+                DocItem pdoc = null;
+                bool ignore = false;
+
+                if (BreakTypes.Contains(property.PropertyType))
+                {
+                    ignore = true;
+                }
+                else
+                {
+                    foreach (var t in BreakTypes)
+                    {
+                        if (t.IsAssignableFrom(property.PropertyType))
+                        {
+                            ignore = true;
+                            break;
+                        }
+                    }
+                }
+
+                if (!ignore)
+                {
+                    pdoc = DocumentInstanceObject(property.PropertyType, property.Name, nextPrefix, curLevel + 1, type, docu, ex);
+                }
+
                 if (pdoc != null)
                 {
                     doc.SubDocs.Add(pdoc);
@@ -395,7 +448,7 @@ namespace LunarBind.Documentation
 
             if (curLevel > MaxRecursion)
             {
-                doc.SubDocs.Add(new DocItem(DocItemType.None, typeof(void), "Max Recursion Reached", "Max Recursion Reached", "Max Recursion Reached", "", "", ""){ DataType = typeof(string) });
+                doc.SubDocs.Add(new DocItem(DocItemType.None, typeof(void), "Max Recursion Reached", "Max Recursion Reached", "Max Recursion Reached", "", "", "") { DataType = typeof(string) });
                 return doc;
             }
 
@@ -492,7 +545,7 @@ namespace LunarBind.Documentation
 
             var doc = new DocItem(DocItemType.Enum, enu.EnumType, name, fullName, definition, copy, documentation, example) { DataType = enu.EnumType };
 
-            for(int i = 0; i < enu.EnumVals.Count; i++)
+            for (int i = 0; i < enu.EnumVals.Count; i++)
             {
                 var field = enu.EnumVals[i];
                 var iobj = DocumentInstanceObject(typeof(int), field.Key, nextPrefix, 0, enu.EnumType, enu.FieldDocumentations[i], enu.FieldExamples[i]);
@@ -607,7 +660,7 @@ namespace LunarBind.Documentation
                     }
                     else
                     {
-                         str = GetGenericString(paramType, full);
+                        str = GetGenericString(paramType, full);
                     }
                     paramSubList.Add(str);
                 }
@@ -656,7 +709,7 @@ namespace LunarBind.Documentation
     }
 
 
-    public class DocItem 
+    public class DocItem
     {
         //Accessable for sorting
         public string Name { get; private set; }
@@ -709,9 +762,13 @@ namespace LunarBind.Documentation
         /// </summary>
         public Type DataType { get; internal set; } = null;
 
-        internal DocItem(DocItemType itemType) : this(itemType, null, "", "", "") { }
+        public DocItem(DocItemType itemType) : this(itemType, null, "", "", "") { }
+        public DocItem(string errorMessage) : this(DocItemType.InstanceObject, typeof(string), errorMessage, errorMessage, errorMessage, errorMessage, errorMessage, errorMessage, errorMessage, errorMessage, errorMessage)
+        {
+            DataType = typeof(string);
+        }
 
-        internal DocItem(DocItemType itemType, Type declaringType, string name, string fullname, string definition, string copyString = "", string documentation = "", string example = "", string richTextDefinition = null, string preview = null, string richTextPreview = null)
+        public DocItem(DocItemType itemType, Type declaringType, string name, string fullname, string definition, string copyString = "", string documentation = "", string example = "", string richTextDefinition = null, string preview = null, string richTextPreview = null)
         {
             ItemType = itemType;
             Name = name;
@@ -747,22 +804,23 @@ namespace LunarBind.Documentation
     {
         public int Compare(DocItem x, DocItem y)
         {
-            if(x.ItemType != DocItemType.InstanceObject 
+            if (x.ItemType != DocItemType.InstanceObject
                 && x.ItemType != DocItemType.Enum
                 && x.ItemType == y.ItemType)
             {
                 return string.Compare(x.Name, y.Name);
             }
-            else if(x.ItemType == DocItemType.InstanceObject)
+            else if (x.ItemType == DocItemType.InstanceObject)
             {
-                if (y.ItemType == DocItemType.InstanceObject) {
+                if (y.ItemType == DocItemType.InstanceObject)
+                {
                     //Intentional, check if conditions are equal
                     if (x.SubDocs.Count > 0 == y.SubDocs.Count > 0)
                     {
                         //Compare by str
                         return string.Compare(x.Name, y.Name);
                     }
-                    else if(x.SubDocs.Count > 0)
+                    else if (x.SubDocs.Count > 0)
                     {
                         return -1; //X above
                     }
@@ -771,13 +829,13 @@ namespace LunarBind.Documentation
                         return 1; //X below
                     }
                 }
-                else if(y.ItemType == DocItemType.Enum)
+                else if (y.ItemType == DocItemType.Enum)
                 {
                     return x.SubDocs.Count == 0 ? -1 : 1;
                 }
                 //use default
             }
-            else if(x.ItemType == DocItemType.Enum)
+            else if (x.ItemType == DocItemType.Enum)
             {
                 if (y.ItemType == DocItemType.Enum)
                 {

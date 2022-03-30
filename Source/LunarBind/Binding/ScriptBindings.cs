@@ -1,5 +1,6 @@
 ﻿namespace LunarBind
 {
+    using LunarBind.Exceptions;
     using MoonSharp.Interpreter;
     using MoonSharp.Interpreter.Interop;
     using System;
@@ -76,7 +77,7 @@
         public void AddGlobalType(Type t)
         {
             RegisterUserDataType(t);
-            BindingHelpers.CreateBindType(bindItems, t.Name, t);
+            BindingHelper.CreateBindType(bindItems, t.Name, t);
         }
 
         /// <summary>
@@ -89,7 +90,7 @@
         public void AddGlobalType(string name, Type t)
         {
             RegisterUserDataType(t);
-            BindingHelpers.CreateBindType(bindItems, name, t);
+            BindingHelper.CreateBindType(bindItems, name, t);
         }
 
         public void AddGlobalObject(string path, object o)
@@ -98,7 +99,7 @@
             {
                 RegisterUserDataType(o.GetType());
             }
-            BindingHelpers.CreateBindUserObject(bindItems, path, o);
+            BindingHelper.CreateBindUserObject(bindItems, path, o);
             //globalObjects[name]
         }
 
@@ -108,7 +109,7 @@
         /// <typeparam name="T"></typeparam>
         public void AddEnum<T>() where T : Enum
         {
-            BindingHelpers.CreateBindEnum(bindItems, typeof(T).Name, typeof(T));
+            BindingHelper.CreateBindEnum(bindItems, typeof(T).Name, typeof(T));
         }
         /// <summary>
         /// Adds all fields of an enum not marked with <see cref="MoonSharpHiddenAttribute"/> or <see cref="LunarBindHideAttribute"/> to a lua table with the path
@@ -116,7 +117,7 @@
         /// <typeparam name="T"></typeparam>
         public void AddEnum<T>(string path)
         {
-            BindingHelpers.CreateBindEnum(bindItems, path, typeof(T));
+            BindingHelper.CreateBindEnum(bindItems, path, typeof(T));
         }
 
         /// <summary>
@@ -215,7 +216,7 @@
         [Obsolete]
         public void AddAction(string name, Action action, string documentation = "", string example = "")
         {
-            BindingHelpers.CreateBindFunction(bindItems, name, action, false, documentation ?? "", example ?? "");
+            BindingHelper.CreateBindFunction(bindItems, name, action, false, documentation ?? "", example ?? "");
         }
         /// <summary>
         /// Use <see cref="BindAction(Action, string, string)"/> instead
@@ -226,7 +227,7 @@
         [Obsolete]
         public void AddAction(Action action, string documentation = "", string example = "")
         {
-            BindingHelpers.CreateBindFunction(bindItems, action.Method.Name, action, false, documentation ?? "", example ?? "");
+            BindingHelper.CreateBindFunction(bindItems, action.Method.Name, action, false, documentation ?? "", example ?? "");
         }
 
         /// <summary>
@@ -238,7 +239,7 @@
         /// <param name="example"></param>
         public void BindAction(string path, Action action, string documentation = "", string example = "")
         {
-            BindingHelpers.CreateBindFunction(bindItems, path, action, false, documentation ?? "", example ?? "");
+            BindingHelper.CreateBindFunction(bindItems, path, action, false, documentation ?? "", example ?? "");
         }
 
         /// <summary>
@@ -249,19 +250,19 @@
         /// <param name="example"></param>
         public void BindAction(Action action, string documentation = "", string example = "")
         {
-            BindingHelpers.CreateBindFunction(bindItems, action.Method.Name, action, false, documentation ?? "", example ?? "");
+            BindingHelper.CreateBindFunction(bindItems, action.Method.Name, action, false, documentation ?? "", example ?? "");
         }
 
         /// <summary>
         /// Use <see cref="BindActions(Action[])"/> instead
         /// </summary>
         /// <param name="actions"></param>
-        [Obsolete]
+        [Obsolete("Use BindActions(Action[]) instead")]
         public void AddActions(params Action[] actions)
         {
             foreach (var action in actions)
             {
-                BindingHelpers.CreateBindFunction(bindItems, action.Method.Name, action, false, "", "");
+                BindingHelper.CreateBindFunction(bindItems, action.Method.Name, action, false, "", "");
             }
         }
 
@@ -273,9 +274,43 @@
         {
             foreach (var action in actions)
             {
-                BindingHelpers.CreateBindFunction(bindItems, action.Method.Name, action, false, "", "");
+                BindingHelper.CreateBindFunction(bindItems, action.Method.Name, action, false, "", "");
             }
         }
+
+        /// <summary>
+        /// Binds static <see cref="MethodInfo"/>s 
+        /// </summary>
+        /// <param name="actions"></param>
+        public void AddMethodInfos(params MethodInfo[] methodInfos)
+        {
+            foreach (var methodInfo in methodInfos)
+            {
+                if (methodInfo.IsAbstract) throw new LunarBindStandardException("Cannot bind an abstract MethodInfo in MethodInfos");
+                if (!methodInfo.IsStatic) throw new LunarBindStandardException("Cannot bind an instance MethodInfo in AddActions(). Use AddAction() and specify a target object instead.");
+
+                BindingHelper.CreateBindFunction(bindItems, methodInfo.Name, BindingHelper.CreateDelegate(methodInfo, null), false, "", "");
+            }
+        }
+
+        /// <summary>
+        /// Binds <see cref="MethodInfo"/>s. Null
+        /// </summary>
+        /// <param name="methodInfo"></param>
+        /// <param name="target">The target instance. Use null for static methods</param>
+        public void AddMethodInfo(MethodInfo methodInfo, object target = null)
+        {
+            if (methodInfo.IsAbstract)
+            {
+                if(target == null)
+                {
+                    throw new LunarBindStandardException("Cannot bind an Abstract MethodInfo with null target");
+                }
+            }
+                  
+            BindingHelper.CreateBindFunction(bindItems, methodInfo.Name, BindingHelper.CreateDelegate(methodInfo, target), false, "", "");
+        }
+
 
         /// <summary>
         /// Use <see cref="BindDelegate(string, Delegate, string, string)"/> instead
@@ -287,7 +322,7 @@
         [Obsolete]
         public void AddDelegate(string name, Delegate del, string documentation = "", string example = "")
         {
-            BindingHelpers.CreateBindFunction(bindItems, name, del, false, documentation ?? "", example ?? "");
+            BindingHelper.CreateBindFunction(bindItems, name, del, false, documentation ?? "", example ?? "");
         }
 
         /// <summary>
@@ -299,7 +334,7 @@
         [Obsolete]
         public void AddDelegate(Delegate del, string documentation = "", string example = "")
         {
-            BindingHelpers.CreateBindFunction(bindItems, del.Method.Name, del, false, documentation ?? "", example ?? "");
+            BindingHelper.CreateBindFunction(bindItems, del.Method.Name, del, false, documentation ?? "", example ?? "");
         }
 
         /// <summary>
@@ -311,7 +346,7 @@
         /// <param name="example"></param>
         public void BindDelegate(string path, Delegate del, string documentation = "", string example = "")
         {
-            BindingHelpers.CreateBindFunction(bindItems, path, del, false, documentation ?? "", example ?? "");
+            BindingHelper.CreateBindFunction(bindItems, path, del, false, documentation ?? "", example ?? "");
         }
 
         /// <summary>
@@ -322,7 +357,7 @@
         /// <param name="example"></param>
         public void BindDelegate(Delegate del, string documentation = "", string example = "")
         {
-            BindingHelpers.CreateBindFunction(bindItems, del.Method.Name, del, false, documentation ?? "", example ?? "");
+            BindingHelper.CreateBindFunction(bindItems, del.Method.Name, del, false, documentation ?? "", example ?? "");
         }
 
 
@@ -338,7 +373,7 @@
         {
             foreach (var del in dels)
             {
-                BindingHelpers.CreateBindFunction(bindItems, del.Method.Name, del, false, "", "");
+                BindingHelper.CreateBindFunction(bindItems, del.Method.Name, del, false, "", "");
             }
         }
 
@@ -353,7 +388,7 @@
         {
             foreach (var del in dels)
             {
-                BindingHelpers.CreateBindFunction(bindItems, del.Method.Name, del, false, "", "");
+                BindingHelper.CreateBindFunction(bindItems, del.Method.Name, del, false, "", "");
             }
         }
 
@@ -409,9 +444,9 @@
                 {
                     var documentation = (LunarBindDocumentationAttribute)Attribute.GetCustomAttribute(mi, typeof(LunarBindDocumentationAttribute));
                     var example = (LunarBindExampleAttribute)Attribute.GetCustomAttribute(mi, typeof(LunarBindExampleAttribute));
-                    var del = BindingHelpers.CreateDelegate(mi, target);
+                    var del = BindingHelper.CreateDelegate(mi, target);
                     string name = attr.Name ?? mi.Name;
-                    BindingHelpers.CreateBindFunction(bindItems, name, del,attr.AutoYield, documentation?.Data ?? "", example?.Data ?? "");
+                    BindingHelper.CreateBindFunction(bindItems, name, del,attr.AutoYield, documentation?.Data ?? "", example?.Data ?? "");
                 }
             }
         }
@@ -428,11 +463,11 @@
                     var prefixAttrib = (LunarBindPrefixAttribute)type.GetCustomAttribute(typeof(LunarBindPrefixAttribute));
                     var documentation = (LunarBindDocumentationAttribute)Attribute.GetCustomAttribute(mi, typeof(LunarBindDocumentationAttribute));
                     var example = (LunarBindExampleAttribute)Attribute.GetCustomAttribute(mi, typeof(LunarBindExampleAttribute));
-                    var del = BindingHelpers.CreateDelegate(mi);
+                    var del = BindingHelper.CreateDelegate(mi);
                     //string name = (prefix != null ? prefix + "." : "") + (attr.Name ?? mi.Name);
                     string name = $"{(prefixAttrib?.Prefix != null ? prefixAttrib.Prefix + "." : "")}{(prefix != null ? prefix + "." : "")}{(attr.Name ?? mi.Name)}";
 
-                    BindingHelpers.CreateBindFunction(bindItems, name, del, attr.AutoYield, documentation?.Data ?? "", example?.Data ?? "");
+                    BindingHelper.CreateBindFunction(bindItems, name, del, attr.AutoYield, documentation?.Data ?? "", example?.Data ?? "");
                 }
             }
         }
@@ -448,7 +483,7 @@
                     var enumAttr = (LunarBindEnumAttribute)type.GetCustomAttribute(typeof(LunarBindEnumAttribute));
                     if (enumAttr != null)
                     {
-                        BindingHelpers.CreateBindEnum(bindItems, enumAttr.Name ?? type.Name, type);
+                        BindingHelper.CreateBindEnum(bindItems, enumAttr.Name ?? type.Name, type);
                     }
                 }
                 else
@@ -461,7 +496,7 @@
                         {
                             object instance = constructor.Invoke(new object[] { });
                             RegisterUserDataType(type);
-                            var bindObj = BindingHelpers.CreateBindUserObject(bindItems, instantiable.Path, instance);
+                            var bindObj = BindingHelper.CreateBindUserObject(bindItems, instantiable.Path, instance);
                             var doc = type.GetCustomAttribute<LunarBindDocumentationAttribute>()?.Data ?? "";
                             var ex = type.GetCustomAttribute<LunarBindExampleAttribute>()?.Data ?? "";
                             bindObj.Documentation = doc;
@@ -481,7 +516,7 @@
                     if (staticAttribute != null)
                     {
                         RegisterUserDataType(type);
-                        BindingHelpers.CreateBindType(bindItems, staticAttribute.Path ?? type.Name, type);
+                        BindingHelper.CreateBindType(bindItems, staticAttribute.Path ?? type.Name, type);
                     }
 
                     RegisterTypeFuncs(type);

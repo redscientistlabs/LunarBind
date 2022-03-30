@@ -86,11 +86,11 @@
     <Compile Include="..\LunarBind\Runners\HookedScriptContainer.cs">
       <Link>Runners\HookedScriptContainer.cs</Link>
     </Compile>
-    <Compile Include="..\LunarBind\Internal\BindingHelpers.cs">
-      <Link>Internal\BindingHelpers.cs</Link>
+    <Compile Include="..\LunarBind\Helpers\BindingHelper.cs">
+      <Link>Helpers\BindingHelper.cs</Link>
     </Compile>
-    <Compile Include="..\LunarBind\Internal\StandardHelpers.cs">
-      <Link>Internal\StandardHelpers.cs</Link>
+    <Compile Include="..\LunarBind\Helpers\StandardHelpers.cs">
+      <Link>Helpers\StandardHelpers.cs</Link>
     </Compile>
     <Compile Include="..\LunarBind\Binding\BindEnum.cs">
       <Link>Binding\BindEnum.cs</Link>

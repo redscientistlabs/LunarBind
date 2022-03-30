@@ -9,6 +9,7 @@ namespace LunarBind
     /// <summary>
     /// Creating coroutines is very expensive, so this mitigates that issue until a PR is submitted
     /// </summary>
+    [Obsolete("Unity build now includes coroutine recycling.")]
     public class OptimizedUnityCoroutine
     {
         /// <summary>
@@ -30,7 +31,7 @@ namespace LunarBind
         /// </summary>
         public Yielder CurYielder { get; set; } = null;
         public string ID { get; protected set; } = "Func_" + Guid.NewGuid().ToString().Replace('-', '_');
-        public string UnityCoroutineState { get; protected set; }
+        public string OptimizedCoroutineState { get; protected set; }
 
         private bool started = false;
 
@@ -38,9 +39,9 @@ namespace LunarBind
 
         public OptimizedUnityCoroutine(Script scriptRef, string functionBody, params string[] parameters)
         {
-            UnityCoroutineState = $"{ID}_UNITY_COROUTINE_STATE";
+            OptimizedCoroutineState = $"{ID}_OPTIMIZED_COROUTINE_STATE";
             this.ScriptRef = scriptRef;
-            ScriptRef.Globals[UnityCoroutineState] = true;
+            ScriptRef.Globals[OptimizedCoroutineState] = true;
             string nxtV = $"{ID}_NextVals";
             StringBuilder sb = new StringBuilder();
             //1 based lua indices, ugh
@@ -49,7 +50,7 @@ namespace LunarBind
                 sb.Append($"{parameters[i - 1]} = {nxtV}[{i}] ");
             }
             string NextParamsStr = sb.ToString();
-            string funcString = $"function({string.Join(",", parameters)}) while (true) do{Environment.NewLine}{functionBody}{Environment.NewLine}{UnityCoroutineState} = false " +
+            string funcString = $"function({string.Join(",", parameters)}) while (true) do{Environment.NewLine}{functionBody}{Environment.NewLine}{OptimizedCoroutineState} = false " +
                 $"local {nxtV} = coroutine.yield() " +
                 $"{NextParamsStr} " +
                 $"end end";
@@ -58,9 +59,9 @@ namespace LunarBind
         }
         public OptimizedUnityCoroutine(ScriptRunnerBase runner, string functionBody, params string[] parameters)
         {
-            UnityCoroutineState = $"{ID}_UNITY_COROUTINE_STATE";
+            OptimizedCoroutineState = $"{ID}_OPTIMIZED_COROUTINE_STATE";
             this.ScriptRef = runner.Lua;
-            ScriptRef.Globals[UnityCoroutineState] = true;
+            ScriptRef.Globals[OptimizedCoroutineState] = true;
             string nxtV = $"{ID}_NextVals";
               StringBuilder sb = new StringBuilder();
             //1 based lua indices, ugh
@@ -69,7 +70,7 @@ namespace LunarBind
                 sb.Append($"{parameters[i - 1]} = {nxtV}[{i}] ");
             }
             string NextParamsStr = sb.ToString();
-            string funcString = $"function({string.Join(",", parameters)}) while (true) do{Environment.NewLine}{functionBody}{Environment.NewLine}{UnityCoroutineState} = false " +
+            string funcString = $"function({string.Join(",", parameters)}) while (true) do{Environment.NewLine}{functionBody}{Environment.NewLine}{OptimizedCoroutineState} = false " +
                 $"local {nxtV} = coroutine.yield() " +
                 $"{NextParamsStr} " +
                 $"end end";
@@ -106,7 +107,7 @@ namespace LunarBind
         /// <returns></returns>
         public IEnumerator AsUnityCoroutine(Action callback, params object[] args)
         {
-            ScriptRef.Globals[$"{ID}_UNITY_COROUTINE_STATE"] = true;
+            ScriptRef.Globals[OptimizedCoroutineState] = true;
             //started = true;
             CoroutineState state = CoroutineState.NotStarted;
             Coroutine co = Coroutine.Coroutine;
@@ -121,7 +122,7 @@ namespace LunarBind
         {
             Coroutine = ScriptRef.CreateCoroutine(LuaFunc);
             started = false;
-            ScriptRef.Globals[$"{ID}_UNITY_COROUTINE_STATE"] = true;
+            ScriptRef.Globals[OptimizedCoroutineState] = true;
         }
 
         protected virtual CoroutineState ExecuteAsRepeatableCoroutineForUnity(Coroutine co, Action callback, object[] args)
@@ -152,7 +153,7 @@ namespace LunarBind
                         ret = co.Resume();
                     }
 
-                    bool unityCoroutineState = (bool)ScriptRef.Globals[$"{ID}_UNITY_COROUTINE_STATE"];
+                    bool unityCoroutineState = (bool)ScriptRef.Globals[OptimizedCoroutineState];
 
                     if (unityCoroutineState)
                     {

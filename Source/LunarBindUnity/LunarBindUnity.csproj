@@ -44,167 +44,167 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="..\LunarBind\ScriptReference.cs">
+    <Content Include="Properties\AssemblyInfo.cs" />
+    <Content Include="..\LunarBind\ScriptReference.cs">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Compile>
-    <Compile Include="..\LunarBind\QuickScripting.cs">
+    </Content>
+    <Content Include="..\LunarBind\QuickScripting.cs">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Compile>
-    <Compile Include="..\LunarBind\ScriptFunction.cs">
+    </Content>
+    <Content Include="..\LunarBind\ScriptLibrary.cs">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Compile>
-	<Compile Include="..\LunarBind\OptimizedUnityCoroutine.cs">
-	  <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Compile>
-    <Compile Include="..\LunarBind\ScriptLibrary.cs">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Compile>
-    <Compile Include="..\LunarBind\Yielding\WaitForDone.cs">
+    </Content>
+    <Content Include="..\LunarBind\Yielding\WaitForDone.cs">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       <Link>Yielding\WaitForDone.cs</Link>
-    </Compile>
-    <Compile Include="..\LunarBind\Yielding\WaitFrames.cs">
+    </Content>
+    <Content Include="..\LunarBind\Yielding\WaitFrames.cs">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       <Link>Yielding\WaitFrames.cs</Link>
-    </Compile>
-    <Compile Include="..\LunarBind\Yielding\WaitUntil.cs">
+    </Content>
+    <Content Include="..\LunarBind\Yielding\WaitUntil.cs">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       <Link>Yielding\WaitUntil.cs</Link>
-    </Compile>
-    <Compile Include="..\LunarBind\Yielding\Yielder.cs">
+    </Content>
+    <Content Include="..\LunarBind\Yielding\Yielder.cs">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       <Link>Yielding\Yielder.cs</Link>
-    </Compile>
-    <Compile Include="..\LunarBind\Standards\LuaFuncType.cs">
+    </Content>
+    <Content Include="..\LunarBind\Standards\LuaFuncType.cs">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       <Link>Standards\LuaFuncType.cs</Link>
-    </Compile>
-    <Compile Include="..\LunarBind\Standards\LuaScriptStandard.cs">
+    </Content>
+    <Content Include="..\LunarBind\Standards\LuaScriptStandard.cs">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       <Link>Standards\LuaScriptStandard.cs</Link>
-    </Compile>
-    <Compile Include="..\LunarBind\Runners\BasicScriptRunner.cs">
+    </Content>
+    <Content Include="..\LunarBind\Runners\BasicScriptRunner.cs">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       <Link>Runners\BasicScriptRunner.cs</Link>
-    </Compile>
-    <Compile Include="..\LunarBind\Runners\HookedScriptRunner.cs">
+    </Content>
+    <Content Include="..\LunarBind\Runners\HookedScriptRunner.cs">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       <Link>Runners\HookedScriptRunner.cs</Link>
-    </Compile>
-    <Compile Include="..\LunarBind\Runners\HookedStateScriptRunner.cs">
+    </Content>
+    <Content Include="..\LunarBind\Runners\HookedStateScriptRunner.cs">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       <Link>Runners\HookedStateScriptRunner.cs</Link>
-    </Compile>
-    <Compile Include="..\LunarBind\Runners\ScriptRunnerBase.cs">
+    </Content>
+    <Content Include="..\LunarBind\Runners\ScriptRunnerBase.cs">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       <Link>Runners\ScriptRunnerBase.cs</Link>
-    </Compile>
-    <Compile Include="..\LunarBind\Runners\UserScriptRunner.cs">
+    </Content>
+    <Content Include="..\LunarBind\Runners\UserScriptRunner.cs">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       <Link>Runners\UserScriptRunner.cs</Link>
-    </Compile>
-    <Compile Include="..\LunarBind\Runners\HookedScriptContainer.cs">
+    </Content>
+    <Content Include="..\LunarBind\Runners\HookedScriptContainer.cs">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       <Link>Runners\HookedScriptContainer.cs</Link>
-    </Compile>
-    <Compile Include="..\LunarBind\Internal\BindingHelpers.cs">
+    </Content>
+    <Content Include="..\LunarBind\Helpers\BindingHelper.cs">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-      <Link>Internal\BindingHelpers.cs</Link>
-    </Compile>
-    <Compile Include="..\LunarBind\Internal\StandardHelpers.cs">
+      <Link>Helpers\BindingHelper.cs</Link>
+    </Content>
+    <Content Include="..\LunarBind\Helpers\StandardHelpers.cs">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-      <Link>Internal\StandardHelpers.cs</Link>
-    </Compile>
-    <Compile Include="..\LunarBind\Binding\BindEnum.cs">
+      <Link>Helpers\StandardHelpers.cs</Link>
+    </Content>
+    <Content Include="..\LunarBind\Binding\BindEnum.cs">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       <Link>Binding\BindEnum.cs</Link>
-    </Compile>
-    <Compile Include="..\LunarBind\Binding\BindFunc.cs">
+    </Content>
+    <Content Include="..\LunarBind\Binding\BindFunc.cs">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       <Link>Binding\BindFunc.cs</Link>
-    </Compile>
-    <Compile Include="..\LunarBind\Binding\BindItem.cs">
+    </Content>
+    <Content Include="..\LunarBind\Binding\BindItem.cs">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       <Link>Binding\BindItem.cs</Link>
-    </Compile>
-    <Compile Include="..\LunarBind\Binding\BindTable.cs">
+    </Content>
+    <Content Include="..\LunarBind\Binding\BindTable.cs">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       <Link>Binding\BindTable.cs</Link>
-    </Compile>
-    <Compile Include="..\LunarBind\Binding\BindUserObject.cs">
+    </Content>
+    <Content Include="..\LunarBind\Binding\BindUserObject.cs">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       <Link>Binding\BindUserObject.cs</Link>
-    </Compile>
-    <Compile Include="..\LunarBind\Binding\GlobalScriptBindings.cs">
+    </Content>
+    <Content Include="..\LunarBind\Binding\GlobalScriptBindings.cs">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       <Link>Binding\GlobalScriptBindings.cs</Link>
-    </Compile>
-    <Compile Include="..\LunarBind\Binding\ScriptBindings.cs">
+    </Content>
+    <Content Include="..\LunarBind\Binding\ScriptBindings.cs">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       <Link>Binding\ScriptBindings.cs</Link>
-    </Compile>
-    <Compile Include="..\LunarBind\Documentation\BindingDocumentation.cs">
+    </Content>
+    <Content Include="..\LunarBind\Documentation\BindingDocumentation.cs">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       <Link>Documentation\BindingDocumentation.cs</Link>
-    </Compile>
-    <Compile Include="..\LunarBind\Attributes\LunarBindDocumentationAttribute.cs">
+    </Content>
+    <Content Include="..\LunarBind\Attributes\LunarBindDocumentationAttribute.cs">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       <Link>Attributes\LunarBindDocumentationAttribute.cs</Link>
-    </Compile>
-    <Compile Include="..\LunarBind\Attributes\LunarBindEnumAttribute.cs">
+    </Content>
+    <Content Include="..\LunarBind\Attributes\LunarBindEnumAttribute.cs">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       <Link>Attributes\LunarBindEnumAttribute.cs</Link>
-    </Compile>
-    <Compile Include="..\LunarBind\Attributes\LunarBindExampleAttribute.cs">
+    </Content>
+    <Content Include="..\LunarBind\Attributes\LunarBindExampleAttribute.cs">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       <Link>Attributes\LunarBindExampleAttribute.cs</Link>
-    </Compile>
-    <Compile Include="..\LunarBind\Attributes\LunarBindFunctionAttribute.cs">
+    </Content>
+    <Content Include="..\LunarBind\Attributes\LunarBindFunctionAttribute.cs">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       <Link>Attributes\LunarBindFunctionAttribute.cs</Link>
-    </Compile>
-    <Compile Include="..\LunarBind\Attributes\LunarBindInstanceAttribute.cs">
+    </Content>
+    <Content Include="..\LunarBind\Attributes\LunarBindInstanceAttribute.cs">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       <Link>Attributes\LunarBindInstanceAttribute.cs</Link>
-    </Compile>
-    <Compile Include="..\LunarBind\Attributes\LunarBindStaticAttribute.cs">
+    </Content>
+    <Content Include="..\LunarBind\Attributes\LunarBindStaticAttribute.cs">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       <Link>Attributes\LunarBindStaticAttribute.cs</Link>
-    </Compile>
-    <Compile Include="..\LunarBind\Attributes\LunarBindPrefixAttribute.cs">
+    </Content>
+    <Content Include="..\LunarBind\Attributes\LunarBindPrefixAttribute.cs">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       <Link>Attributes\LunarBindPrefixAttribute.cs</Link>
-    </Compile>
-    <Compile Include="..\LunarBind\Attributes\LunarBindHideAttribute.cs">
+    </Content>
+    <Content Include="..\LunarBind\Attributes\LunarBindHideAttribute.cs">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       <Link>Attributes\LunarBindHideAttribute.cs</Link>
-    </Compile>
-    <Compile Include="..\LunarBind\Attributes\LunarBindTypeAttribute.cs">
+    </Content>
+    <Content Include="..\LunarBind\Attributes\LunarBindTypeAttribute.cs">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       <Link>Attributes\LunarBindTypeAttribute.cs</Link>
-    </Compile>
-	<Compile Include="..\LunarBind\Attributes\LunarBindYielderAttribute.cs">
-	  <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="..\LunarBind\Attributes\LunarBindYielderAttribute.cs">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       <Link>Attributes\LunarBindYielderAttribute.cs</Link>
-    </Compile>
-	<Compile Include="..\LunarBind\Attributes\LunarBindIgnoreAssemblyAddAttribute.cs">
-	  <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="..\LunarBind\Attributes\LunarBindIgnoreAssemblyAddAttribute.cs">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       <Link>Attributes\LunarBindIgnoreAssemblyAddAttribute.cs</Link>
-    </Compile>
-    <Compile Include="..\LunarBind\Exceptions\LunarBindStandardException.cs">
+    </Content>
+    <Content Include="..\LunarBind\Exceptions\LunarBindStandardException.cs">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       <Link>Exceptions\LunarBindStandardException.cs</Link>
-    </Compile>
+    </Content>
+    <Content Include="ScriptFunction.cs">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
   </ItemGroup>
-    <ItemGroup>
-    <Folder Include="Documentation\" />
-    <Folder Include="Exceptions\" />
+  <ItemGroup>
+    <Content Include="UnityHelper.cs">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <Compile Include="Yielding\WaitForSeconds.cs" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
     <PostBuildEvent>cd $(TargetDir)

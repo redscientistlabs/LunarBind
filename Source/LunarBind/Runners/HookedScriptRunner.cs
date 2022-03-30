@@ -177,8 +177,6 @@
             scriptContainer.GetHook(functionName)?.ExecuteWithCallback(callback, args);
         }
 
-        
-
         public IEnumerator CreateUnityCoroutine(string functionName, params object[] args)
         {
             CoroutineState state = CoroutineState.NotStarted;

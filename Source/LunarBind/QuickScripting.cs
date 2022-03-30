@@ -1,7 +1,10 @@
 ﻿namespace LunarBind
 {
     using MoonSharp.Interpreter;
+    using System;
     using System.Collections.Generic;
+    using System.Text;
+
     /// <summary>
     /// This class is for quick testing of scripts using global bindings. If you do not need bindings, use <see cref="MoonSharp.Interpreter.Script.RunString(string)"/>
     /// </summary>
@@ -42,6 +45,23 @@
             bindings.Initialize(script);
             return script;
         }
-
     }
+
+    public static class Optimizers
+    {
+        public static DynValue CreateOptimizedAutoCoroutine(Script script, string functionName, int numArgs = 0)
+        {
+            StringBuilder sb = new StringBuilder();
+            for (int i = 0; i < numArgs; i++)
+            {
+                if(i == 0) { sb.Append("arg0"); }
+                else { sb.Append(",arg"); sb.Append(i); }
+            }
+            string guid = "_OriginalOptimizedFunction_"+ Guid.NewGuid().ToString().Replace('-', '_');
+            string paramStr = sb.ToString();
+            string overrideStr = $"{guid} = {functionName} function {functionName}({paramStr}){Environment.NewLine} while true do{Environment.NewLine}  {guid}({paramStr}){Environment.NewLine}  coroutine.yield(){Environment.NewLine}  end{Environment.NewLine}end return{functionName}";
+            return script.DoString(overrideStr);
+        }
+    }
+
 }

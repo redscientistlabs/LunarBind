@@ -7,10 +7,14 @@
     using System.Text;
     using System.Threading.Tasks;
     using MoonSharp.Interpreter;
-    internal static class BindingHelpers
+    public static class BindingHelper
     {
-        //From https://stackoverflow.com/a/40579063
-        //Creates a delegate from reflection info. Very helpful for binding
+        /// <summary>
+        /// Creates a delegate from reflection info. Very helpful for binding. Code originally from https://stackoverflow.com/a/40579063
+        /// </summary>
+        /// <param name="methodInfo"></param>
+        /// <param name="target"></param>
+        /// <returns></returns>
         public static Delegate CreateDelegate(MethodInfo methodInfo, object target = null)
         {
             Func<Type[], Type> getType;
@@ -260,60 +264,6 @@
         {
             return (item is BindFunc ? "Function" : (item is BindEnum ? "Enum" : (item is BindUserObject ? "Global Object" : (item is BindUserType ? "Global Type" : "Table"))));
         }
-
-
-
-        ///// <summary>
-        ///// Automatically create tables, etc
-        ///// </summary>
-        ///// <param name="dict"></param>
-        ///// <param name="pathString"></param>
-        //public static void CreateCallbackEnum(Dictionary<string, BindItem> dict, string pathString, List<KeyValuePair<string,int>> keyValues, string documentation, string example)
-        //{
-        //    if (string.IsNullOrWhiteSpace(pathString))
-        //    {
-        //        throw new Exception($"Path cannot be null, empty, or whitespace for path [{pathString}] MethodInfo: ({callback.Method.Name})");
-        //    }
-        //    var path = pathString.Split('.');
-        //    string root = path[0];
-        //    BindFunc func = new BindFunc(path[path.Length - 1], callback, documentation, example);
-        //    if (func.IsYieldable && GlobalScriptBindings.AutoYield) { func.GenerateYieldableString(pathString); }
-
-        //    if (path.Length == 1)
-        //    {
-        //        //Simple global function
-        //        if (dict.ContainsKey(root))
-        //        {
-        //            throw new Exception($"Cannot add {pathString} ({callback.Method.Name}), a {(dict[root].GetType() == typeof(BindFunc) ? "Function" : "Table")} with that key already exists");
-        //        }
-        //        dict[root] = func;
-        //    }
-        //    else
-        //    {
-        //        //Recursion time
-        //        if (dict.TryGetValue(root, out BindItem item))
-        //        {
-        //            if (item is BindTable t)
-        //            {
-        //                t.AddCallbackFunc(path, 1, func);
-        //                t.GenerateYieldableString(); //Bake the yieldable string
-        //            }
-        //            else
-        //            {
-        //                throw new Exception($"Cannot add {pathString} ({callback.Method.Name}), One or more keys in the path is assigned to a function");
-        //            }
-        //        }
-        //        else
-        //        {
-        //            //Create new
-        //            BindTable t = new BindTable(root);
-        //            dict[root] = t;
-        //            t.AddCallbackFunc(path, 1, func);
-        //            t.GenerateYieldableString(); //Bake the yieldable string
-        //        }
-        //    }
-        //}
-
 
 
     }

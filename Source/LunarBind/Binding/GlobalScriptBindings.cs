@@ -16,7 +16,6 @@
         internal static readonly Dictionary<string, BindItem> bindItems = new Dictionary<string, BindItem>();
         internal static readonly Dictionary<string, Type> yieldableTypes = new Dictionary<string, Type>();
         internal static readonly Dictionary<string, Type> newableTypes = new Dictionary<string, Type>();
-        //private static readonly Dictionary<string, Type> staticTypes = new Dictionary<string, Type>();
 
         private static string bakedNewableTypeString = null;
         private static string bakedYieldableNewableTypeString = null;
@@ -31,11 +30,6 @@
         /// </summary>
         public static bool AutoYield { get; set; } = true;
 
-        //TODO: Implement
-        ///// <summary>
-        ///// Should bound classes automatically be added to <see cref="MoonSharp"/>'s <see cref="UserData"/>? defaults to true
-        ///// </summary>
-        //public static bool AutoAddUserData { get; set; } = true;
 
         /// <summary>
         /// Use this to initialize all scripts with custom Lua code. This runs after all global bindings have been set up. 
@@ -84,11 +78,6 @@
                 item.AddToScript(lua);
             }
 
-            //foreach (var type in staticTypes)
-            //{
-            //    lua.Globals[type.Key] = type.Value;
-            //}
-
             InitializeNewables(lua);
             InitializeYieldables(lua);
 
@@ -134,12 +123,12 @@
 
         public static void AddEnum<T>() where T : Enum
         {
-            BindingHelpers.CreateBindEnum(bindItems, typeof(T).Name, typeof(T));
+            BindingHelper.CreateBindEnum(bindItems, typeof(T).Name, typeof(T));
         }
 
         public static void AddEnum<T>(string path)
         {
-            BindingHelpers.CreateBindEnum(bindItems, path, typeof(T));
+            BindingHelper.CreateBindEnum(bindItems, path, typeof(T));
         }
 
         /// <summary>
@@ -150,7 +139,7 @@
         public static void AddGlobalType(Type t)
         {
             RegisterUserDataType(t);
-            BindingHelpers.CreateBindType(bindItems, t.Name, t);
+            BindingHelper.CreateBindType(bindItems, t.Name, t);
         }
 
         /// <summary>
@@ -163,7 +152,7 @@
         public static void AddGlobalType(string path, Type t)
         {
             RegisterUserDataType(t);
-            BindingHelpers.CreateBindType(bindItems, path, t);
+            BindingHelper.CreateBindType(bindItems, path, t);
         }
 
         /// <summary>
@@ -174,7 +163,7 @@
         public static void AddGlobalObject(string path, object o)
         {
             RegisterUserDataType(o.GetType());
-            BindingHelpers.CreateBindUserObject(bindItems, path, o);
+            BindingHelper.CreateBindUserObject(bindItems, path, o);
         }
 
         /// <summary>
@@ -296,11 +285,11 @@
                     var prefixAttrib = (LunarBindPrefixAttribute)type.GetCustomAttribute(typeof(LunarBindPrefixAttribute));
                     var documentation = (LunarBindDocumentationAttribute)Attribute.GetCustomAttribute(mi, typeof(LunarBindDocumentationAttribute));
                     var example = (LunarBindExampleAttribute)Attribute.GetCustomAttribute(mi, typeof(LunarBindExampleAttribute));
-                    var del = BindingHelpers.CreateDelegate(mi);
+                    var del = BindingHelper.CreateDelegate(mi);
                     //string name = (prefix != null ? prefix + "." : "") + (attr.Name ?? mi.Name);
                     string name = $"{(prefixAttrib?.Prefix != null ? prefixAttrib.Prefix + "." : "")}{(prefix != null ? prefix + "." : "")}{(attr.Name ?? mi.Name)}";
 
-                    BindingHelpers.CreateBindFunction(bindItems, name, del, attr.AutoYield, documentation?.Data ?? "", example?.Data ?? "");
+                    BindingHelper.CreateBindFunction(bindItems, name, del, attr.AutoYield, documentation?.Data ?? "", example?.Data ?? "");
                 }
             }
         }
@@ -336,7 +325,7 @@
         [Obsolete("use BindAction instead")]
         public static void AddAction(string name, Action action, string documentation = "", string example = "")
         {
-            BindingHelpers.CreateBindFunction(bindItems, name, action, false, documentation ?? "", example ?? "");
+            BindingHelper.CreateBindFunction(bindItems, name, action, false, documentation ?? "", example ?? "");
         }
         /// <summary>
         /// Use <see cref="BindAction(Action, string, string)"/> instead
@@ -347,7 +336,7 @@
         [Obsolete("use BindAction instead")]
         public static void AddAction(Action action, string documentation = "", string example = "")
         {
-            BindingHelpers.CreateBindFunction(bindItems, action.Method.Name, action, false, documentation ?? "", example ?? "");
+            BindingHelper.CreateBindFunction(bindItems, action.Method.Name, action, false, documentation ?? "", example ?? "");
         }
 
         /// <summary>
@@ -359,7 +348,7 @@
         {
             foreach (var action in actions)
             {
-                BindingHelpers.CreateBindFunction(bindItems, action.Method.Name, action, false, "", "");
+                BindingHelper.CreateBindFunction(bindItems, action.Method.Name, action, false, "", "");
             }
         }
 
@@ -372,7 +361,7 @@
         /// <param name="example"></param>
         public static void BindAction(string path, Action action, string documentation = "", string example = "")
         {
-            BindingHelpers.CreateBindFunction(bindItems, path, action, false, documentation ?? "", example ?? "");
+            BindingHelper.CreateBindFunction(bindItems, path, action, false, documentation ?? "", example ?? "");
         }
 
         /// <summary>
@@ -383,7 +372,7 @@
         /// <param name="example"></param>
         public static void BindAction(Action action, string documentation = "", string example = "")
         {
-            BindingHelpers.CreateBindFunction(bindItems, action.Method.Name, action, false, documentation ?? "", example ?? "");
+            BindingHelper.CreateBindFunction(bindItems, action.Method.Name, action, false, documentation ?? "", example ?? "");
         }
 
         /// <summary>
@@ -394,7 +383,7 @@
         {
             foreach (var action in actions)
             {
-                BindingHelpers.CreateBindFunction(bindItems, action.Method.Name, action, false, "", "");
+                BindingHelper.CreateBindFunction(bindItems, action.Method.Name, action, false, "", "");
             }
         }
 
@@ -408,7 +397,7 @@
         [Obsolete("Use BindDelegate instead")]
         public static void AddDelegate(string name, Delegate del, string documentation = "", string example = "")
         {
-            BindingHelpers.CreateBindFunction(bindItems, name, del, false, documentation ?? "", example ?? "");
+            BindingHelper.CreateBindFunction(bindItems, name, del, false, documentation ?? "", example ?? "");
         }
 
         /// <summary>
@@ -421,7 +410,7 @@
         [Obsolete("Use BindDelegate instead")]
         public static void AddDelegate(Delegate del, string documentation = "", string example = "")
         {
-            BindingHelpers.CreateBindFunction(bindItems, del.Method.Name, del, false, documentation ?? "", example ?? "");
+            BindingHelper.CreateBindFunction(bindItems, del.Method.Name, del, false, documentation ?? "", example ?? "");
         }
 
         /// <summary>
@@ -436,7 +425,7 @@
         {
             foreach (var del in dels)
             {
-                BindingHelpers.CreateBindFunction(bindItems, del.Method.Name, del, false, "", "");
+                BindingHelper.CreateBindFunction(bindItems, del.Method.Name, del, false, "", "");
             }
         }
 
@@ -449,7 +438,7 @@
         /// <param name="example"></param>
         public static void BindDelegate(string name, Delegate del, string documentation = "", string example = "")
         {
-            BindingHelpers.CreateBindFunction(bindItems, name, del, false, documentation ?? "", example ?? "");
+            BindingHelper.CreateBindFunction(bindItems, name, del, false, documentation ?? "", example ?? "");
         }
 
         /// <summary>
@@ -461,7 +450,7 @@
         /// <param name="example"></param>
         public static void BindDelegate(Delegate del, string documentation = "", string example = "")
         {
-            BindingHelpers.CreateBindFunction(bindItems, del.Method.Name, del, false, documentation ?? "", example ?? "");
+            BindingHelper.CreateBindFunction(bindItems, del.Method.Name, del, false, documentation ?? "", example ?? "");
         }
 
         /// <summary>
@@ -475,7 +464,7 @@
         {
             foreach (var del in dels)
             {
-                BindingHelpers.CreateBindFunction(bindItems, del.Method.Name, del, false, "", "");
+                BindingHelper.CreateBindFunction(bindItems, del.Method.Name, del, false, "", "");
             }
         }
 
@@ -489,7 +478,7 @@
                     var enumAttr = (LunarBindEnumAttribute)type.GetCustomAttribute(typeof(LunarBindEnumAttribute));
                     if (enumAttr != null)
                     {
-                        BindingHelpers.CreateBindEnum(bindItems, enumAttr.Name ?? type.Name, type);
+                        BindingHelper.CreateBindEnum(bindItems, enumAttr.Name ?? type.Name, type);
                     }
                 }
                 else 
@@ -502,7 +491,7 @@
                         {
                             object instance = constructor.Invoke(new object[] { });
 
-                            var bindObj = BindingHelpers.CreateBindUserObject(bindItems, instantiable.Path, instance);
+                            var bindObj = BindingHelper.CreateBindUserObject(bindItems, instantiable.Path, instance);
                             var doc = type.GetCustomAttribute<LunarBindDocumentationAttribute>()?.Data ?? "";
                             var ex = type.GetCustomAttribute<LunarBindExampleAttribute>()?.Data ?? "";
                             bindObj.Documentation = doc;
@@ -520,7 +509,7 @@
                     if (staticAttribute != null)
                     {
                         RegisterUserDataType(type);
-                        BindingHelpers.CreateBindType(bindItems, staticAttribute.Path ?? type.Name, type);
+                        BindingHelper.CreateBindType(bindItems, staticAttribute.Path ?? type.Name, type);
                     }
 
                     RegisterTypeFuncs(type);
