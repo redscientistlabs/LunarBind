@@ -349,6 +349,5 @@ MigrationBackup/
 # Ionide (cross platform F# VS Code tools) working folder
 .ionide/
 
-#Unity projects (Local)
-Source/LunarBindUnityPersonal.sln
-Source/LunarBindUnityPersonal/
+#Unity package outputt
+./Source/UnityPackage/output/
