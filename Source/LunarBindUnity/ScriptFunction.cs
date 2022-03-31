@@ -122,7 +122,7 @@
         /// Clone the other scripthook. Also creates a new coroutine with the same settings as the original
         /// </summary>
         /// <param name="other"></param>
-        public ScriptFunction(ScriptFunction other, bool recycle)
+        public ScriptFunction(ScriptFunction other, bool recycle = true)
         {
             this.ScriptRef = other.ScriptRef;
             LuaFunc = other.LuaFunc;
@@ -130,7 +130,7 @@
             AutoResetCoroutine = other.AutoResetCoroutine;
             if (IsCoroutine)
             {
-                if (recycle)
+                if (recycle && other.CoroutineState != CoroutineState.Dead)
                 {
                     Coroutine = ScriptRef.RecycleCoroutine(other.Coroutine.Coroutine, LuaFunc);
                 }

@@ -70,7 +70,7 @@
         {
             if (CustomPreInitializerString != null)
             {
-                lua.LoadString(CustomPreInitializerString);
+                lua.DoString(CustomPreInitializerString);
             }
 
             foreach (var item in bindItems.Values)
@@ -83,7 +83,7 @@
 
             if (CustomInitializerString != null)
             {
-                lua.LoadString(CustomInitializerString);
+                lua.DoString(CustomInitializerString);
             }
         }
 

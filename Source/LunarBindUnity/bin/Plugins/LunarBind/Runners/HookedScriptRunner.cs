@@ -83,7 +83,7 @@
         {
             ScriptStandard = standard;
         }
-        [Obsolete("Obsolete override")]
+
         public void LoadScript(string scriptString, string scriptName = "User Code")
         {
             //Remove old hooks so they aren't counted
@@ -96,37 +96,6 @@
 
             Lua.DoString(scriptString, null, scriptName);
                 
-            if (ScriptStandard != null)
-            {
-                List<string> errors = new List<string>();
-                bool res = ScriptStandard.ApplyStandard(Lua, scriptContainer, errors);
-                if (!res)
-                {
-                    //Todo: new type of exception with info
-                    throw new Exception($"Script Standard was not met! Standards Not Met: [{string.Join(", ", errors)}]");
-                }
-            }
-        }
-
-        public void LoadScript(string scriptString, string scriptName = "User Code", bool run = true, bool rehook = true, bool removeOldHooks = true)
-        {
-            //Remove old hooks so they aren't counted
-            if (ScriptStandard != null)
-            {
-                ScriptStandard.Scrub(Lua, scriptContainer);
-            }
-
-            scriptContainer.ResetHooks();
-
-            if (run)
-            {
-                Lua.DoString(scriptString, null, scriptName);
-            }
-            else
-            {
-                Lua.LoadString(scriptString, null, scriptName);
-            }
-
             if (ScriptStandard != null)
             {
                 List<string> errors = new List<string>();
