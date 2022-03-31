@@ -202,13 +202,7 @@
   <ItemGroup>
     <None Include="packages.config" />
   </ItemGroup>
-  <!-- <ItemGroup> -->
-  <!-- <ContentWithTargetPath Include="$(SolutionDir)..\moonsharp\src\MoonSharp.Interpreter\**"> -->
-  <!-- <CopyToOutputDirectory>Always</CopyToOutputDirectory> -->
-  <!-- <TargetPath>$(TargetDir)..\MoonSharp\Interpreter\**</TargetPath> -->
-  <!-- </ContentWithTargetPath> -->
-  <!-- <None Include="$(SolutionDir)..\moonsharp\src\MoonSharp.Interpreter\**" /> -->
-  <!-- </ItemGroup> -->
+
   <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Target Name="CopySourceFiles" AfterTargets="Build">
@@ -224,9 +218,7 @@
     <Delete Files="$(TargetDir)..\MoonSharp\Interpreter\output.zip" />
 	<Delete Files="$(TargetDir)..\MoonSharp\Debugger\output.zip" />
     <Message Text="Deleted Temporary Zipped Files" Importance="High" />
-    <!-- <Copy -->
-    <!-- SourceFiles="$(SolutionDir)..\moonsharp\src\MoonSharp.Interpreter\" -->
-    <!-- DestinationFolder="C:\Users\kyles\Documents\Unity2021\RTC\LunarBindPackage\LunarBindPackage\Assets\Plugins\MoonSharp\Interpreter\" /> -->
+	
     <Message Text="Deleting Extra LunarBind Files" />
     <Delete Files="$(TargetDir)$(ProjectName).dll;$(TargetDir)$(ProjectName).dll.meta;$(TargetDir)$(ProjectName).pdb;$(TargetDir)$(ProjectName).pdb.meta;$(TargetDir)$(ProjectName).xml;$(TargetDir)$(ProjectName).xml.meta" />
     <Delete Files="$(TargetDir)MoonSharp.Interpreter.dll;$(TargetDir)MoonSharp.Interpreter.dll.meta;$(TargetDir)MoonSharp.Interpreter.pdb;$(TargetDir)MoonSharp.Interpreter.pdb.meta;$(TargetDir)MoonSharp.Interpreter.xml;$(TargetDir)MoonSharp.Interpreter.xml.meta" />
@@ -243,7 +235,7 @@
 	<Message Text="Deleted Extra MoonSharp Files" Importance="High" />
     <Message Text="Copying License Files" Importance="High" />
 	<Copy SourceFiles="$(SolutionDir)..\moonsharp\LICENSE" DestinationFolder="$(TargetDir)..\MoonSharp\"/>
-	<Copy SourceFiles="$(SolutionDir)..\LICENSE" DestinationFolder="$(TargetDir)..\MoonSharp\"/>
+	<Copy SourceFiles="$(SolutionDir)..\LICENSE" DestinationFolder="$(TargetDir)"/>
     <Message Text="Successfully Copied Everything" Importance="High" />
   </Target>
   
