@@ -31,9 +31,6 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="MoonSharp.Interpreter, Version=2.0.0.0, Culture=neutral, PublicKeyToken=921e73ce94aa17f8, processorArchitecture=MSIL">
-      <HintPath>..\packages\MoonSharp.2.0.0.0\lib\net40-client\MoonSharp.Interpreter.dll</HintPath>
-    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
@@ -48,7 +45,7 @@
     <Compile Include="..\LunarBind\ScriptReference.cs" />
     <Compile Include="..\LunarBind\QuickScripting.cs" />
     <Compile Include="..\LunarBind\ScriptFunction.cs" />
-	<Compile Include="..\LunarBind\OptimizedUnityCoroutine.cs" />
+    <Compile Include="..\LunarBind\OptimizedUnityCoroutine.cs" />
     <Compile Include="..\LunarBind\ScriptLibrary.cs" />
     <Compile Include="..\LunarBind\Yielding\WaitForDone.cs">
       <Link>Yielding\WaitForDone.cs</Link>
@@ -113,7 +110,7 @@
     <Compile Include="..\LunarBind\Binding\ScriptBindings.cs">
       <Link>Binding\ScriptBindings.cs</Link>
     </Compile>
-	<Compile Include="..\LunarBind\Documentation\BindingDocumentation.cs">
+    <Compile Include="..\LunarBind\Documentation\BindingDocumentation.cs">
       <Link>Documentation\BindingDocumentation.cs</Link>
     </Compile>
     <Compile Include="..\LunarBind\Attributes\LunarBindDocumentationAttribute.cs">
@@ -143,10 +140,10 @@
     <Compile Include="..\LunarBind\Attributes\LunarBindTypeAttribute.cs">
       <Link>Attributes\LunarBindTypeAttribute.cs</Link>
     </Compile>
-	<Compile Include="..\LunarBind\Attributes\LunarBindYielderAttribute.cs">
+    <Compile Include="..\LunarBind\Attributes\LunarBindYielderAttribute.cs">
       <Link>Attributes\LunarBindYielderAttribute.cs</Link>
     </Compile>
-	<Compile Include="..\LunarBind\Attributes\LunarBindIgnoreAssemblyAddAttribute.cs">
+    <Compile Include="..\LunarBind\Attributes\LunarBindIgnoreAssemblyAddAttribute.cs">
       <Link>Attributes\LunarBindIgnoreAssemblyAddAttribute.cs</Link>
     </Compile>
     <Compile Include="..\LunarBind\Exceptions\LunarBindStandardException.cs">
@@ -157,8 +154,10 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="Documentation\" />
-    <Folder Include="Exceptions\" />
+    <ProjectReference Include="..\..\moonsharp\src\MoonSharp.Interpreter\_Projects\MoonSharp.Interpreter.net40-client\MoonSharp.Interpreter.net40-client.csproj">
+      <Project>{88d2880c-a863-4b16-abef-f67bd1e98bd1}</Project>
+      <Name>MoonSharp.Interpreter.net40-client</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
