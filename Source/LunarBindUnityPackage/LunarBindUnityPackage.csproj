@@ -249,7 +249,7 @@
   
   <Target Name="BuildUnityPackage" AfterTargets="CopySourceFiles">
 	<Message Text="Executing BuildUnityPackage task" Importance="High" />
-	<Exec Command="&#34;C:\Program Files\Unity\Hub\Editor\2020.2.4f1\Editor\Unity.exe&#34; -quit -batchmode -nographics -projectPath &#34;C:\Users\kyles\Documents\Unity2021\RTC\LunarBindPackage\LunarBindPackage&#34; -exportPackage &#34;Assets\Plugins\LunarBind&#34; &#34;C:\Users\kyles\Documents\Unity2021\RTC\LunarBindPackage\Out\LunarBind.unitypackage&#34;"/>
+	<Exec Command="&#34;C:\Program Files\Unity\Hub\Editor\2020.2.4f1\Editor\Unity.exe&#34; -quit -batchmode -nographics -projectPath &#34;$(SolutionDir)UnityPackage\UnityPackage&#34; -exportPackage &#34;Assets\Plugins&#34; &#34;$(SolutionDir)UnityPackage\output\LunarBind.unitypackage&#34;"/>
   </Target>
 
 </Project>
