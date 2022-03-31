@@ -1,0 +1,255 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{D77B6E86-A552-4333-B814-689B3873C220}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>LunarBind</RootNamespace>
+    <AssemblyName>LunarBindUnityPackage</AssemblyName>
+    <TargetFrameworkVersion>v4.7.1</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <Deterministic>true</Deterministic>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>..\UnityPackage\UnityPackage\Assets\Plugins\LunarBind\</OutputPath>
+    <DefineConstants>TRACE;DEBUG;LBNETFW</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>..\UnityPackage\UnityPackage\Assets\Plugins\LunarBind\</OutputPath>
+    <DefineConstants>TRACE;LBNETFW</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="MoonSharp.Interpreter, Version=2.0.0.0, Culture=neutral, PublicKeyToken=921e73ce94aa17f8, processorArchitecture=MSIL">
+      <HintPath>..\packages\MoonSharp.2.0.0.0\lib\net40-client\MoonSharp.Interpreter.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Net.Http" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Properties\AssemblyInfo.cs" />
+    <None Include="..\LunarBind\ScriptReference.cs">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="..\LunarBind\QuickScripting.cs">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="..\LunarBind\ScriptLibrary.cs">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="..\LunarBind\Yielding\WaitForDone.cs">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <Link>Yielding\WaitForDone.cs</Link>
+    </None>
+    <None Include="..\LunarBind\Yielding\WaitFrames.cs">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <Link>Yielding\WaitFrames.cs</Link>
+    </None>
+    <None Include="..\LunarBind\Yielding\WaitUntil.cs">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <Link>Yielding\WaitUntil.cs</Link>
+    </None>
+    <None Include="..\LunarBind\Yielding\Yielder.cs">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <Link>Yielding\Yielder.cs</Link>
+    </None>
+    <None Include="..\LunarBind\Standards\LuaFuncType.cs">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <Link>Standards\LuaFuncType.cs</Link>
+    </None>
+    <None Include="..\LunarBind\Standards\LuaScriptStandard.cs">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <Link>Standards\LuaScriptStandard.cs</Link>
+    </None>
+    <None Include="..\LunarBind\Runners\BasicScriptRunner.cs">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <Link>Runners\BasicScriptRunner.cs</Link>
+    </None>
+    <None Include="..\LunarBind\Runners\HookedScriptRunner.cs">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <Link>Runners\HookedScriptRunner.cs</Link>
+    </None>
+    <None Include="..\LunarBind\Runners\HookedStateScriptRunner.cs">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <Link>Runners\HookedStateScriptRunner.cs</Link>
+    </None>
+    <None Include="..\LunarBind\Runners\ScriptRunnerBase.cs">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <Link>Runners\ScriptRunnerBase.cs</Link>
+    </None>
+    <None Include="..\LunarBind\Runners\UserScriptRunner.cs">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <Link>Runners\UserScriptRunner.cs</Link>
+    </None>
+    <None Include="..\LunarBind\Runners\HookedScriptContainer.cs">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <Link>Runners\HookedScriptContainer.cs</Link>
+    </None>
+    <None Include="..\LunarBind\Helpers\BindingHelper.cs">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <Link>Helpers\BindingHelper.cs</Link>
+    </None>
+    <None Include="..\LunarBind\Helpers\StandardHelpers.cs">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <Link>Helpers\StandardHelpers.cs</Link>
+    </None>
+    <None Include="..\LunarBind\Binding\BindEnum.cs">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <Link>Binding\BindEnum.cs</Link>
+    </None>
+    <None Include="..\LunarBind\Binding\BindFunc.cs">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <Link>Binding\BindFunc.cs</Link>
+    </None>
+    <None Include="..\LunarBind\Binding\BindItem.cs">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <Link>Binding\BindItem.cs</Link>
+    </None>
+    <None Include="..\LunarBind\Binding\BindTable.cs">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <Link>Binding\BindTable.cs</Link>
+    </None>
+    <None Include="..\LunarBind\Binding\BindUserObject.cs">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <Link>Binding\BindUserObject.cs</Link>
+    </None>
+    <None Include="..\LunarBind\Binding\GlobalScriptBindings.cs">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <Link>Binding\GlobalScriptBindings.cs</Link>
+    </None>
+    <None Include="..\LunarBind\Binding\ScriptBindings.cs">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <Link>Binding\ScriptBindings.cs</Link>
+    </None>
+    <None Include="..\LunarBind\Documentation\BindingDocumentation.cs">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <Link>Documentation\BindingDocumentation.cs</Link>
+    </None>
+    <None Include="..\LunarBind\Attributes\LunarBindDocumentationAttribute.cs">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <Link>Attributes\LunarBindDocumentationAttribute.cs</Link>
+    </None>
+    <None Include="..\LunarBind\Attributes\LunarBindEnumAttribute.cs">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <Link>Attributes\LunarBindEnumAttribute.cs</Link>
+    </None>
+    <None Include="..\LunarBind\Attributes\LunarBindExampleAttribute.cs">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <Link>Attributes\LunarBindExampleAttribute.cs</Link>
+    </None>
+    <None Include="..\LunarBind\Attributes\LunarBindFunctionAttribute.cs">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <Link>Attributes\LunarBindFunctionAttribute.cs</Link>
+    </None>
+    <None Include="..\LunarBind\Attributes\LunarBindInstanceAttribute.cs">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <Link>Attributes\LunarBindInstanceAttribute.cs</Link>
+    </None>
+    <None Include="..\LunarBind\Attributes\LunarBindStaticAttribute.cs">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <Link>Attributes\LunarBindStaticAttribute.cs</Link>
+    </None>
+    <None Include="..\LunarBind\Attributes\LunarBindPrefixAttribute.cs">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <Link>Attributes\LunarBindPrefixAttribute.cs</Link>
+    </None>
+    <None Include="..\LunarBind\Attributes\LunarBindHideAttribute.cs">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <Link>Attributes\LunarBindHideAttribute.cs</Link>
+    </None>
+    <None Include="..\LunarBind\Attributes\LunarBindTypeAttribute.cs">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <Link>Attributes\LunarBindTypeAttribute.cs</Link>
+    </None>
+    <None Include="..\LunarBind\Attributes\LunarBindYielderAttribute.cs">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <Link>Attributes\LunarBindYielderAttribute.cs</Link>
+    </None>
+    <None Include="..\LunarBind\Attributes\LunarBindIgnoreAssemblyAddAttribute.cs">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <Link>Attributes\LunarBindIgnoreAssemblyAddAttribute.cs</Link>
+    </None>
+    <None Include="..\LunarBind\Exceptions\LunarBindStandardException.cs">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <Link>Exceptions\LunarBindStandardException.cs</Link>
+    </None>
+    <None Include="..\LunarBindUnity\ScriptFunction.cs">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <Link>ScriptFunction.cs</Link>
+    </None>
+    <None Include="..\LunarBindUnity\UnityHelper.cs">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <Link>UnityHelper.cs</Link>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
+  </ItemGroup>
+  <!-- <ItemGroup> -->
+  <!-- <ContentWithTargetPath Include="$(SolutionDir)..\moonsharp\src\MoonSharp.Interpreter\**"> -->
+  <!-- <CopyToOutputDirectory>Always</CopyToOutputDirectory> -->
+  <!-- <TargetPath>$(TargetDir)..\MoonSharp\Interpreter\**</TargetPath> -->
+  <!-- </ContentWithTargetPath> -->
+  <!-- <None Include="$(SolutionDir)..\moonsharp\src\MoonSharp.Interpreter\**" /> -->
+  <!-- </ItemGroup> -->
+  <ItemGroup />
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <Target Name="CopySourceFiles" AfterTargets="Build">
+    <Message Text="Executing CopySourceFiles task" Importance="High" />
+    <ZipDirectory SourceDirectory="$(SolutionDir)..\moonsharp\src\MoonSharp.Interpreter\" DestinationFile="$(TargetDir)..\MoonSharp\Interpreter\output.zip" />
+    <Unzip SourceFiles="$(TargetDir)..\MoonSharp\Interpreter\output.zip" DestinationFolder="$(TargetDir)..\MoonSharp\Interpreter\" OverwriteReadOnlyFiles="true" />
+	<Message Text="Copied Interpreter Files" Importance="High" />
+
+    <ZipDirectory SourceDirectory="$(SolutionDir)..\moonsharp\src\MoonSharp.VsCodeDebugger\" DestinationFile="$(TargetDir)..\MoonSharp\Debugger\output.zip" />
+    <Unzip SourceFiles="$(TargetDir)..\MoonSharp\Debugger\output.zip" DestinationFolder="$(TargetDir)..\MoonSharp\Debugger\" OverwriteReadOnlyFiles="true" />
+	<Message Text="Copied Debugger Files" Importance="High" />
+	
+    <Delete Files="$(TargetDir)..\MoonSharp\Interpreter\output.zip" />
+	<Delete Files="$(TargetDir)..\MoonSharp\Debugger\output.zip" />
+    <Message Text="Deleted Temporary Zipped Files" Importance="High" />
+    <!-- <Copy -->
+    <!-- SourceFiles="$(SolutionDir)..\moonsharp\src\MoonSharp.Interpreter\" -->
+    <!-- DestinationFolder="C:\Users\kyles\Documents\Unity2021\RTC\LunarBindPackage\LunarBindPackage\Assets\Plugins\MoonSharp\Interpreter\" /> -->
+    <Message Text="Deleting Extra LunarBind Files" />
+    <Delete Files="$(TargetDir)$(ProjectName).dll;$(TargetDir)$(ProjectName).dll.meta;$(TargetDir)$(ProjectName).pdb;$(TargetDir)$(ProjectName).pdb.meta;$(TargetDir)$(ProjectName).xml;$(TargetDir)$(ProjectName).xml.meta" />
+    <Delete Files="$(TargetDir)MoonSharp.Interpreter.dll;$(TargetDir)MoonSharp.Interpreter.dll.meta;$(TargetDir)MoonSharp.Interpreter.pdb;$(TargetDir)MoonSharp.Interpreter.pdb.meta;$(TargetDir)MoonSharp.Interpreter.xml;$(TargetDir)MoonSharp.Interpreter.xml.meta" />
+	
+    <Message Text="Deleting Extra MoonSharp Files" />
+    <RemoveDir Directories="$(TargetDir)..\MoonSharp\Interpreter\_Projects\;$(TargetDir)..\MoonSharp\Interpreter\bin\;$(TargetDir)..\MoonSharp\Interpreter\obj\;$(TargetDir)..\MoonSharp\Interpreter\Properties\" />
+    <Delete Files="$(TargetDir)..\MoonSharp\Interpreter\_Projects.meta;$(TargetDir)..\MoonSharp\Interpreter\bin.meta;$(TargetDir)..\MoonSharp\Interpreter\obj.meta;$(TargetDir)..\MoonSharp\Interpreter\Properties.meta" />
+	<Delete Files="$(TargetDir)..\MoonSharp\Interpreter\MoonSharp.Interpreter.net35-client.csproj;$(TargetDir)..\MoonSharp\Interpreter\Report20141003-0007.diagsession" />
+	
+	<RemoveDir Directories="$(TargetDir)..\MoonSharp\Debugger\_Projects\;$(TargetDir)..\MoonSharp\Debugger\bin\;$(TargetDir)..\MoonSharp\Debugger\obj\;$(TargetDir)..\MoonSharp\Debugger\Properties\" />
+	<Delete Files="$(TargetDir)..\MoonSharp\Debugger\_Projects.meta;$(TargetDir)..\MoonSharp\Debugger\bin.meta;$(TargetDir)..\MoonSharp\Debugger\obj.meta;$(TargetDir)..\MoonSharp\Debugger\Properties.meta" />
+    <Delete Files="$(TargetDir)..\MoonSharp\Debugger\keypair.snk;$(TargetDir)..\MoonSharp\Debugger\MoonSharp.VsCodeDebugger.net35-client.csproj" />
+    
+	<Message Text="Deleted Extra MoonSharp Files" Importance="High" />
+    <Message Text="Copying License Files" Importance="High" />
+	<Copy SourceFiles="$(SolutionDir)..\moonsharp\LICENSE" DestinationFolder="$(TargetDir)..\MoonSharp\"/>
+	<Copy SourceFiles="$(SolutionDir)..\LICENSE" DestinationFolder="$(TargetDir)..\MoonSharp\"/>
+    <Message Text="Successfully Copied Everything" Importance="High" />
+  </Target>
+  
+  <Target Name="BuildUnityPackage" AfterTargets="CopySourceFiles">
+	<Message Text="Executing BuildUnityPackage task" Importance="High" />
+	<Exec Command="&#34;C:\Program Files\Unity\Hub\Editor\2020.2.4f1\Editor\Unity.exe&#34; -quit -batchmode -nographics -projectPath &#34;C:\Users\kyles\Documents\Unity2021\RTC\LunarBindPackage\LunarBindPackage&#34; -exportPackage &#34;Assets\Plugins\LunarBind&#34; &#34;C:\Users\kyles\Documents\Unity2021\RTC\LunarBindPackage\Out\LunarBind.unitypackage&#34;"/>
+  </Target>
+
+</Project>
