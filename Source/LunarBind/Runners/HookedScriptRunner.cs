@@ -34,7 +34,7 @@
 
         public HookedScriptRunner()
         {
-            Lua = new Script(CoreModules.Preset_HardSandbox | CoreModules.Coroutine | CoreModules.OS_Time);
+            Lua = new Script(CoreModules.Preset_HardSandbox | CoreModules.Coroutine | CoreModules.OS_Time | CoreModules.LoadMethods);
             Lua.Globals["Script"] = new ScriptReference(Lua);
             Lua.Globals["RegisterHook"] = (Action<DynValue, string>)RegisterHook;
             Lua.Globals["RegisterCoroutine"] = (Action<DynValue, string, bool>)RegisterCoroutine;

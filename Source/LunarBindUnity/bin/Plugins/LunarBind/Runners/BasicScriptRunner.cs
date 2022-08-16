@@ -14,7 +14,7 @@ namespace LunarBind
     {   
         public Table Globals => Lua.Globals;
 
-        public BasicScriptRunner(CoreModules modules = CoreModules.Preset_HardSandbox | CoreModules.Coroutine | CoreModules.OS_Time) {
+        public BasicScriptRunner(CoreModules modules = CoreModules.Preset_HardSandbox | CoreModules.Coroutine | CoreModules.OS_Time | CoreModules.LoadMethods) {
             Lua = new Script(modules);
             Lua.Globals["Script"] = new ScriptReference(Lua);
             GlobalScriptBindings.Initialize(Lua);
